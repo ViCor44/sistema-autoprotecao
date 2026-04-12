@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-8 offset-md-2">
-        <h1 class="mb-4"><i class="bi bi-calendar-plus"></i> Agendar Manutenção</h1>
+        <h1 class="mb-4"><i class="bi bi-calendar-plus"></i> Agendar Inspeção</h1>
 
         <form method="POST" action="index.php?controler=calendario&acao=salvar" class="card">
             <div class="card-body">
@@ -22,9 +22,9 @@
                     <div class="col-md-6 mb-3">
                         <label for="tipo_inspecao" class="form-label">Tipo de Inspeção</label>
                         <select name="tipo_inspecao" id="tipo_inspecao" class="form-select">
-                            <option value="inspeção">Inspeção</option>
-                            <option value="manutenção">Manutenção</option>
-                            <option value="reparação">Reparação</option>
+                            <option value="inspecao">Inspeção de Rotina</option>
+                            <option value="inspecao_extraordinaria">Inspeção Extraordinária</option>
+                            <option value="vistoria_corretiva">Vistoria Corretiva</option>
                         </select>
                     </div>
                 </div>

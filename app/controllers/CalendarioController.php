@@ -1,6 +1,6 @@
 <?php
 /**
- * Controller para Calendário de Manutenção
+ * Controller para Calendário de Inspeções
  */
 class CalendarioController {
     private $calendario;
@@ -81,9 +81,9 @@ class CalendarioController {
         $dados = [
             'equipamento_id' => $_POST['equipamento_id'] ?? 0,
             'data_inspecao' => $_POST['data_inspecao'] ?? date('Y-m-d'),
-            'tipo_inspecao' => $_POST['tipo_inspecao'] ?? 'inspeção',
+            'tipo_inspecao' => $_POST['tipo_inspecao'] ?? 'inspecao',
             'descricao' => $_POST['descricao'] ?? '',
-            'responsavel_id' => $_POST['responsavel_id'] ?? null,
+            'responsavel_id' => !empty($_POST['responsavel_id']) ? (int)$_POST['responsavel_id'] : null,
             'status' => 'agendado',
             'prioridade' => $_POST['prioridade'] ?? 'normal'
         ];
@@ -101,12 +101,12 @@ class CalendarioController {
     }
 
     /**
-     * Dashboard com próximas manutenções
+     * Dashboard com próximas inspeções
      */
     public function dashboard() {
-        $proximasManutencoes = $this->calendario->getProximos(30);
-        $manutencoeVencidas = $this->calendario->getVencidos();
-        $equipamentosPendentes = $this->equipamento->getEquipamentosComManutencaoPendente();
+        $proximasInspecoes = $this->calendario->getProximos(30);
+        $inspecoesVencidas = $this->calendario->getVencidos();
+        $equipamentosPendentes = $this->equipamento->getEquipamentosComVistoriaPendente();
 
         require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'calendario' . DIRECTORY_SEPARATOR . 'dashboard.php';
     }

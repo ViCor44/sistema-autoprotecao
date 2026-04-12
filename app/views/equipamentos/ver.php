@@ -18,6 +18,23 @@
                     </span><br>
                     <strong>Observações:</strong> <?php echo $equipamento['observacoes'] ?? '-'; ?>
                 </p>
+
+                <?php if (!empty($camposDinamicos)): ?>
+                    <hr>
+                    <h5>Características Específicas</h5>
+                    <div class="row">
+                        <?php foreach ($camposDinamicos as $campo): ?>
+                            <div class="col-md-6 mb-2">
+                                <strong><?php echo $campo['nome_campo']; ?>:</strong>
+                                <?php
+                                    $valor = $valoresCamposDinamicos[$campo['id']] ?? '-';
+                                    $sufixo = !empty($campo['unidade']) && $valor !== '-' ? ' ' . $campo['unidade'] : '';
+                                    echo htmlspecialchars((string)$valor) . $sufixo;
+                                ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
 

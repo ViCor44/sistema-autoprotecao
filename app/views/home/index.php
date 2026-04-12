@@ -16,7 +16,7 @@
     <div class="col-md-3">
         <div class="card bg-warning text-white">
             <div class="card-body">
-                <h5 class="card-title">Manutenções Próximas (7 dias)</h5>
+                <h5 class="card-title">Inspeções Próximas (7 dias)</h5>
                 <h2><?php echo count($proximasManutencoes); ?></h2>
                 <a href="index.php?controler=calendario&acao=dashboard" class="btn btn-sm btn-light">Ver</a>
             </div>
@@ -25,7 +25,7 @@
     <div class="col-md-3">
         <div class="card bg-danger text-white">
             <div class="card-body">
-                <h5 class="card-title">Manutenções Vencidas</h5>
+                <h5 class="card-title">Inspeções em Atraso</h5>
                 <h2><?php echo count($manutencoeVencidas); ?></h2>
                 <a href="index.php?controler=calendario&acao=dashboard" class="btn btn-sm btn-light">Ver</a>
             </div>
@@ -46,11 +46,11 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-calendar-event"></i> Próximas Manutenções</h5>
+                <h5 class="mb-0"><i class="bi bi-calendar-event"></i> Próximas Inspeções</h5>
             </div>
             <div class="card-body">
                 <?php if (empty($proximasManutencoes)): ?>
-                    <p class="text-muted">Nenhuma manutenção agendada para os próximos 7 dias.</p>
+                    <p class="text-muted">Nenhuma inspeção agendada para os próximos 7 dias.</p>
                 <?php else: ?>
                     <div class="table-responsive">
                         <table class="table table-sm table-hover">
@@ -90,7 +90,7 @@
                     <i class="bi bi-file-earmark-plus"></i> Criar Novo Relatório
                 </a>
                 <a href="index.php?controler=calendario&acao=agendar" class="btn btn-info btn-sm w-100 mb-2">
-                    <i class="bi bi-calendar-plus"></i> Agendar Manutenção
+                    <i class="bi bi-calendar-plus"></i> Agendar Inspeção
                 </a>
                 <a href="index.php?controler=relatorio&acao=pendentes" class="btn btn-warning btn-sm w-100">
                     <i class="bi bi-clock-history"></i> Relatórios Pendentes

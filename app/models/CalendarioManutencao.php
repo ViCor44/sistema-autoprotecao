@@ -1,7 +1,7 @@
 <?php
 /**
  * Classe CalendarioManutencao
- * Modelo para gerenciar calendário de manutenção
+ * Modelo para gerenciar calendário de inspeções
  */
 class CalendarioManutencao {
     private $db;
@@ -70,7 +70,7 @@ class CalendarioManutencao {
 
         $stmt = $this->db->prepare($query);
         $stmt->bind_param(
-            "isssiis",
+            "isssiss",
             $dados['equipamento_id'],
             $dados['data_inspecao'],
             $dados['tipo_inspecao'],
@@ -100,7 +100,7 @@ class CalendarioManutencao {
 
         $stmt = $this->db->prepare($query);
         $stmt->bind_param(
-            "sssisi",
+            "ssissi",
             $dados['tipo_inspecao'],
             $dados['descricao'],
             $dados['responsavel_id'],

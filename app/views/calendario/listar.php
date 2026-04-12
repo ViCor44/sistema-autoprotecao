@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-12">
-        <h1 class="mb-4"><i class="bi bi-calendar3"></i> Agendamentos</h1>
+        <h1 class="mb-4"><i class="bi bi-calendar3"></i> Agendamentos de Inspeção</h1>
     </div>
 </div>
 
@@ -21,7 +21,7 @@
                 <tr>
                     <th>Data</th>
                     <th>Equipamento</th>
-                    <th>Tipo</th>
+                    <th>Tipo de Inspeção</th>
                     <th>Prioridade</th>
                     <th>Status</th>
                     <th>Responsável</th>
@@ -33,7 +33,7 @@
                     <tr>
                         <td><?php echo date('d/m/Y', strtotime($ag['data_inspecao'])); ?></td>
                         <td><?php echo $ag['localizacao']; ?></td>
-                        <td><?php echo ucfirst($ag['tipo_inspecao']); ?></td>
+                        <td><?php echo ucfirst(str_replace('_', ' ', $ag['tipo_inspecao'])); ?></td>
                         <td>
                             <span class="badge bg-<?php 
                                 if ($ag['prioridade'] === 'urgente') echo 'danger';

@@ -5,6 +5,7 @@
 class EquipamentoController {
     private $equipamento;
     private $tiposEquipamentos = [];
+    private $camposDinamicosPorTipo = [];
 
     public function __construct() {
         $this->equipamento = new Equipamento();
@@ -18,6 +19,10 @@ class EquipamentoController {
         $db = new Database();
         $resultado = $db->query("SELECT id, nome FROM tipos_equipamentos WHERE ativo = TRUE ORDER BY nome ASC");
         $this->tiposEquipamentos = $resultado->fetch_all(MYSQLI_ASSOC);
+
+        foreach ($this->tiposEquipamentos as $tipo) {
+            $this->camposDinamicosPorTipo[(int)$tipo['id']] = $this->equipamento->getCamposDinamicosPorTipo((int)$tipo['id']);
+        }
     }
 
     /**
@@ -51,6 +56,9 @@ class EquipamentoController {
             exit;
         }
 
+        $camposDinamicos = $this->equipamento->getCamposDinamicosPorTipo((int)$equipamento['tipo_equipamento_id']);
+        $valoresCamposDinamicos = $this->equipamento->getValoresCamposDinamicos((int)$equipamento['id']);
+
         require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'equipamentos' . DIRECTORY_SEPARATOR . 'ver.php';
     }
 
@@ -59,6 +67,7 @@ class EquipamentoController {
      */
     public function criar() {
         $tipos = $this->tiposEquipamentos;
+        $camposDinamicosPorTipo = $this->camposDinamicosPorTipo;
         require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'equipamentos' . DIRECTORY_SEPARATOR . 'criar.php';
     }
 
@@ -84,7 +93,12 @@ class EquipamentoController {
             'observacoes' => $_POST['observacoes'] ?? ''
         ];
 
-        if ($this->equipamento->create($dados)) {
+        $equipamentoId = $this->equipamento->create($dados);
+
+        if ($equipamentoId) {
+            $camposDinamicos = $_POST['campos_dinamicos'] ?? [];
+            $this->equipamento->salvarCamposDinamicos((int)$equipamentoId, $camposDinamicos);
+
             $_SESSION['mensagem'] = 'Equipamento criado com sucesso!';
             $_SESSION['tipo_mensagem'] = 'sucesso';
             header('Location: index.php?controler=equipamento&acao=listar');
@@ -110,6 +124,8 @@ class EquipamentoController {
         }
 
         $tipos = $this->tiposEquipamentos;
+        $camposDinamicosPorTipo = $this->camposDinamicosPorTipo;
+        $valoresCamposDinamicos = $this->equipamento->getValoresCamposDinamicos((int)$id);
         require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'equipamentos' . DIRECTORY_SEPARATOR . 'editar.php';
     }
 
@@ -136,6 +152,9 @@ class EquipamentoController {
         ];
 
         if ($this->equipamento->update($id, $dados)) {
+            $camposDinamicos = $_POST['campos_dinamicos'] ?? [];
+            $this->equipamento->salvarCamposDinamicos((int)$id, $camposDinamicos);
+
             $_SESSION['mensagem'] = 'Equipamento atualizado com sucesso!';
             $_SESSION['tipo_mensagem'] = 'sucesso';
             header('Location: index.php?controler=equipamento&acao=ver&id=' . $id);

@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-12">
-        <h1 class="mb-4"><i class="bi bi-calendar3"></i> Calendário de Manutenção</h1>
+        <h1 class="mb-4"><i class="bi bi-calendar3"></i> Calendário de Inspeções</h1>
     </div>
 </div>
 
@@ -70,7 +70,7 @@
                                     if ($temAgendamentos) {
                                         echo '<br><small>';
                                         foreach ($agendamentosMap[$d] as $ag) {
-                                            echo '<span class="badge bg-primary">' . ucfirst($ag['tipo_inspecao']) . '</span><br>';
+                                            echo '<span class="badge bg-primary">' . ucfirst(str_replace('_', ' ', $ag['tipo_inspecao'])) . '</span><br>';
                                         }
                                         echo '</small>';
                                     }

@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-12">
-        <h1 class="mb-4"><i class="bi bi-speedometer2"></i> Dashboard de Manutenção</h1>
+        <h1 class="mb-4"><i class="bi bi-speedometer2"></i> Dashboard de Inspeções</h1>
     </div>
 </div>
 
@@ -8,23 +8,23 @@
     <div class="col-md-4">
         <div class="card bg-info text-white">
             <div class="card-body">
-                <h5 class="card-title">Próximas Manutenções (30 dias)</h5>
-                <h2><?php echo count($proximasManutencoes); ?></h2>
+                <h5 class="card-title">Próximas Inspeções (30 dias)</h5>
+                <h2><?php echo count($proximasInspecoes); ?></h2>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card bg-danger text-white">
             <div class="card-body">
-                <h5 class="card-title">Manutenções Vencidas</h5>
-                <h2><?php echo count($manutencoeVencidas); ?></h2>
+                <h5 class="card-title">Inspeções em Atraso</h5>
+                <h2><?php echo count($inspecoesVencidas); ?></h2>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card bg-warning text-white">
             <div class="card-body">
-                <h5 class="card-title">Equipamentos com Manutenção Pendente</h5>
+                <h5 class="card-title">Equipamentos com Vistoria Pendente</h5>
                 <h2><?php echo count($equipamentosPendentes); ?></h2>
             </div>
         </div>
@@ -35,11 +35,11 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Próximas Manutenções</h5>
+                <h5 class="mb-0">Próximas Inspeções</h5>
             </div>
             <div class="card-body">
-                <?php if (empty($proximasManutencoes)): ?>
-                    <p class="text-muted">Nenhuma manutenção próxima.</p>
+                <?php if (empty($proximasInspecoes)): ?>
+                    <p class="text-muted">Nenhuma inspeção próxima.</p>
                 <?php else: ?>
                     <div class="table-responsive">
                         <table class="table table-sm">
@@ -51,7 +51,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($proximasManutencoes as $m): ?>
+                                <?php foreach ($proximasInspecoes as $m): ?>
                                     <tr>
                                         <td><?php echo date('d/m/Y', strtotime($m['data_inspecao'])); ?></td>
                                         <td><?php echo $m['localizacao']; ?></td>
@@ -69,11 +69,11 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Manutenções Vencidas</h5>
+                <h5 class="mb-0">Inspeções em Atraso</h5>
             </div>
             <div class="card-body">
-                <?php if (empty($manutencoeVencidas)): ?>
-                    <p class="text-muted text-success"><i class="bi bi-check-circle"></i> Nenhuma manutenção vencida!</p>
+                <?php if (empty($inspecoesVencidas)): ?>
+                    <p class="text-muted text-success"><i class="bi bi-check-circle"></i> Nenhuma inspeção em atraso!</p>
                 <?php else: ?>
                     <div class="table-responsive">
                         <table class="table table-sm">
@@ -85,7 +85,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($manutencoeVencidas as $m): ?>
+                                <?php foreach ($inspecoesVencidas as $m): ?>
                                     <tr class="table-danger">
                                         <td><?php echo date('d/m/Y', strtotime($m['data_inspecao'])); ?></td>
                                         <td><?php echo $m['localizacao']; ?></td>
