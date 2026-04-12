@@ -57,27 +57,19 @@ try {
         throw new Exception("Ação não encontrada: $acao");
     }
     
-    // Determinar o caminho da view
-    $view_file = APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR;
-    
-    if ($controler === 'HomeController') {
-        $view_file .= strtolower(str_replace('Controller', '', $controler)) . DIRECTORY_SEPARATOR . $acao . '.php';
-    } else {
-        $view_file .= strtolower(str_replace('Controller', '', $controler)) . DIRECTORY_SEPARATOR . $acao . '.php';
-    }
-    
+    // Renderizar a ação e capturar o conteúdo para o layout
+    ob_start();
+
     // Chamar a ação do controller
     if ($id !== null) {
         $controller->$acao($id);
     } else {
         $controller->$acao();
     }
-    
-    // Se existir ficheiro de view, renderizar
-    if (isset($view_file) && file_exists($view_file)) {
-        $view_path = $view_file;
-        include APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'layouts' . DIRECTORY_SEPARATOR . 'main.php';
-    }
+
+    $content = ob_get_clean();
+
+    include APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'layouts' . DIRECTORY_SEPARATOR . 'main.php';
     
 } catch (Exception $e) {
     // Tratar erros

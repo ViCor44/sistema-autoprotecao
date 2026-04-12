@@ -55,7 +55,11 @@
             <?php unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']); ?>
         <?php endif; ?>
 
-        <?php include $view_path; ?>
+        <?php if (isset($content)): ?>
+            <?php echo $content; ?>
+        <?php elseif (isset($view_path) && file_exists($view_path)): ?>
+            <?php include $view_path; ?>
+        <?php endif; ?>
     </main>
 
     <footer class="bg-dark text-white text-center py-4 mt-5">
