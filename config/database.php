@@ -12,8 +12,3 @@ return [
     'dbname' => 'sistema_autoprotecao',
     'charset' => 'utf8mb4',
 ];
-            echo 'Connection error: ' . $exception->getMessage();
-        }
-        return $this->conn;
-    }
-}
