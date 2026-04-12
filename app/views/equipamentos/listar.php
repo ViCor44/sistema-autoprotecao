@@ -39,7 +39,7 @@
                         <h5 class="card-title"><?php echo $equip['tipo_nome']; ?></h5>
                         <p class="card-text">
                             <strong>Localização:</strong> <?php echo $equip['localizacao']; ?><br>
-                            <strong>Série:</strong> <?php echo $equip['numero_serie'] ?? '-'; ?><br>
+                            <strong>Número de Registo:</strong> <?php echo $equip['numero_serie'] ?? '-'; ?><br>
                             <strong>Marca/Modelo:</strong> <?php echo $equip['marca'] ?? '-'; ?> / <?php echo $equip['modelo'] ?? '-'; ?><br>
                             <strong>Estado:</strong> 
                             <span class="badge bg-<?php echo $equip['estado'] === 'operacional' ? 'success' : 'danger'; ?>">

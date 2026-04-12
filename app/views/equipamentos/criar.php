@@ -16,8 +16,8 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="numero_serie" class="form-label">Número de Série</label>
-                        <input type="text" class="form-control" name="numero_serie" id="numero_serie">
+                        <label for="numero_serie" class="form-label">Número de Registo / Património</label>
+                        <input type="text" class="form-control" name="numero_serie" id="numero_serie" placeholder="Ex: EXT-00123">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="localizacao" class="form-label">Localização *</label>
@@ -48,8 +48,12 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="data_proxima_manutencao" class="form-label">Data da Próxima Manutenção</label>
+                    <label for="data_proxima_manutencao" class="form-label">Data da Próxima Vistoria</label>
                     <input type="date" class="form-control" name="data_proxima_manutencao" id="data_proxima_manutencao">
+                </div>
+
+                <div class="alert alert-info" role="alert">
+                    Para características específicas por tipo (ex: capacidade do extintor, classe de fogo), configure campos dinâmicos no backoffice após aplicar a migração da base de dados.
                 </div>
 
                 <div class="mb-3">

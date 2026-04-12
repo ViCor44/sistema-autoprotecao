@@ -6,12 +6,12 @@
             <div class="card-body">
                 <p>
                     <strong>Localização:</strong> <?php echo $equipamento['localizacao']; ?><br>
-                    <strong>Número de Série:</strong> <?php echo $equipamento['numero_serie'] ?? '-'; ?><br>
+                    <strong>Número de Registo:</strong> <?php echo $equipamento['numero_serie'] ?? '-'; ?><br>
                     <strong>Marca:</strong> <?php echo $equipamento['marca'] ?? '-'; ?><br>
                     <strong>Modelo:</strong> <?php echo $equipamento['modelo'] ?? '-'; ?><br>
                     <strong>Data de Aquisição:</strong> <?php echo $equipamento['data_aquisicao'] ? date('d/m/Y', strtotime($equipamento['data_aquisicao'])) : '-'; ?><br>
                     <strong>Data de Instalação:</strong> <?php echo $equipamento['data_instalacao'] ? date('d/m/Y', strtotime($equipamento['data_instalacao'])) : '-'; ?><br>
-                    <strong>Próxima Manutenção:</strong> <?php echo $equipamento['data_proxima_manutencao'] ? date('d/m/Y', strtotime($equipamento['data_proxima_manutencao'])) : '-'; ?><br>
+                    <strong>Próxima Vistoria:</strong> <?php echo $equipamento['data_proxima_manutencao'] ? date('d/m/Y', strtotime($equipamento['data_proxima_manutencao'])) : '-'; ?><br>
                     <strong>Estado:</strong> 
                     <span class="badge bg-<?php echo $equipamento['estado'] === 'operacional' ? 'success' : 'danger'; ?>">
                         <?php echo ucfirst($equipamento['estado']); ?>

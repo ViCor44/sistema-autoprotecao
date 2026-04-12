@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS tipos_equipamentos (
     nome VARCHAR(100) NOT NULL,
     descricao TEXT,
     icone VARCHAR(50),
+    prefixo_numeracao VARCHAR(20) COMMENT 'Prefixo para numeração dos equipamentos, ex: EXT, HID, LUM',
+    proximo_numero INT DEFAULT 1 COMMENT 'Próximo número sequencial do tipo de equipamento',
     frequencia_inspecao INT COMMENT 'Frequência em dias',
     ativo BOOLEAN DEFAULT TRUE,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -45,12 +47,14 @@ CREATE TABLE IF NOT EXISTS tipos_equipamentos (
 CREATE TABLE IF NOT EXISTS equipamentos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tipo_equipamento_id INT NOT NULL,
+    numero_registo VARCHAR(100) UNIQUE COMMENT 'Número interno de registo/património do equipamento',
     numero_serie VARCHAR(100) UNIQUE,
     localizacao VARCHAR(255) NOT NULL,
     marca VARCHAR(100),
     modelo VARCHAR(100),
     data_aquisicao DATE,
     data_instalacao DATE,
+    data_ultima_vistoria DATE,
     data_proxima_manutencao DATE,
     estado VARCHAR(30) DEFAULT 'operacional' COMMENT 'operacional, inservivel, aguardando_reparacao',
     observacoes TEXT,
@@ -62,6 +66,45 @@ CREATE TABLE IF NOT EXISTS equipamentos (
     INDEX idx_localizacao (localizacao),
     INDEX idx_proxima_manutencao (data_proxima_manutencao),
     INDEX idx_ativo (ativo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- Tabela: tipos_equipamentos_campos
+-- Campos dinâmicos por tipo de equipamento
+-- ========================================
+CREATE TABLE IF NOT EXISTS tipos_equipamentos_campos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tipo_equipamento_id INT NOT NULL,
+    nome_campo VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) NOT NULL,
+    tipo_dado VARCHAR(30) NOT NULL DEFAULT 'texto' COMMENT 'texto, numero, data, opcao, booleano',
+    unidade VARCHAR(20),
+    obrigatorio BOOLEAN DEFAULT FALSE,
+    ordem INT DEFAULT 0,
+    ativo BOOLEAN DEFAULT TRUE,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tipo_equipamento_id) REFERENCES tipos_equipamentos(id),
+    UNIQUE KEY uk_tipo_slug (tipo_equipamento_id, slug),
+    INDEX idx_tipo (tipo_equipamento_id),
+    INDEX idx_ativo (ativo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- Tabela: equipamentos_campos_valores
+-- Valores dos campos dinâmicos por equipamento
+-- ========================================
+CREATE TABLE IF NOT EXISTS equipamentos_campos_valores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    equipamento_id INT NOT NULL,
+    campo_id INT NOT NULL,
+    valor TEXT,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (equipamento_id) REFERENCES equipamentos(id) ON DELETE CASCADE,
+    FOREIGN KEY (campo_id) REFERENCES tipos_equipamentos_campos(id) ON DELETE CASCADE,
+    UNIQUE KEY uk_equipamento_campo (equipamento_id, campo_id),
+    INDEX idx_equipamento (equipamento_id),
+    INDEX idx_campo (campo_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ========================================
@@ -128,15 +171,24 @@ CREATE TABLE IF NOT EXISTS itens_relatorio (
 -- ========================================
 -- Dados de exemplo - Tipos de Equipamentos
 -- ========================================
-INSERT INTO tipos_equipamentos (nome, descricao, frequencia_inspecao) VALUES
-    ('Extintores de Incêndio', 'Extintores portáteis para combate a incêndios', 365),
-    ('Hidrantes', 'Hidrantes interiores e exteriores', 180),
-    ('Luminárias de Emergência', 'Luminárias de emergência e sinalização', 365),
-    ('Portas Corta-Fogo', 'Portas e sistemas corta-fogo', 365),
-    ('Escadas de Emergência', 'Escadas e caminhos de evacuação', 180),
-    ('Sistemas de Deteção de Fumo', 'Detetores de fumo e alarmes', 180),
-    ('Bombas de Incêndio', 'Sistemas de bombagem de água', 90),
-    ('Quadros Elétricos', 'Quadros de controlo e distribuição', 365);
+INSERT INTO tipos_equipamentos (nome, descricao, prefixo_numeracao, frequencia_inspecao) VALUES
+    ('Extintores de Incêndio', 'Extintores portáteis para combate a incêndios', 'EXT', 365),
+    ('Hidrantes', 'Hidrantes interiores e exteriores', 'HID', 180),
+    ('Luminárias de Emergência', 'Luminárias de emergência e sinalização', 'LUM', 365),
+    ('Portas Corta-Fogo', 'Portas e sistemas corta-fogo', 'PCF', 365),
+    ('Escadas de Emergência', 'Escadas e caminhos de evacuação', 'ESC', 180),
+    ('Sistemas de Deteção de Fumo', 'Detetores de fumo e alarmes', 'SDF', 180),
+    ('Bombas de Incêndio', 'Sistemas de bombagem de água', 'BOM', 90),
+    ('Quadros Elétricos', 'Quadros de controlo e distribuição', 'QEL', 365);
+
+-- ========================================
+-- Campos dinâmicos exemplo - Extintores
+-- ========================================
+INSERT INTO tipos_equipamentos_campos (tipo_equipamento_id, nome_campo, slug, tipo_dado, unidade, obrigatorio, ordem) VALUES
+    (1, 'Capacidade', 'capacidade', 'numero', 'kg', TRUE, 1),
+    (1, 'Classe de Fogo', 'classe_fogo', 'texto', NULL, TRUE, 2),
+    (1, 'Agente Extintor', 'agente_extintor', 'texto', NULL, TRUE, 3),
+    (1, 'Pressão de Serviço', 'pressao_servico', 'numero', 'bar', FALSE, 4);
 
 -- ========================================
 -- Dados de exemplo - Utilizador Administrador
