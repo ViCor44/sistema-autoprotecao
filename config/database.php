@@ -1,8 +1,14 @@
 <?php
-// Database configuration
+/**
+ * Configuração da Base de Dados
+ */
+
 return [
+    'driver' => 'mysql',
     'host' => 'localhost',
-    'user' => 'db_user',
-    'password' => 'db_password',
+    'port' => 3306,
+    'user' => 'root',
+    'password' => '',
     'dbname' => 'sistema_autoprotecao',
+    'charset' => 'utf8mb4',
 ];
