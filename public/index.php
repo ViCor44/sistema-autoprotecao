@@ -7,7 +7,7 @@
 session_start();
 
 // Carregar configurações
-require_once __DIR__ . '/config/Config.php';
+require_once dirname(__DIR__) . '/config/Config.php';
 
 // Auto-loader de classes
 function autoload($class) {
