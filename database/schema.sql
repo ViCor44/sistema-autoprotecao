@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS tipos_equipamentos (
     frequencia_inspecao INT COMMENT 'Frequência em dias',
     ativo BOOLEAN DEFAULT TRUE,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_tipo_nome (nome),
     INDEX idx_ativo (ativo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -182,7 +183,12 @@ INSERT INTO tipos_equipamentos (nome, descricao, prefixo_numeracao, frequencia_i
     ('Escadas de Emergência', 'Escadas e caminhos de evacuação', 'ESC', 180),
     ('Sistemas de Deteção de Fumo', 'Detetores de fumo e alarmes', 'SDF', 180),
     ('Bombas de Incêndio', 'Sistemas de bombagem de água', 'BOM', 90),
-    ('Quadros Elétricos', 'Quadros de controlo e distribuição', 'QEL', 365);
+    ('Quadros Elétricos', 'Quadros de controlo e distribuição', 'QEL', 365)
+ON DUPLICATE KEY UPDATE
+    descricao = VALUES(descricao),
+    prefixo_numeracao = VALUES(prefixo_numeracao),
+    frequencia_inspecao = VALUES(frequencia_inspecao),
+    ativo = TRUE;
 
 -- ========================================
 -- Campos dinâmicos exemplo - Extintores
