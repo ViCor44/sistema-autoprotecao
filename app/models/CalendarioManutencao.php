@@ -178,4 +178,30 @@ class CalendarioManutencao {
         $stmt->bind_param("i", $id);
         return $stmt->execute();
     }
+
+    /**
+     * Atualizar dados da inspeção
+     */
+    public function atualizarInspecao($id, $dados) {
+        $campos = [];
+        $params = [];
+        if (isset($dados['parecer'])) {
+            $campos[] = "parecer = ?";
+            $params[] = $dados['parecer'];
+        }
+        if (isset($dados['equipamentos_avariados'])) {
+            $campos[] = "equipamentos_avariados = ?";
+            $params[] = $dados['equipamentos_avariados'];
+        }
+        if (isset($dados['observacoes'])) {
+            $campos[] = "observacoes = ?";
+            $params[] = $dados['observacoes'];
+        }
+        if (empty($campos)) return false;
+        $params[] = $id;
+        $query = "UPDATE calendario_manutencao SET ".implode(", ", $campos)." WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param(str_repeat('s', count($params)-1).'i', ...$params);
+        return $stmt->execute();
+    }
 }
