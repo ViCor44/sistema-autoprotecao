@@ -15,13 +15,17 @@ class CalendarioManutencao {
      * Obter todos os agendamentos
      */
     public function getAll($filtros = []) {
-        $query = "SELECT c.*, e.localizacao, e.numero_serie, 
+        $query = "SELECT c.*, e.localizacao, e.numero_serie,
                         t.nome as tipo_equipamento, u.nome as responsavel_nome
                   FROM {$this->table} c
-                  JOIN equipamentos e ON c.equipamento_id = e.id
-                  JOIN tipos_equipamentos t ON e.tipo_equipamento_id = t.id
+                  LEFT JOIN equipamentos e ON c.equipamento_id = e.id
+                  JOIN tipos_equipamentos t ON t.id = c.tipo_equipamento_id
                   LEFT JOIN utilizadores u ON c.responsavel_id = u.id
                   WHERE 1=1";
+
+        if (isset($filtros['tipo_equipamento_id'])) {
+            $query .= " AND c.tipo_equipamento_id = " . (int)$filtros['tipo_equipamento_id'];
+        }
 
         if (isset($filtros['status'])) {
             $query .= " AND c.status = '" . $this->db->escape($filtros['status']) . "'";
@@ -45,11 +49,11 @@ class CalendarioManutencao {
      * Obter agendamento por ID
      */
     public function getById($id) {
-        $query = "SELECT c.*, e.localizacao, e.numero_serie, e.marca, e.modelo,
-                        t.nome as tipo_equipamento, u.nome as responsavel_nome
+          $query = "SELECT c.*, e.localizacao, e.numero_serie, e.marca, e.modelo,
+                    t.nome as tipo_equipamento, u.nome as responsavel_nome
                   FROM {$this->table} c
-                  JOIN equipamentos e ON c.equipamento_id = e.id
-                  JOIN tipos_equipamentos t ON e.tipo_equipamento_id = t.id
+                LEFT JOIN equipamentos e ON c.equipamento_id = e.id
+                JOIN tipos_equipamentos t ON t.id = c.tipo_equipamento_id
                   LEFT JOIN utilizadores u ON c.responsavel_id = u.id
                   WHERE c.id = ?";
 
@@ -65,12 +69,13 @@ class CalendarioManutencao {
      */
     public function create($dados) {
         $query = "INSERT INTO {$this->table}
-                  (equipamento_id, data_inspecao, tipo_inspecao, descricao, responsavel_id, status, prioridade)
-                  VALUES (?, ?, ?, ?, ?, ?, ?)";
+                  (tipo_equipamento_id, equipamento_id, data_inspecao, tipo_inspecao, descricao, responsavel_id, status, prioridade)
+                  VALUES (?, NULLIF(?, 0), ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($query);
         $stmt->bind_param(
-            "isssiss",
+            "iisssiss",
+            $dados['tipo_equipamento_id'],
             $dados['equipamento_id'],
             $dados['data_inspecao'],
             $dados['tipo_inspecao'],
@@ -91,6 +96,8 @@ class CalendarioManutencao {
      */
     public function update($id, $dados) {
         $query = "UPDATE {$this->table} SET
+                  tipo_equipamento_id = ?,
+                  equipamento_id = NULLIF(?, 0),
                   tipo_inspecao = ?,
                   descricao = ?,
                   responsavel_id = ?,
@@ -100,7 +107,9 @@ class CalendarioManutencao {
 
         $stmt = $this->db->prepare($query);
         $stmt->bind_param(
-            "ssissi",
+            "iississi",
+            $dados['tipo_equipamento_id'],
+            $dados['equipamento_id'],
             $dados['tipo_inspecao'],
             $dados['descricao'],
             $dados['responsavel_id'],
@@ -128,8 +137,8 @@ class CalendarioManutencao {
     public function getProximos($dias = 7) {
         $query = "SELECT c.*, e.localizacao, t.nome as tipo_equipamento, u.nome as responsavel_nome
                   FROM {$this->table} c
-                  JOIN equipamentos e ON c.equipamento_id = e.id
-                  JOIN tipos_equipamentos t ON e.tipo_equipamento_id = t.id
+                  LEFT JOIN equipamentos e ON c.equipamento_id = e.id
+                  JOIN tipos_equipamentos t ON t.id = c.tipo_equipamento_id
                   LEFT JOIN utilizadores u ON c.responsavel_id = u.id
                   WHERE c.data_inspecao BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY)
                   AND c.status != 'cancelado'
@@ -148,8 +157,8 @@ class CalendarioManutencao {
     public function getVencidos() {
         $query = "SELECT c.*, e.localizacao, t.nome as tipo_equipamento, u.nome as responsavel_nome
                   FROM {$this->table} c
-                  JOIN equipamentos e ON c.equipamento_id = e.id
-                  JOIN tipos_equipamentos t ON e.tipo_equipamento_id = t.id
+                  LEFT JOIN equipamentos e ON c.equipamento_id = e.id
+                  JOIN tipos_equipamentos t ON t.id = c.tipo_equipamento_id
                   LEFT JOIN utilizadores u ON c.responsavel_id = u.id
                   WHERE c.data_inspecao < CURDATE()
                   AND c.status != 'concluido'

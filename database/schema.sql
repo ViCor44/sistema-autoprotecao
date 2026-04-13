@@ -112,7 +112,8 @@ CREATE TABLE IF NOT EXISTS equipamentos_campos_valores (
 -- ========================================
 CREATE TABLE IF NOT EXISTS calendarios_manutencao (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    equipamento_id INT NOT NULL,
+    tipo_equipamento_id INT NOT NULL,
+    equipamento_id INT NULL,
     data_inspecao DATE NOT NULL,
     tipo_inspecao VARCHAR(50) COMMENT 'inspeção, manutenção, reparação',
     descricao TEXT,
@@ -121,8 +122,10 @@ CREATE TABLE IF NOT EXISTS calendarios_manutencao (
     prioridade VARCHAR(20) DEFAULT 'normal' COMMENT 'baixa, normal, alta, urgente',
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (tipo_equipamento_id) REFERENCES tipos_equipamentos(id),
     FOREIGN KEY (equipamento_id) REFERENCES equipamentos(id),
     FOREIGN KEY (responsavel_id) REFERENCES utilizadores(id),
+    INDEX idx_tipo_equipamento (tipo_equipamento_id),
     INDEX idx_equipamento (equipamento_id),
     INDEX idx_data (data_inspecao),
     INDEX idx_status (status),

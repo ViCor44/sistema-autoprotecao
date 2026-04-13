@@ -5,7 +5,13 @@
         <div class="card">
             <div class="card-body">
                 <p>
-                    <strong>Equipamento:</strong> <?php echo $agendamento['tipo_equipamento']; ?> (<?php echo $agendamento['localizacao']; ?>)<br>
+                    <strong>Tipo de Equipamento:</strong> <?php echo $agendamento['tipo_equipamento']; ?><br>
+                    <strong>Âmbito:</strong>
+                    <?php if (!empty($agendamento['equipamento_id'])): ?>
+                        Equipamento específico (<?php echo $agendamento['localizacao']; ?>)
+                    <?php else: ?>
+                        Todos os equipamentos do tipo
+                    <?php endif; ?><br>
                     <strong>Data:</strong> <?php echo date('d/m/Y', strtotime($agendamento['data_inspecao'])); ?><br>
                     <strong>Tipo:</strong> <?php echo ucfirst(str_replace('_', ' ', $agendamento['tipo_inspecao'])); ?><br>
                     <strong>Prioridade:</strong> <?php echo ucfirst($agendamento['prioridade']); ?><br>

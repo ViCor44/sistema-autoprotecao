@@ -20,7 +20,8 @@
             <thead class="table-dark">
                 <tr>
                     <th>Data</th>
-                    <th>Equipamento</th>
+                    <th>Tipo de Equipamento</th>
+                    <th>Âmbito</th>
                     <th>Tipo de Inspeção</th>
                     <th>Prioridade</th>
                     <th>Status</th>
@@ -32,7 +33,14 @@
                 <?php foreach ($agendamentos as $ag): ?>
                     <tr>
                         <td><?php echo date('d/m/Y', strtotime($ag['data_inspecao'])); ?></td>
-                        <td><?php echo $ag['localizacao']; ?></td>
+                        <td><?php echo $ag['tipo_equipamento']; ?></td>
+                        <td>
+                            <?php if (!empty($ag['equipamento_id'])): ?>
+                                Equipamento: <?php echo $ag['localizacao']; ?>
+                            <?php else: ?>
+                                Todos do tipo
+                            <?php endif; ?>
+                        </td>
                         <td><?php echo ucfirst(str_replace('_', ' ', $ag['tipo_inspecao'])); ?></td>
                         <td>
                             <span class="badge bg-<?php 

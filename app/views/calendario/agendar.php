@@ -5,13 +5,24 @@
         <form method="POST" action="index.php?controler=calendario&acao=salvar" class="card">
             <div class="card-body">
                 <div class="mb-3">
-                    <label for="equipamento_id" class="form-label">Equipamento *</label>
-                    <select name="equipamento_id" id="equipamento_id" class="form-select" required>
+                    <label for="tipo_equipamento_id" class="form-label">Tipo de Equipamento *</label>
+                    <select name="tipo_equipamento_id" id="tipo_equipamento_id" class="form-select" required>
                         <option value="">Selecione...</option>
-                        <?php foreach ($equipamentos as $equip): ?>
-                            <option value="<?php echo $equip['id']; ?>"><?php echo $equip['tipo_nome']; ?> - <?php echo $equip['localizacao']; ?></option>
+                        <?php foreach ($tiposEquipamentos as $tipo): ?>
+                            <option value="<?php echo $tipo['id']; ?>"><?php echo $tipo['nome']; ?></option>
                         <?php endforeach; ?>
                     </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="equipamento_id" class="form-label">Equipamento Específico (opcional)</label>
+                    <select name="equipamento_id" id="equipamento_id" class="form-select">
+                        <option value="">Selecione...</option>
+                        <?php foreach ($equipamentos as $equip): ?>
+                            <option value="<?php echo $equip['id']; ?>" data-tipo-id="<?php echo $equip['tipo_equipamento_id']; ?>"><?php echo $equip['tipo_nome']; ?> - <?php echo $equip['localizacao']; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="text-muted">Deixe vazio para agendar a inspeção para todos os equipamentos do tipo selecionado.</small>
                 </div>
 
                 <div class="row">
@@ -58,3 +69,31 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const selectTipo = document.getElementById('tipo_equipamento_id');
+    const selectEquipamento = document.getElementById('equipamento_id');
+    const opcoesEquipamento = Array.from(selectEquipamento.querySelectorAll('option'));
+
+    function filtrarEquipamentosPorTipo() {
+        const tipoId = selectTipo.value;
+
+        opcoesEquipamento.forEach(function (opcao, index) {
+            if (index === 0) {
+                opcao.hidden = false;
+                return;
+            }
+
+            const tipoOpcao = opcao.getAttribute('data-tipo-id');
+            opcao.hidden = !!tipoId && tipoOpcao !== tipoId;
+        });
+
+        if (selectEquipamento.selectedOptions[0] && selectEquipamento.selectedOptions[0].hidden) {
+            selectEquipamento.value = '';
+        }
+    }
+
+    selectTipo.addEventListener('change', filtrarEquipamentosPorTipo);
+});
+</script>

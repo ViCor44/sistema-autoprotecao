@@ -5,10 +5,21 @@
 class CalendarioController {
     private $calendario;
     private $equipamento;
+    private $tiposEquipamentos = [];
 
     public function __construct() {
         $this->calendario = new CalendarioManutencao();
         $this->equipamento = new Equipamento();
+        $this->carregarTiposEquipamentos();
+    }
+
+    /**
+     * Carregar tipos de equipamentos
+     */
+    private function carregarTiposEquipamentos() {
+        $db = new Database();
+        $resultado = $db->query("SELECT id, nome FROM tipos_equipamentos WHERE ativo = TRUE ORDER BY nome ASC");
+        $this->tiposEquipamentos = $resultado->fetch_all(MYSQLI_ASSOC);
     }
 
     /**
@@ -66,6 +77,7 @@ class CalendarioController {
      */
     public function agendar($equipamento_id = null) {
         $equipamentos = $this->equipamento->getAll();
+        $tiposEquipamentos = $this->tiposEquipamentos;
         require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'calendario' . DIRECTORY_SEPARATOR . 'agendar.php';
     }
 
@@ -79,6 +91,7 @@ class CalendarioController {
         }
 
         $dados = [
+            'tipo_equipamento_id' => (int)($_POST['tipo_equipamento_id'] ?? 0),
             'equipamento_id' => $_POST['equipamento_id'] ?? 0,
             'data_inspecao' => $_POST['data_inspecao'] ?? date('Y-m-d'),
             'tipo_inspecao' => $_POST['tipo_inspecao'] ?? 'inspecao',
@@ -87,6 +100,13 @@ class CalendarioController {
             'status' => 'agendado',
             'prioridade' => $_POST['prioridade'] ?? 'normal'
         ];
+
+        if ($dados['tipo_equipamento_id'] <= 0) {
+            $_SESSION['mensagem'] = 'Selecione o tipo de equipamento para a inspeção.';
+            $_SESSION['tipo_mensagem'] = 'erro';
+            header('Location: index.php?controler=calendario&acao=agendar');
+            exit;
+        }
 
         if ($this->calendario->create($dados)) {
             $_SESSION['mensagem'] = 'Agendamento criado com sucesso!';
