@@ -67,6 +67,8 @@ class RelatorioController {
         }
 
         $dados = [
+            'calendario_id' => $_POST['calendario_id'] ?? 0,
+            'tipo_equipamento_id' => $_POST['tipo_equipamento_id'] ?? 0,
             'equipamento_id' => $_POST['equipamento_id'] ?? 0,
             'data_relatorio' => $_POST['data_relatorio'] ?? date('Y-m-d'),
             'responsavel_id' => $_SESSION['utilizador_id'] ?? 0,

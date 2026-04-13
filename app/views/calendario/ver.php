@@ -21,6 +21,11 @@
                 </p>
             </div>
             <div class="card-footer bg-white">
+                <?php if (!empty($relatorioInspecao)): ?>
+                    <a href="index.php?controler=relatorio&acao=ver&id=<?php echo $relatorioInspecao['id']; ?>" class="btn btn-primary">
+                        <i class="bi bi-file-earmark-text"></i> Ver Relatório da Inspeção
+                    </a>
+                <?php endif; ?>
                 <a href="index.php?controler=calendario&acao=listar" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
             </div>
         </div>

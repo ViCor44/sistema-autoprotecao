@@ -138,7 +138,9 @@ CREATE TABLE IF NOT EXISTS calendarios_manutencao (
 -- ========================================
 CREATE TABLE IF NOT EXISTS relatorios (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    equipamento_id INT NOT NULL,
+    calendario_id INT UNIQUE,
+    tipo_equipamento_id INT,
+    equipamento_id INT,
     data_relatorio DATE NOT NULL,
     responsavel_id INT NOT NULL,
     tipo_relatorio VARCHAR(50) NOT NULL COMMENT 'inspecao, manutencao, reparacao',
@@ -150,8 +152,12 @@ CREATE TABLE IF NOT EXISTS relatorios (
     data_assinatura TIMESTAMP,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (calendario_id) REFERENCES calendarios_manutencao(id),
+    FOREIGN KEY (tipo_equipamento_id) REFERENCES tipos_equipamentos(id),
     FOREIGN KEY (equipamento_id) REFERENCES equipamentos(id),
     FOREIGN KEY (responsavel_id) REFERENCES utilizadores(id),
+    INDEX idx_calendario (calendario_id),
+    INDEX idx_tipo_equipamento (tipo_equipamento_id),
     INDEX idx_equipamento (equipamento_id),
     INDEX idx_data (data_relatorio),
     INDEX idx_tipo (tipo_relatorio),

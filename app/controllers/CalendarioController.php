@@ -5,11 +5,13 @@
 class CalendarioController {
     private $calendario;
     private $equipamento;
+    private $relatorio;
     private $tiposEquipamentos = [];
 
     public function __construct() {
         $this->calendario = new CalendarioManutencao();
         $this->equipamento = new Equipamento();
+        $this->relatorio = new Relatorio();
         $this->carregarTiposEquipamentos();
     }
 
@@ -69,6 +71,8 @@ class CalendarioController {
             exit;
         }
 
+        $relatorioInspecao = $this->relatorio->getByCalendarioId((int)$id);
+
         require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'calendario' . DIRECTORY_SEPARATOR . 'ver.php';
     }
 
@@ -108,9 +112,20 @@ class CalendarioController {
             exit;
         }
 
-        if ($this->calendario->create($dados)) {
-            $_SESSION['mensagem'] = 'Agendamento criado com sucesso!';
-            $_SESSION['tipo_mensagem'] = 'sucesso';
+        $agendamentoId = $this->calendario->create($dados);
+
+        if ($agendamentoId) {
+            $agendamento = $this->calendario->getById((int)$agendamentoId);
+            $responsavelRelatorio = $_SESSION['utilizador_id'] ?? 0;
+            $relatorioId = $this->relatorio->createFromInspecao($agendamento, $responsavelRelatorio);
+
+            if ($relatorioId) {
+                $_SESSION['mensagem'] = 'Agendamento criado e relatório gerado com sucesso!';
+                $_SESSION['tipo_mensagem'] = 'sucesso';
+            } else {
+                $_SESSION['mensagem'] = 'Agendamento criado, mas não foi possível gerar o relatório automático.';
+                $_SESSION['tipo_mensagem'] = 'erro';
+            }
             header('Location: index.php?controler=calendario&acao=listar');
         } else {
             $_SESSION['mensagem'] = 'Erro ao criar agendamento.';

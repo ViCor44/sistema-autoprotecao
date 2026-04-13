@@ -15,11 +15,11 @@ class Relatorio {
      * Obter todos os relatórios com filtros
      */
     public function getAll($filtros = []) {
-        $query = "SELECT r.*, e.localizacao, e.numero_serie, 
+        $query = "SELECT r.*, e.localizacao, e.numero_serie,
                         t.nome as tipo_equipamento, u.nome as responsavel_nome
                   FROM {$this->table} r
-                  JOIN equipamentos e ON r.equipamento_id = e.id
-                  JOIN tipos_equipamentos t ON e.tipo_equipamento_id = t.id
+                  LEFT JOIN equipamentos e ON r.equipamento_id = e.id
+                  LEFT JOIN tipos_equipamentos t ON t.id = COALESCE(r.tipo_equipamento_id, e.tipo_equipamento_id)
                   JOIN utilizadores u ON r.responsavel_id = u.id
                   WHERE 1=1";
 
@@ -48,8 +48,8 @@ class Relatorio {
         $query = "SELECT r.*, e.localizacao, e.numero_serie, e.marca, e.modelo,
                         t.nome as tipo_equipamento, u.nome as responsavel_nome
                   FROM {$this->table} r
-                  JOIN equipamentos e ON r.equipamento_id = e.id
-                  JOIN tipos_equipamentos t ON e.tipo_equipamento_id = t.id
+                  LEFT JOIN equipamentos e ON r.equipamento_id = e.id
+                  LEFT JOIN tipos_equipamentos t ON t.id = COALESCE(r.tipo_equipamento_id, e.tipo_equipamento_id)
                   JOIN utilizadores u ON r.responsavel_id = u.id
                   WHERE r.id = ?";
 
@@ -65,13 +65,15 @@ class Relatorio {
      */
     public function create($dados) {
         $query = "INSERT INTO {$this->table}
-                  (equipamento_id, data_relatorio, responsavel_id, tipo_relatorio, 
+                  (calendario_id, tipo_equipamento_id, equipamento_id, data_relatorio, responsavel_id, tipo_relatorio,
                    descricao, observacoes, condicoes_encontradas, proxima_inspecao)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                  VALUES (NULLIF(?, 0), NULLIF(?, 0), NULLIF(?, 0), ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($query);
         $stmt->bind_param(
-            "isssssss",
+            "iiisisssss",
+            $dados['calendario_id'],
+            $dados['tipo_equipamento_id'],
             $dados['equipamento_id'],
             $dados['data_relatorio'],
             $dados['responsavel_id'],
@@ -86,6 +88,52 @@ class Relatorio {
             return $this->db->getLastId();
         }
         return false;
+    }
+
+    /**
+     * Obter relatório associado a uma inspeção
+     */
+    public function getByCalendarioId($calendarioId) {
+        $query = "SELECT id FROM {$this->table} WHERE calendario_id = ? LIMIT 1";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $calendarioId);
+        $stmt->execute();
+        $resultado = $stmt->get_result()->fetch_assoc();
+
+        if (!$resultado) {
+            return null;
+        }
+
+        return $this->getById((int)$resultado['id']);
+    }
+
+    /**
+     * Criar relatório automaticamente a partir de uma inspeção
+     */
+    public function createFromInspecao($agendamento, $responsavelId) {
+        if (empty($agendamento) || empty($agendamento['id'])) {
+            return false;
+        }
+
+        $existente = $this->getByCalendarioId((int)$agendamento['id']);
+        if ($existente) {
+            return (int)$existente['id'];
+        }
+
+        $dados = [
+            'calendario_id' => (int)$agendamento['id'],
+            'tipo_equipamento_id' => (int)$agendamento['tipo_equipamento_id'],
+            'equipamento_id' => !empty($agendamento['equipamento_id']) ? (int)$agendamento['equipamento_id'] : 0,
+            'data_relatorio' => $agendamento['data_inspecao'] ?? date('Y-m-d'),
+            'responsavel_id' => (int)$responsavelId,
+            'tipo_relatorio' => 'inspecao',
+            'descricao' => 'Relatório gerado automaticamente a partir do agendamento de inspeção.',
+            'observacoes' => $agendamento['descricao'] ?? '',
+            'condicoes_encontradas' => '',
+            'proxima_inspecao' => null
+        ];
+
+        return $this->create($dados);
     }
 
     /**
@@ -153,8 +201,8 @@ class Relatorio {
     public function getRelatoriosPendentesAssinatura() {
         $query = "SELECT r.*, e.localizacao, t.nome as tipo_equipamento, u.nome as responsavel_nome
                   FROM {$this->table} r
-                  JOIN equipamentos e ON r.equipamento_id = e.id
-                  JOIN tipos_equipamentos t ON e.tipo_equipamento_id = t.id
+                  LEFT JOIN equipamentos e ON r.equipamento_id = e.id
+                  LEFT JOIN tipos_equipamentos t ON t.id = COALESCE(r.tipo_equipamento_id, e.tipo_equipamento_id)
                   JOIN utilizadores u ON r.responsavel_id = u.id
                   WHERE r.assinado = FALSE
                   ORDER BY r.data_criacao DESC";
