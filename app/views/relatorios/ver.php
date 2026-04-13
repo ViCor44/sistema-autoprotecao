@@ -58,7 +58,7 @@
         <div class="card-footer bg-white">
             <?php if (!$relatorio['assinado']): ?>
                 <a href="index.php?controler=relatorio&acao=editar&id=<?php echo $relatorio['id']; ?>" class="btn btn-warning">
-                    <i class="bi bi-pencil-square"></i> Editar
+                    <i class="bi bi-pencil-square"></i> Preencher/Editar Formulário
                 </a>
             <?php endif; ?>
             <?php if (!$relatorio['assinado']): ?>
@@ -66,6 +66,9 @@
                     <i class="bi bi-check-circle"></i> Assinar
                 </a>
             <?php endif; ?>
+            <a href="index.php?controler=relatorio&acao=exportar_pdf&id=<?php echo $relatorio['id']; ?>" class="btn btn-outline-secondary">
+                <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+            </a>
             <a href="index.php?controler=relatorio&acao=listar" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Voltar
             </a>

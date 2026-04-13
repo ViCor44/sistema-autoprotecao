@@ -25,6 +25,11 @@
                     <a href="index.php?controler=relatorio&acao=ver&id=<?php echo $relatorioInspecao['id']; ?>" class="btn btn-primary">
                         <i class="bi bi-file-earmark-text"></i> Ver Relatório da Inspeção
                     </a>
+                    <?php if (!$relatorioInspecao['assinado']): ?>
+                        <a href="index.php?controler=relatorio&acao=editar&id=<?php echo $relatorioInspecao['id']; ?>" class="btn btn-warning ms-2">
+                            <i class="bi bi-pencil-square"></i> Preencher Formulário da Inspeção
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
                 <a href="index.php?controler=calendario&acao=listar" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
             </div>
