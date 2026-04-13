@@ -139,26 +139,30 @@ class Relatorio {
     /**
      * Atualizar relatório
      */
-    public function update($id, $dados) {
-        $query = "UPDATE {$this->table} SET
-                  tipo_relatorio = ?,
-                  descricao = ?,
-                  observacoes = ?,
-                  condicoes_encontradas = ?,
-                  proxima_inspecao = ?
-                  WHERE id = ?";
-
+    public function atualizar($id, $dados) {
+        $campos = [];
+        $params = [];
+        if (isset($dados['descricao'])) {
+            $campos[] = "descricao = ?";
+            $params[] = $dados['descricao'];
+        }
+        if (isset($dados['observacoes'])) {
+            $campos[] = "observacoes = ?";
+            $params[] = $dados['observacoes'];
+        }
+        if (isset($dados['condicoes_encontradas'])) {
+            $campos[] = "condicoes_encontradas = ?";
+            $params[] = $dados['condicoes_encontradas'];
+        }
+        if (isset($dados['proxima_inspecao'])) {
+            $campos[] = "proxima_inspecao = ?";
+            $params[] = $dados['proxima_inspecao'];
+        }
+        if (empty($campos)) return false;
+        $params[] = $id;
+        $query = "UPDATE {$this->table} SET ".implode(", ", $campos)." WHERE id = ?";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param(
-            "ssssi",
-            $dados['tipo_relatorio'],
-            $dados['descricao'],
-            $dados['observacoes'],
-            $dados['condicoes_encontradas'],
-            $dados['proxima_inspecao'],
-            $id
-        );
-
+        $stmt->bind_param(str_repeat('s', count($params)-1).'i', ...$params);
         return $stmt->execute();
     }
 

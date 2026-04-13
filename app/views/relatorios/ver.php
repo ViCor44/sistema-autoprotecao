@@ -57,6 +57,11 @@
 
         <div class="card-footer bg-white">
             <?php if (!$relatorio['assinado']): ?>
+                <a href="index.php?controler=relatorio&acao=editar&id=<?php echo $relatorio['id']; ?>" class="btn btn-warning">
+                    <i class="bi bi-pencil-square"></i> Editar
+                </a>
+            <?php endif; ?>
+            <?php if (!$relatorio['assinado']): ?>
                 <a href="index.php?controler=relatorio&acao=assinar&id=<?php echo $relatorio['id']; ?>" class="btn btn-success" onclick="return confirm('Tem a certeza que deseja assinar este relatório?');">
                     <i class="bi bi-check-circle"></i> Assinar
                 </a>

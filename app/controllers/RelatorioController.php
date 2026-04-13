@@ -106,6 +106,42 @@ class RelatorioController {
     }
 
     /**
+     * Formulário para editar relatório
+     */
+    public function editar($id) {
+        $relatorio = $this->relatorio->getById($id);
+        if (!$relatorio || $relatorio['assinado']) {
+            $_SESSION['mensagem'] = 'Relatório não encontrado ou já assinado.';
+            $_SESSION['tipo_mensagem'] = 'erro';
+            header('Location: index.php?controler=relatorio&acao=ver&id=' . $id);
+            exit;
+        }
+        $equipamentos = $this->equipamento->getAll();
+        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'relatorios' . DIRECTORY_SEPARATOR . 'editar.php';
+    }
+
+    /**
+     * Atualizar relatório
+     */
+    public function atualizar($id) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?controler=relatorio&acao=ver&id=' . $id);
+            exit;
+        }
+        $dados = [
+            'descricao' => $_POST['descricao'] ?? '',
+            'observacoes' => $_POST['observacoes'] ?? '',
+            'condicoes_encontradas' => $_POST['condicoes_encontradas'] ?? '',
+            'proxima_inspecao' => $_POST['proxima_inspecao'] ?? null
+        ];
+        $this->relatorio->atualizar($id, $dados);
+        $_SESSION['mensagem'] = 'Relatório atualizado com sucesso!';
+        $_SESSION['tipo_mensagem'] = 'sucesso';
+        header('Location: index.php?controler=relatorio&acao=ver&id=' . $id);
+        exit;
+    }
+
+    /**
      * Assinar relatório
      */
     public function assinar($id) {
