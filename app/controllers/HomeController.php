@@ -22,7 +22,7 @@ class HomeController {
         $manutencoeVencidas = $this->calendarioManutencao->getVencidos();
         $relatoriosRecentes = $this->relatorio->getAll(['data_inicio' => date('Y-m-d', strtotime('-30 days'))]);
         $totalEquipamentos = count($this->equipamento->getAll(['ativo' => 1]));
-
+        $totalInspecoesAgendadas = count($this->calendarioManutencao->getAll(['status' => 'agendado']));
         require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'home' . DIRECTORY_SEPARATOR . 'index.php';
     }
 
