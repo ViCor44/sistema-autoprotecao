@@ -48,15 +48,15 @@
             <div class="card-body">
                 <h5 class="card-title">Inspeções Agendadas</h5>
                 <h2><?php echo $totalInspecoesAgendadas ?? 0; ?></h2>
-                <a href="index.php?controler=calendario&acao=listar" class="btn btn-sm btn-light">Ver</a>
+                <a href="index.php?controler=inspecao&acao=listar" class="btn btn-sm btn-light">Ver</a>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card bg-primary text-white">
             <div class="card-body">
-                <h5 class="card-title">Registar Parecer de Inspeção</h5>
-                <a href="index.php?controler=calendario&acao=listar" class="btn btn-sm btn-light">Aceder</a>
+                <h5 class="card-title">Preencher Inspeção</h5>
+                <a href="index.php?controler=inspecao&acao=listar" class="btn btn-sm btn-light">Aceder</a>
             </div>
         </div>
     </div>
