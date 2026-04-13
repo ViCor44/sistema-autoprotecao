@@ -31,6 +31,7 @@ class InspecaoController {
             'observacoes' => $_POST['observacoes'] ?? ''
         ];
         $this->calendario->atualizarInspecao($id, $dados);
+        $this->calendario->updateStatus($id, 'concluida');
         // Gera relatório automaticamente
         $inspecao = $this->calendario->getById($id);
         $this->relatorio->createFromInspecao($inspecao, $_SESSION['utilizador_id'] ?? 0);

@@ -32,8 +32,8 @@
                         <td><?php echo $insp['tipo_equipamento']; ?></td>
                         <td><?php echo $insp['localizacao'] ?? '-'; ?></td>
                         <td>
-                            <span class="badge bg-<?php echo $insp['status'] === 'concluida' ? 'success' : 'warning'; ?>">
-                                <?php echo ucfirst($insp['status']); ?>
+                            <span class="badge bg-<?php echo $insp['status'] === 'concluida' ? 'success' : ($insp['status'] === 'em_progresso' ? 'info' : 'warning'); ?>">
+                                <?php echo ucfirst(str_replace('_',' ',$insp['status'])); ?>
                             </span>
                         </td>
                         <td><?php echo $insp['responsavel_nome'] ?? '-'; ?></td>
