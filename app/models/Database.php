@@ -6,13 +6,16 @@
 class Database {
     private $conexao;
     private $host;
+    private $port;
     private $user;
     private $password;
     private $dbname;
+    private static $sharedConnection = null;
 
     public function __construct() {
         $config = require CONFIG_PATH . DIRECTORY_SEPARATOR . 'database.php';
         $this->host = $config['host'];
+        $this->port = $config['port'] ?? 3306;
         $this->user = $config['user'];
         $this->password = $config['password'];
         $this->dbname = $config['dbname'];
@@ -23,21 +26,29 @@ class Database {
      * Estabelece conexão com a base de dados
      */
     private function conectar() {
+        if (self::$sharedConnection instanceof mysqli && !self::$sharedConnection->connect_errno) {
+            $this->conexao = self::$sharedConnection;
+            return;
+        }
+
         try {
-            $this->conexao = new mysqli(
+            $connection = new mysqli(
                 $this->host,
                 $this->user,
                 $this->password,
-                $this->dbname
+                $this->dbname,
+                (int)$this->port
             );
 
             // Verificar erro de conexão
-            if ($this->conexao->connect_error) {
-                throw new Exception('Erro na conexão: ' . $this->conexao->connect_error);
+            if ($connection->connect_error) {
+                throw new Exception('Erro na conexão: ' . $connection->connect_error);
             }
 
             // Configurar charset
-            $this->conexao->set_charset("utf8mb4");
+            $connection->set_charset("utf8mb4");
+            self::$sharedConnection = $connection;
+            $this->conexao = $connection;
         } catch (Exception $e) {
             die('Erro de conexão com a base de dados: ' . $e->getMessage());
         }
