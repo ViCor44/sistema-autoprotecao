@@ -2,7 +2,7 @@
 /**
  * Controller para Calendário de Inspeções
  */
-class CalendarioController {
+class CalendarioController extends Controller {
     private $calendario;
     private $equipamento;
     private $relatorio;
@@ -40,7 +40,7 @@ class CalendarioController {
             'data_fim' => date('Y-m-t', mktime(0, 0, 0, $mes, 1, $ano))
         ]);
 
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'calendario' . DIRECTORY_SEPARATOR . 'calendario.php';
+        $this->render('calendario/calendario', compact('mes', 'ano', 'agendamentos'));
     }
 
     /**
@@ -54,8 +54,8 @@ class CalendarioController {
         }
         
         $agendamentos = $this->calendario->getAll($filtros);
-        
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'calendario' . DIRECTORY_SEPARATOR . 'listar.php';
+
+        $this->render('calendario/listar', compact('agendamentos'));
     }
 
     /**
@@ -65,15 +65,13 @@ class CalendarioController {
         $agendamento = $this->calendario->getById($id);
         
         if (!$agendamento) {
-            $_SESSION['mensagem'] = 'Agendamento não encontrado.';
-            $_SESSION['tipo_mensagem'] = 'erro';
-            header('Location: index.php?controler=calendario&acao=listar');
-            exit;
+            $this->flash('Agendamento não encontrado.', 'erro');
+            $this->redirect('calendario', 'listar');
         }
 
         $relatorioInspecao = $this->relatorio->getByCalendarioId((int)$id);
 
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'calendario' . DIRECTORY_SEPARATOR . 'ver.php';
+        $this->render('calendario/ver', compact('agendamento', 'relatorioInspecao'));
     }
 
     /**
@@ -82,17 +80,14 @@ class CalendarioController {
     public function agendar($equipamento_id = null) {
         $equipamentos = $this->equipamento->getAll();
         $tiposEquipamentos = $this->tiposEquipamentos;
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'calendario' . DIRECTORY_SEPARATOR . 'agendar.php';
+        $this->render('calendario/agendar', compact('equipamento_id', 'equipamentos', 'tiposEquipamentos'));
     }
 
     /**
      * Salvar agendamento
      */
     public function salvar() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: index.php?controler=calendario&acao=listar');
-            exit;
-        }
+        $this->requirePost('calendario', 'listar');
 
         $dados = [
             'tipo_equipamento_id' => (int)($_POST['tipo_equipamento_id'] ?? 0),
@@ -106,10 +101,8 @@ class CalendarioController {
         ];
 
         if ($dados['tipo_equipamento_id'] <= 0) {
-            $_SESSION['mensagem'] = 'Selecione o tipo de equipamento para a inspeção.';
-            $_SESSION['tipo_mensagem'] = 'erro';
-            header('Location: index.php?controler=calendario&acao=agendar');
-            exit;
+            $this->flash('Selecione o tipo de equipamento para a inspeção.', 'erro');
+            $this->redirect('calendario', 'agendar');
         }
 
         $agendamentoId = $this->calendario->create($dados);
@@ -120,19 +113,15 @@ class CalendarioController {
             $relatorioId = $this->relatorio->createFromInspecao($agendamento, $responsavelRelatorio);
 
             if ($relatorioId) {
-                $_SESSION['mensagem'] = 'Agendamento criado e relatório gerado com sucesso!';
-                $_SESSION['tipo_mensagem'] = 'sucesso';
+                $this->flash('Agendamento criado e relatório gerado com sucesso!', 'sucesso');
             } else {
-                $_SESSION['mensagem'] = 'Agendamento criado, mas não foi possível gerar o relatório automático.';
-                $_SESSION['tipo_mensagem'] = 'erro';
+                $this->flash('Agendamento criado, mas não foi possível gerar o relatório automático.', 'erro');
             }
-            header('Location: index.php?controler=calendario&acao=listar');
+            $this->redirect('calendario', 'listar');
         } else {
-            $_SESSION['mensagem'] = 'Erro ao criar agendamento.';
-            $_SESSION['tipo_mensagem'] = 'erro';
-            header('Location: index.php?controler=calendario&acao=agendar');
+            $this->flash('Erro ao criar agendamento.', 'erro');
+            $this->redirect('calendario', 'agendar');
         }
-        exit;
     }
 
     /**
@@ -143,29 +132,23 @@ class CalendarioController {
         $inspecoesVencidas = $this->calendario->getVencidos();
         $equipamentosPendentes = $this->equipamento->getEquipamentosComVistoriaPendente();
 
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'calendario' . DIRECTORY_SEPARATOR . 'dashboard.php';
+        $this->render('calendario/dashboard', compact('proximasInspecoes', 'inspecoesVencidas', 'equipamentosPendentes'));
     }
 
     /**
      * Atualizar status de agendamento
      */
     public function atualizarStatus($id) {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: index.php?controler=calendario&acao=listar');
-            exit;
-        }
+        $this->requirePost('calendario', 'listar');
 
         $status = $_POST['status'] ?? 'agendado';
         
         if ($this->calendario->updateStatus($id, $status)) {
-            $_SESSION['mensagem'] = 'Status atualizado com sucesso!';
-            $_SESSION['tipo_mensagem'] = 'sucesso';
+            $this->flash('Status atualizado com sucesso!', 'sucesso');
         } else {
-            $_SESSION['mensagem'] = 'Erro ao atualizar status.';
-            $_SESSION['tipo_mensagem'] = 'erro';
+            $this->flash('Erro ao atualizar status.', 'erro');
         }
-        
-        header('Location: index.php?controler=calendario&acao=ver&id=' . $id);
-        exit;
+
+        $this->redirect('calendario', 'ver', ['id' => $id]);
     }
 }

@@ -5,8 +5,8 @@
 </div>
 <div class="row mb-3">
     <div class="col-md-12">
-        <a href="index.php?controler=inspecao&acao=agendar" class="btn btn-success">
-            <i class="bi bi-calendar-plus"></i> Nova Inspeção
+        <a href="index.php?controler=calendario&acao=listar" class="btn btn-outline-primary">
+            <i class="bi bi-calendar3"></i> Ver Calendário de Inspeções
         </a>
     </div>
 </div>
@@ -32,13 +32,13 @@
                         <td><?php echo $insp['tipo_equipamento']; ?></td>
                         <td><?php echo $insp['localizacao'] ?? '-'; ?></td>
                         <td>
-                            <span class="badge bg-<?php echo $insp['status'] === 'concluida' ? 'success' : ($insp['status'] === 'em_progresso' ? 'info' : 'warning'); ?>">
+                            <span class="badge bg-<?php echo $insp['status'] === 'concluido' ? 'success' : ($insp['status'] === 'em_progresso' ? 'info' : 'warning'); ?>">
                                 <?php echo ucfirst(str_replace('_',' ',$insp['status'])); ?>
                             </span>
                         </td>
                         <td><?php echo $insp['responsavel_nome'] ?? '-'; ?></td>
                         <td>
-                            <?php if ($insp['status'] !== 'concluida'): ?>
+                            <?php if ($insp['status'] !== 'concluido'): ?>
                                 <a href="index.php?controler=inspecao&acao=preencher&id=<?php echo $insp['id']; ?>" class="btn btn-sm btn-warning">Preencher</a>
                             <?php else: ?>
                                 <a href="index.php?controler=inspecao&acao=ver&id=<?php echo $insp['id']; ?>" class="btn btn-sm btn-primary">Ver Relatório</a>

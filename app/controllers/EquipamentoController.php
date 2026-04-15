@@ -2,7 +2,7 @@
 /**
  * Controller para Equipamentos
  */
-class EquipamentoController {
+class EquipamentoController extends Controller {
     private $equipamento;
     private $tiposEquipamentos = [];
     private $camposDinamicosPorTipo = [];
@@ -39,8 +39,8 @@ class EquipamentoController {
         }
         
         $equipamentos = $this->equipamento->getAll($filtros);
-        
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'equipamentos' . DIRECTORY_SEPARATOR . 'listar.php';
+
+        $this->render('equipamentos/listar', compact('equipamentos'));
     }
 
     /**
@@ -50,16 +50,14 @@ class EquipamentoController {
         $equipamento = $this->equipamento->getById($id);
         
         if (!$equipamento) {
-            $_SESSION['mensagem'] = 'Equipamento não encontrado.';
-            $_SESSION['tipo_mensagem'] = 'erro';
-            header('Location: index.php?controler=equipamento&acao=listar');
-            exit;
+            $this->flash('Equipamento não encontrado.', 'erro');
+            $this->redirect('equipamento', 'listar');
         }
 
         $camposDinamicos = $this->equipamento->getCamposDinamicosPorTipo((int)$equipamento['tipo_equipamento_id']);
         $valoresCamposDinamicos = $this->equipamento->getValoresCamposDinamicos((int)$equipamento['id']);
 
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'equipamentos' . DIRECTORY_SEPARATOR . 'ver.php';
+        $this->render('equipamentos/ver', compact('equipamento', 'camposDinamicos', 'valoresCamposDinamicos'));
     }
 
     /**
@@ -68,17 +66,14 @@ class EquipamentoController {
     public function criar() {
         $tipos = $this->tiposEquipamentos;
         $camposDinamicosPorTipo = $this->camposDinamicosPorTipo;
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'equipamentos' . DIRECTORY_SEPARATOR . 'criar.php';
+        $this->render('equipamentos/criar', compact('tipos', 'camposDinamicosPorTipo'));
     }
 
     /**
      * Salvar novo equipamento
      */
     public function salvar() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: index.php?controler=equipamento&acao=listar');
-            exit;
-        }
+        $this->requirePost('equipamento', 'listar');
 
         $dados = [
             'tipo_equipamento_id' => $_POST['tipo_equipamento_id'] ?? 0,
@@ -99,15 +94,12 @@ class EquipamentoController {
             $camposDinamicos = $_POST['campos_dinamicos'] ?? [];
             $this->equipamento->salvarCamposDinamicos((int)$equipamentoId, $camposDinamicos);
 
-            $_SESSION['mensagem'] = 'Equipamento criado com sucesso!';
-            $_SESSION['tipo_mensagem'] = 'sucesso';
-            header('Location: index.php?controler=equipamento&acao=listar');
+            $this->flash('Equipamento criado com sucesso!', 'sucesso');
+            $this->redirect('equipamento', 'listar');
         } else {
-            $_SESSION['mensagem'] = 'Erro ao criar equipamento.';
-            $_SESSION['tipo_mensagem'] = 'erro';
-            header('Location: index.php?controler=equipamento&acao=criar');
+            $this->flash('Erro ao criar equipamento.', 'erro');
+            $this->redirect('equipamento', 'criar');
         }
-        exit;
     }
 
     /**
@@ -117,26 +109,21 @@ class EquipamentoController {
         $equipamento = $this->equipamento->getById($id);
         
         if (!$equipamento) {
-            $_SESSION['mensagem'] = 'Equipamento não encontrado.';
-            $_SESSION['tipo_mensagem'] = 'erro';
-            header('Location: index.php?controler=equipamento&acao=listar');
-            exit;
+            $this->flash('Equipamento não encontrado.', 'erro');
+            $this->redirect('equipamento', 'listar');
         }
 
         $tipos = $this->tiposEquipamentos;
         $camposDinamicosPorTipo = $this->camposDinamicosPorTipo;
         $valoresCamposDinamicos = $this->equipamento->getValoresCamposDinamicos((int)$id);
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'equipamentos' . DIRECTORY_SEPARATOR . 'editar.php';
+        $this->render('equipamentos/editar', compact('equipamento', 'tipos', 'camposDinamicosPorTipo', 'valoresCamposDinamicos'));
     }
 
     /**
      * Atualizar equipamento
      */
     public function atualizar($id) {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: index.php?controler=equipamento&acao=listar');
-            exit;
-        }
+        $this->requirePost('equipamento', 'listar');
 
         $dados = [
             'tipo_equipamento_id' => $_POST['tipo_equipamento_id'] ?? 0,
@@ -155,15 +142,12 @@ class EquipamentoController {
             $camposDinamicos = $_POST['campos_dinamicos'] ?? [];
             $this->equipamento->salvarCamposDinamicos((int)$id, $camposDinamicos);
 
-            $_SESSION['mensagem'] = 'Equipamento atualizado com sucesso!';
-            $_SESSION['tipo_mensagem'] = 'sucesso';
-            header('Location: index.php?controler=equipamento&acao=ver&id=' . $id);
+            $this->flash('Equipamento atualizado com sucesso!', 'sucesso');
+            $this->redirect('equipamento', 'ver', ['id' => $id]);
         } else {
-            $_SESSION['mensagem'] = 'Erro ao atualizar equipamento.';
-            $_SESSION['tipo_mensagem'] = 'erro';
-            header('Location: index.php?controler=equipamento&acao=editar&id=' . $id);
+            $this->flash('Erro ao atualizar equipamento.', 'erro');
+            $this->redirect('equipamento', 'editar', ['id' => $id]);
         }
-        exit;
     }
 
     /**
@@ -171,14 +155,11 @@ class EquipamentoController {
      */
     public function deletar($id) {
         if ($this->equipamento->delete($id)) {
-            $_SESSION['mensagem'] = 'Equipamento removido com sucesso!';
-            $_SESSION['tipo_mensagem'] = 'sucesso';
+            $this->flash('Equipamento removido com sucesso!', 'sucesso');
         } else {
-            $_SESSION['mensagem'] = 'Erro ao remover equipamento.';
-            $_SESSION['tipo_mensagem'] = 'erro';
+            $this->flash('Erro ao remover equipamento.', 'erro');
         }
-        
-        header('Location: index.php?controler=equipamento&acao=listar');
-        exit;
+
+        $this->redirect('equipamento', 'listar');
     }
 }

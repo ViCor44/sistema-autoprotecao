@@ -8,7 +8,7 @@
             </div>
             <div class="card-body">
                 <p>
-                    <strong>Equipamento:</strong> <?php echo $relatorio['tipo_equipamento']; ?> (<?php echo $relatorio['localizacao']; ?>)<br>
+                    <strong>Equipamento:</strong> <?php echo $relatorio['tipo_equipamento']; ?> (<?php echo $relatorio['localizacao'] ?: 'Todos os equipamentos do tipo'; ?>)<br>
                     <strong>Data:</strong> <?php echo date('d/m/Y', strtotime($relatorio['data_relatorio'])); ?><br>
                     <strong>Tipo:</strong> <?php echo ucfirst($relatorio['tipo_relatorio']); ?><br>
                     <strong>Responsável:</strong> <?php echo $relatorio['responsavel_nome']; ?><br>
@@ -18,6 +18,7 @@
                         <?php echo $relatorio['assinado'] ? 'Assinado' : 'Pendente de Assinatura'; ?>
                     </span><br>
                     <strong>Descrição:</strong> <?php echo nl2br($relatorio['descricao']); ?><br>
+                    <strong>Observações:</strong> <?php echo nl2br($relatorio['observacoes'] ?: '-'); ?><br>
                     <strong>Próxima Inspeção:</strong> <?php echo $relatorio['proxima_inspecao'] ? date('d/m/Y', strtotime($relatorio['proxima_inspecao'])) : '-'; ?>
                 </p>
             </div>

@@ -2,7 +2,7 @@
 /**
  * Controller para a Página Principal
  */
-class HomeController {
+class HomeController extends Controller {
     private $calendarioManutencao;
     private $relatorio;
     private $equipamento;
@@ -17,13 +17,18 @@ class HomeController {
      * Página inicial - Dashboard
      */
     public function index() {
-        // Obter dados para o dashboard
         $proximasManutencoes = $this->calendarioManutencao->getProximos(7);
         $manutencoeVencidas = $this->calendarioManutencao->getVencidos();
         $relatoriosRecentes = $this->relatorio->getAll(['data_inicio' => date('Y-m-d', strtotime('-30 days'))]);
         $totalEquipamentos = count($this->equipamento->getAll(['ativo' => 1]));
         $totalInspecoesAgendadas = count($this->calendarioManutencao->getAll(['status' => 'agendado']));
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'home' . DIRECTORY_SEPARATOR . 'index.php';
+        $this->render('home/index', compact(
+            'proximasManutencoes',
+            'manutencoeVencidas',
+            'relatoriosRecentes',
+            'totalEquipamentos',
+            'totalInspecoesAgendadas'
+        ));
     }
 
     /**
@@ -31,21 +36,17 @@ class HomeController {
      */
     public function login() {
         if (isset($_SESSION['utilizador_id'])) {
-            header('Location: index.php');
-            exit;
+            $this->redirect('home');
         }
 
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'home' . DIRECTORY_SEPARATOR . 'login.php';
+        $this->render('home/login');
     }
 
     /**
      * Processar login
      */
     public function autenticar() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: index.php?controler=home&acao=login');
-            exit;
-        }
+        $this->requirePost('home', 'login');
 
         $email = $_POST['email'] ?? '';
         $senha = $_POST['senha'] ?? '';
@@ -59,16 +60,12 @@ class HomeController {
             $_SESSION['utilizador_email'] = $user['email'];
             $_SESSION['utilizador_funcao'] = $user['funcao'];
 
-            $_SESSION['mensagem'] = 'Bem-vindo, ' . $user['nome'] . '!';
-            $_SESSION['tipo_mensagem'] = 'sucesso';
-            
-            header('Location: index.php');
+            $this->flash('Bem-vindo, ' . $user['nome'] . '!', 'sucesso');
+            $this->redirect('home');
         } else {
-            $_SESSION['mensagem'] = 'Email ou senha incorretos.';
-            $_SESSION['tipo_mensagem'] = 'erro';
-            header('Location: index.php?controler=home&acao=login');
+            $this->flash('Email ou senha incorretos.', 'erro');
+            $this->redirect('home', 'login');
         }
-        exit;
     }
 
     /**
@@ -76,14 +73,13 @@ class HomeController {
      */
     public function logout() {
         session_destroy();
-        header('Location: index.php?controler=home&acao=login');
-        exit;
+        $this->redirect('home', 'login');
     }
 
     /**
      * Página para exibir mensagens de erro
      */
     public function erro($mensagem = 'Página não encontrada') {
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'home' . DIRECTORY_SEPARATOR . 'erro.php';
+        $this->render('home/erro', compact('mensagem'));
     }
 }

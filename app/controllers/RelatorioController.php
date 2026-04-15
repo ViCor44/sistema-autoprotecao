@@ -2,7 +2,7 @@
 /**
  * Controller para Relatórios
  */
-class RelatorioController {
+class RelatorioController extends Controller {
     private $relatorio;
     private $equipamento;
 
@@ -28,8 +28,8 @@ class RelatorioController {
         }
         
         $relatorios = $this->relatorio->getAll($filtros);
-        
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'relatorios' . DIRECTORY_SEPARATOR . 'listar.php';
+
+        $this->render('relatorios/listar', compact('relatorios'));
     }
 
     /**
@@ -39,14 +39,12 @@ class RelatorioController {
         $relatorio = $this->relatorio->getById($id);
         
         if (!$relatorio) {
-            $_SESSION['mensagem'] = 'Relatório não encontrado.';
-            $_SESSION['tipo_mensagem'] = 'erro';
-            header('Location: index.php?controler=relatorio&acao=listar');
-            exit;
+            $this->flash('Relatório não encontrado.', 'erro');
+            $this->redirect('relatorio', 'listar');
         }
 
         $itens = $this->relatorio->getItensRelatorio($id);
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'relatorios' . DIRECTORY_SEPARATOR . 'ver.php';
+        $this->render('relatorios/ver', compact('relatorio', 'itens'));
     }
 
     /**
@@ -54,17 +52,14 @@ class RelatorioController {
      */
     public function criar($equipamento_id = null) {
         $equipamentos = $this->equipamento->getAll();
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'relatorios' . DIRECTORY_SEPARATOR . 'criar.php';
+        $this->render('relatorios/criar', compact('equipamento_id', 'equipamentos'));
     }
 
     /**
      * Salvar novo relatório
      */
     public function salvar() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: index.php?controler=relatorio&acao=listar');
-            exit;
-        }
+        $this->requirePost('relatorio', 'listar');
 
         $dados = [
             'calendario_id' => $_POST['calendario_id'] ?? 0,
@@ -94,15 +89,12 @@ class RelatorioController {
                 }
             }
 
-            $_SESSION['mensagem'] = 'Relatório criado com sucesso!';
-            $_SESSION['tipo_mensagem'] = 'sucesso';
-            header('Location: index.php?controler=relatorio&acao=ver&id=' . $relatorio_id);
+            $this->flash('Relatório criado com sucesso!', 'sucesso');
+            $this->redirect('relatorio', 'ver', ['id' => $relatorio_id]);
         } else {
-            $_SESSION['mensagem'] = 'Erro ao criar relatório.';
-            $_SESSION['tipo_mensagem'] = 'erro';
-            header('Location: index.php?controler=relatorio&acao=criar');
+            $this->flash('Erro ao criar relatório.', 'erro');
+            $this->redirect('relatorio', 'criar');
         }
-        exit;
     }
 
     /**
@@ -111,23 +103,18 @@ class RelatorioController {
     public function editar($id) {
         $relatorio = $this->relatorio->getById($id);
         if (!$relatorio || $relatorio['assinado']) {
-            $_SESSION['mensagem'] = 'Relatório não encontrado ou já assinado.';
-            $_SESSION['tipo_mensagem'] = 'erro';
-            header('Location: index.php?controler=relatorio&acao=ver&id=' . $id);
-            exit;
+            $this->flash('Relatório não encontrado ou já assinado.', 'erro');
+            $this->redirect('relatorio', 'ver', ['id' => $id]);
         }
         $equipamentos = $this->equipamento->getAll();
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'relatorios' . DIRECTORY_SEPARATOR . 'editar.php';
+        $this->render('relatorios/editar', compact('relatorio', 'equipamentos'));
     }
 
     /**
      * Atualizar relatório
      */
     public function atualizar($id) {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: index.php?controler=relatorio&acao=ver&id=' . $id);
-            exit;
-        }
+        $this->requirePost('relatorio', 'ver', ['id' => $id]);
         $dados = [
             'descricao' => $_POST['descricao'] ?? '',
             'observacoes' => $_POST['observacoes'] ?? '',
@@ -135,10 +122,8 @@ class RelatorioController {
             'proxima_inspecao' => $_POST['proxima_inspecao'] ?? null
         ];
         $this->relatorio->atualizar($id, $dados);
-        $_SESSION['mensagem'] = 'Relatório atualizado com sucesso!';
-        $_SESSION['tipo_mensagem'] = 'sucesso';
-        header('Location: index.php?controler=relatorio&acao=ver&id=' . $id);
-        exit;
+        $this->flash('Relatório atualizado com sucesso!', 'sucesso');
+        $this->redirect('relatorio', 'ver', ['id' => $id]);
     }
 
     /**
@@ -146,15 +131,12 @@ class RelatorioController {
      */
     public function assinar($id) {
         if ($this->relatorio->assinar($id)) {
-            $_SESSION['mensagem'] = 'Relatório assinado com sucesso!';
-            $_SESSION['tipo_mensagem'] = 'sucesso';
+            $this->flash('Relatório assinado com sucesso!', 'sucesso');
         } else {
-            $_SESSION['mensagem'] = 'Erro ao assinar relatório.';
-            $_SESSION['tipo_mensagem'] = 'erro';
+            $this->flash('Erro ao assinar relatório.', 'erro');
         }
-        
-        header('Location: index.php?controler=relatorio&acao=ver&id=' . $id);
-        exit;
+
+        $this->redirect('relatorio', 'ver', ['id' => $id]);
     }
 
     /**
@@ -162,27 +144,14 @@ class RelatorioController {
      */
     public function pendentes() {
         $relatorios = $this->relatorio->getRelatoriosPendentesAssinatura();
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'relatorios' . DIRECTORY_SEPARATOR . 'pendentes.php';
+        $this->render('relatorios/pendentes', compact('relatorios'));
     }
 
     /**
      * Exportar relatório para PDF
      */
     public function pdf($id) {
-        $relatorio = $this->relatorio->getById($id);
-        
-        if (!$relatorio) {
-            $_SESSION['mensagem'] = 'Relatório não encontrado.';
-            $_SESSION['tipo_mensagem'] = 'erro';
-            header('Location: index.php?controler=relatorio&acao=listar');
-            exit;
-        }
-
-        $itens = $this->relatorio->getItensRelatorio($id);
-        
-        // Aqui você pode implementar a geração de PDF
-        // Por enquanto, apenas verificamos se o relatório existe
-        require APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'relatorios' . DIRECTORY_SEPARATOR . 'pdf.php';
+        $this->exportar_pdf($id);
     }
 
     /**
@@ -191,10 +160,8 @@ class RelatorioController {
     public function exportar_pdf($id) {
         $relatorio = $this->relatorio->getById($id);
         if (!$relatorio) {
-            $_SESSION['mensagem'] = 'Relatório não encontrado.';
-            $_SESSION['tipo_mensagem'] = 'erro';
-            header('Location: index.php?controler=relatorio&acao=listar');
-            exit;
+            $this->flash('Relatório não encontrado.', 'erro');
+            $this->redirect('relatorio', 'listar');
         }
         // Geração simples de PDF (exemplo com FPDF)
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
@@ -204,14 +171,32 @@ class RelatorioController {
         $pdf->Cell(0,10,'Relatório de Inspeção',0,1,'C');
         $pdf->SetFont('Arial','',12);
         $pdf->Ln(5);
-        $pdf->Cell(0,10,'Equipamento: ' . $relatorio['tipo_equipamento'] . ' (' . $relatorio['localizacao'] . ')',0,1);
+        $ambito = !empty($relatorio['localizacao']) ? $relatorio['localizacao'] : 'Todos os equipamentos do tipo';
+        $pdf->Cell(0,10,utf8_decode('Equipamento: ' . $relatorio['tipo_equipamento'] . ' (' . $ambito . ')'),0,1);
         $pdf->Cell(0,10,'Data: ' . date('d/m/Y', strtotime($relatorio['data_relatorio'])),0,1);
-        $pdf->Cell(0,10,'Responsável: ' . $relatorio['responsavel_nome'],0,1);
-        $pdf->Cell(0,10,'Condição: ' . ucfirst($relatorio['condicoes_encontradas']),0,1);
+        $pdf->Cell(0,10,utf8_decode('Responsável: ' . $relatorio['responsavel_nome']),0,1);
+        $pdf->Cell(0,10,utf8_decode('Condição: ' . ucfirst($relatorio['condicoes_encontradas'] ?: '-')),0,1);
         $pdf->Ln(5);
-        $pdf->MultiCell(0,8,'Descrição: ' . $relatorio['descricao']);
+        $pdf->MultiCell(0,8,utf8_decode('Descrição: ' . ($relatorio['descricao'] ?: '-')));
         $pdf->Ln(5);
-        $pdf->MultiCell(0,8,'Observações: ' . $relatorio['observacoes']);
+        $pdf->MultiCell(0,8,utf8_decode('Observações: ' . ($relatorio['observacoes'] ?: '-')));
+
+        if (!empty($itens)) {
+            $pdf->Ln(5);
+            $pdf->SetFont('Arial', 'B', 12);
+            $pdf->Cell(0, 10, utf8_decode('Itens de Verificação'), 0, 1);
+            $pdf->SetFont('Arial', '', 11);
+            foreach ($itens as $item) {
+                $linha = sprintf(
+                    '%s | %s | %s',
+                    $item['descricao_verificacao'],
+                    strtoupper((string)$item['resultado']),
+                    $item['observacao'] ?: '-'
+                );
+                $pdf->MultiCell(0, 7, utf8_decode($linha));
+            }
+        }
+
         $pdf->Output('I', 'relatorio_inspecao_'.$id.'.pdf');
         exit;
     }

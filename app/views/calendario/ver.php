@@ -25,11 +25,19 @@
                     <a href="index.php?controler=relatorio&acao=ver&id=<?php echo $relatorioInspecao['id']; ?>" class="btn btn-primary">
                         <i class="bi bi-file-earmark-text"></i> Ver Relatório da Inspeção
                     </a>
-                    <?php if (!$relatorioInspecao['assinado']): ?>
+                    <?php if ($agendamento['status'] !== 'concluido'): ?>
+                        <a href="index.php?controler=inspecao&acao=preencher&id=<?php echo $agendamento['id']; ?>" class="btn btn-warning ms-2">
+                            <i class="bi bi-clipboard-check"></i> Registar Execução da Inspeção
+                        </a>
+                    <?php elseif (!$relatorioInspecao['assinado']): ?>
                         <a href="index.php?controler=relatorio&acao=editar&id=<?php echo $relatorioInspecao['id']; ?>" class="btn btn-warning ms-2">
                             <i class="bi bi-pencil-square"></i> Preencher Formulário da Inspeção
                         </a>
                     <?php endif; ?>
+                <?php elseif ($agendamento['tipo_inspecao'] === 'inspecao'): ?>
+                    <a href="index.php?controler=inspecao&acao=preencher&id=<?php echo $agendamento['id']; ?>" class="btn btn-warning">
+                        <i class="bi bi-clipboard-check"></i> Registar Execução da Inspeção
+                    </a>
                 <?php endif; ?>
                 <a href="index.php?controler=calendario&acao=listar" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
             </div>

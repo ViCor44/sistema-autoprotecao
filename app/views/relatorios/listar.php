@@ -34,7 +34,7 @@
                 <?php foreach ($relatorios as $rel): ?>
                     <tr>
                         <td><?php echo date('d/m/Y', strtotime($rel['data_relatorio'])); ?></td>
-                        <td><?php echo $rel['localizacao']; ?></td>
+                        <td><?php echo $rel['localizacao'] ?: $rel['tipo_equipamento']; ?></td>
                         <td><?php echo ucfirst($rel['tipo_relatorio']); ?></td>
                         <td><?php echo $rel['responsavel_nome']; ?></td>
                         <td>

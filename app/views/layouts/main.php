@@ -48,7 +48,16 @@
 
     <main class="container mt-4">
         <?php if (isset($_SESSION['mensagem'])): ?>
-            <div class="alert alert-<?php echo $_SESSION['tipo_mensagem'] === 'sucesso' ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
+            <?php
+            $alertTypes = [
+                'sucesso' => 'success',
+                'erro' => 'danger',
+                'aviso' => 'warning',
+                'info' => 'info',
+            ];
+            $alertClass = $alertTypes[$_SESSION['tipo_mensagem'] ?? 'info'] ?? 'info';
+            ?>
+            <div class="alert alert-<?php echo $alertClass; ?> alert-dismissible fade show" role="alert">
                 <?php echo $_SESSION['mensagem']; ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>

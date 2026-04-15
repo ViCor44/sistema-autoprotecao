@@ -8,9 +8,13 @@
             <div class="card-body">
                 <p>
                     <strong>Tipo de Equipamento:</strong> <?php echo $inspecao['tipo_equipamento']; ?><br>
-                    <strong>Localização:</strong> <?php echo $inspecao['localizacao'] ?? '-'; ?><br>
-                    <strong>Data:</strong> <?php echo date('d/m/Y', strtotime($inspecao['data_inspecao'])); ?><br>
+                    <strong>Âmbito:</strong> <?php echo $inspecao['localizacao'] ?? 'Todos os equipamentos do tipo'; ?><br>
+                    <strong>Data Planeada:</strong> <?php echo date('d/m/Y', strtotime($inspecao['data_inspecao'])); ?><br>
+                    <strong>Data de Execução:</strong> <?php echo !empty($inspecao['data_realizacao']) ? date('d/m/Y H:i', strtotime($inspecao['data_realizacao'])) : '-'; ?><br>
                     <strong>Responsável:</strong> <?php echo $inspecao['responsavel_nome'] ?? '-'; ?><br>
+                    <strong>Estado:</strong> <?php echo ucfirst(str_replace('_', ' ', $inspecao['status'])); ?><br>
+                    <strong>Condição:</strong> <?php echo ucfirst($inspecao['condicoes_encontradas'] ?? '-'); ?><br>
+                    <strong>Próxima Inspeção:</strong> <?php echo !empty($inspecao['proxima_inspecao']) ? date('d/m/Y', strtotime($inspecao['proxima_inspecao'])) : '-'; ?><br>
                 </p>
                 <hr>
                 <p>
@@ -21,6 +25,11 @@
             </div>
         </div>
         <div class="card-footer bg-white">
+            <?php if (!empty($relatorio)): ?>
+                <a href="index.php?controler=relatorio&acao=ver&id=<?php echo $relatorio['id']; ?>" class="btn btn-primary">
+                    <i class="bi bi-file-earmark-text"></i> Abrir Relatório
+                </a>
+            <?php endif; ?>
             <a href="index.php?controler=inspecao&acao=exportar_pdf&id=<?php echo $inspecao['id']; ?>" class="btn btn-outline-secondary">
                 <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
             </a>

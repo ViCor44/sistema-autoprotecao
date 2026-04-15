@@ -54,6 +54,17 @@ class Equipamento {
         return $resultado->fetch_all(MYSQLI_ASSOC);
     }
 
+    public function atualizarProximaManutencaoPorAgendamento($agendamentoId, $proximaInspecao) {
+        $query = "UPDATE equipamentos e
+                  JOIN calendarios_manutencao c ON c.equipamento_id = e.id
+                  SET e.data_proxima_manutencao = ?
+                  WHERE c.id = ? AND c.equipamento_id IS NOT NULL";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param('si', $proximaInspecao, $agendamentoId);
+        return $stmt->execute();
+    }
+
     /**
      * Obter equipamento por ID
      */

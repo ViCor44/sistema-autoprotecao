@@ -116,22 +116,28 @@ class Relatorio {
         }
 
         $existente = $this->getByCalendarioId((int)$agendamento['id']);
-        if ($existente) {
-            return (int)$existente['id'];
-        }
-
         $dados = [
             'calendario_id' => (int)$agendamento['id'],
-            'tipo_equipamento_id' => (int)$agendamento['tipo_equipamento_id'],
+            'tipo_equipamento_id' => !empty($agendamento['tipo_equipamento_id']) ? (int)$agendamento['tipo_equipamento_id'] : 0,
             'equipamento_id' => !empty($agendamento['equipamento_id']) ? (int)$agendamento['equipamento_id'] : 0,
-            'data_relatorio' => $agendamento['data_inspecao'] ?? date('Y-m-d'),
+            'data_relatorio' => !empty($agendamento['data_realizacao']) ? date('Y-m-d', strtotime($agendamento['data_realizacao'])) : ($agendamento['data_inspecao'] ?? date('Y-m-d')),
             'responsavel_id' => (int)$responsavelId,
             'tipo_relatorio' => 'inspecao',
-            'descricao' => 'Relatório gerado automaticamente a partir do agendamento de inspeção.',
-            'observacoes' => $agendamento['descricao'] ?? '',
-            'condicoes_encontradas' => '',
-            'proxima_inspecao' => null
+            'descricao' => $this->buildDescricaoFromInspecao($agendamento),
+            'observacoes' => $this->buildObservacoesFromInspecao($agendamento),
+            'condicoes_encontradas' => $agendamento['condicoes_encontradas'] ?? '',
+            'proxima_inspecao' => $agendamento['proxima_inspecao'] ?? null
         ];
+
+        if ($existente) {
+            $this->atualizar((int)$existente['id'], [
+                'descricao' => $dados['descricao'],
+                'observacoes' => $dados['observacoes'],
+                'condicoes_encontradas' => $dados['condicoes_encontradas'],
+                'proxima_inspecao' => $dados['proxima_inspecao'],
+            ]);
+            return (int)$existente['id'];
+        }
 
         return $this->create($dados);
     }
@@ -213,5 +219,37 @@ class Relatorio {
 
         $resultado = $this->db->query($query);
         return $resultado->fetch_all(MYSQLI_ASSOC);
+    }
+
+    private function buildDescricaoFromInspecao($agendamento) {
+        $partes = [];
+
+        if (!empty($agendamento['parecer'])) {
+            $partes[] = trim($agendamento['parecer']);
+        }
+
+        if (!empty($agendamento['descricao'])) {
+            $partes[] = 'Plano da inspeção: ' . trim($agendamento['descricao']);
+        }
+
+        if (empty($partes)) {
+            return 'Relatório gerado automaticamente a partir do registo da inspeção agendada.';
+        }
+
+        return implode("\n\n", $partes);
+    }
+
+    private function buildObservacoesFromInspecao($agendamento) {
+        $partes = [];
+
+        if (!empty($agendamento['equipamentos_avariados'])) {
+            $partes[] = 'Equipamentos avariados: ' . trim($agendamento['equipamentos_avariados']);
+        }
+
+        if (!empty($agendamento['observacoes'])) {
+            $partes[] = trim($agendamento['observacoes']);
+        }
+
+        return implode("\n\n", $partes);
     }
 }

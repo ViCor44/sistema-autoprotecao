@@ -28,7 +28,11 @@ class CalendarioManutencao {
         }
 
         if (isset($filtros['status'])) {
-            $query .= " AND c.status = '" . $this->db->escape($filtros['status']) . "'";
+            $query .= " AND c.status = '" . $this->db->escape($this->normalizeStatus($filtros['status'])) . "'";
+        }
+
+        if (isset($filtros['tipo_inspecao'])) {
+            $query .= " AND c.tipo_inspecao = '" . $this->db->escape($filtros['tipo_inspecao']) . "'";
         }
 
         if (isset($filtros['data_inicio']) && isset($filtros['data_fim'])) {
@@ -72,6 +76,8 @@ class CalendarioManutencao {
                   (tipo_equipamento_id, equipamento_id, data_inspecao, tipo_inspecao, descricao, responsavel_id, status, prioridade)
                   VALUES (?, NULLIF(?, 0), ?, ?, ?, ?, ?, ?)";
 
+        $status = $this->normalizeStatus($dados['status']);
+
         $stmt = $this->db->prepare($query);
         $stmt->bind_param(
             "iisssiss",
@@ -81,7 +87,7 @@ class CalendarioManutencao {
             $dados['tipo_inspecao'],
             $dados['descricao'],
             $dados['responsavel_id'],
-            $dados['status'],
+            $status,
             $dados['prioridade']
         );
 
@@ -105,6 +111,8 @@ class CalendarioManutencao {
                   prioridade = ?
                   WHERE id = ?";
 
+        $status = $this->normalizeStatus($dados['status']);
+
         $stmt = $this->db->prepare($query);
         $stmt->bind_param(
             "iississi",
@@ -113,7 +121,7 @@ class CalendarioManutencao {
             $dados['tipo_inspecao'],
             $dados['descricao'],
             $dados['responsavel_id'],
-            $dados['status'],
+            $status,
             $dados['prioridade'],
             $id
         );
@@ -127,7 +135,8 @@ class CalendarioManutencao {
     public function updateStatus($id, $status) {
         $query = "UPDATE {$this->table} SET status = ? WHERE id = ?";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param("si", $status, $id);
+        $normalizedStatus = $this->normalizeStatus($status);
+        $stmt->bind_param("si", $normalizedStatus, $id);
         return $stmt->execute();
     }
 
@@ -185,23 +194,47 @@ class CalendarioManutencao {
     public function atualizarInspecao($id, $dados) {
         $campos = [];
         $params = [];
+        $types = '';
+
         if (isset($dados['parecer'])) {
             $campos[] = "parecer = ?";
             $params[] = $dados['parecer'];
+            $types .= 's';
         }
         if (isset($dados['equipamentos_avariados'])) {
             $campos[] = "equipamentos_avariados = ?";
             $params[] = $dados['equipamentos_avariados'];
+            $types .= 's';
         }
         if (isset($dados['observacoes'])) {
             $campos[] = "observacoes = ?";
             $params[] = $dados['observacoes'];
+            $types .= 's';
         }
-        if (empty($campos)) return false;
+        if (isset($dados['condicoes_encontradas'])) {
+            $campos[] = "condicoes_encontradas = ?";
+            $params[] = $dados['condicoes_encontradas'];
+            $types .= 's';
+        }
+        if (array_key_exists('proxima_inspecao', $dados)) {
+            $campos[] = "proxima_inspecao = ?";
+            $params[] = $dados['proxima_inspecao'];
+            $types .= 's';
+        }
+        $campos[] = "data_realizacao = NOW()";
+
+        if (empty($params)) {
+            return false;
+        }
+
         $params[] = $id;
-        $query = "UPDATE calendario_manutencao SET ".implode(", ", $campos)." WHERE id = ?";
+        $query = "UPDATE {$this->table} SET ".implode(", ", $campos)." WHERE id = ?";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param(str_repeat('s', count($params)-1).'i', ...$params);
+        $stmt->bind_param($types . 'i', ...$params);
         return $stmt->execute();
+    }
+
+    private function normalizeStatus($status) {
+        return $status === 'concluida' ? 'concluido' : $status;
     }
 }
