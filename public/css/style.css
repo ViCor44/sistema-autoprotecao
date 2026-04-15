@@ -841,6 +841,14 @@ footer {
     background: rgba(255, 255, 255, 0.65);
 }
 
+.agenda-ver__descricao {
+    margin-top: 14px;
+}
+
+.agenda-ver__actions {
+    margin-top: 18px;
+}
+
 .equipamentos-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
