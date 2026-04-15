@@ -34,6 +34,17 @@ class EquipamentoController extends Controller {
         $tipo = isset($_GET['tipo']) ? (int)$_GET['tipo'] : 0;
         $estado = isset($_GET['estado']) ? trim((string)$_GET['estado']) : '';
         $localizacao = isset($_GET['localizacao']) ? trim((string)$_GET['localizacao']) : '';
+        $ordenar = isset($_GET['ordenar']) ? trim((string)$_GET['ordenar']) : 'tipo_nome';
+        $direcao = isset($_GET['direcao']) ? strtolower(trim((string)$_GET['direcao'])) : 'asc';
+
+        $camposOrdenacaoPermitidos = ['tipo_nome', 'localizacao', 'estado', 'proxima_manutencao'];
+        if (!in_array($ordenar, $camposOrdenacaoPermitidos, true)) {
+            $ordenar = 'tipo_nome';
+        }
+
+        if (!in_array($direcao, ['asc', 'desc'], true)) {
+            $direcao = 'asc';
+        }
 
         if ($tipo > 0) {
             $filtros['tipo_equipamento_id'] = $tipo;
@@ -58,8 +69,12 @@ class EquipamentoController extends Controller {
         }
 
         $offset = ($paginaAtual - 1) * $porPagina;
+        $ordenacao = [
+            'campo' => $ordenar,
+            'direcao' => strtoupper($direcao),
+        ];
 
-        $equipamentos = $this->equipamento->getAll($filtros, $porPagina, $offset);
+        $equipamentos = $this->equipamento->getAll($filtros, $porPagina, $offset, $ordenacao);
         $resumo = $this->equipamento->getResumoEstados($filtros);
         $tipos = $this->tiposEquipamentos;
 
@@ -72,7 +87,9 @@ class EquipamentoController extends Controller {
             'porPagina',
             'totalPaginas',
             'totalResultados',
-            'offset'
+            'offset',
+            'ordenar',
+            'direcao'
         ));
     }
 

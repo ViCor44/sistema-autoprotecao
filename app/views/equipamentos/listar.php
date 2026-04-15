@@ -5,6 +5,8 @@ $emFalha = (int)($resumo['anomalias'] ?? 0);
 $localizacaoAtual = $filtros['localizacao'] ?? '';
 $tipoAtual = (int)($filtros['tipo_equipamento_id'] ?? 0);
 $estadoAtual = $filtros['estado'] ?? '';
+$ordenarAtual = $ordenar ?? 'tipo_nome';
+$direcaoAtual = strtolower($direcao ?? 'asc');
 $resultadosNaPagina = count($equipamentos);
 $inicioPagina = $totalResultados > 0 ? ($offset + 1) : 0;
 $fimPagina = $offset + $resultadosNaPagina;
@@ -25,6 +27,9 @@ if ($tipoAtual > 0) {
 if ($estadoAtual !== '') {
     $queryBase['estado'] = $estadoAtual;
 }
+
+$queryBase['ordenar'] = $ordenarAtual;
+$queryBase['direcao'] = $direcaoAtual;
 ?>
 
 <section class="page-shell page-shell--narrow equipamentos-page">
@@ -92,6 +97,16 @@ if ($estadoAtual !== '') {
                     <option value="inoperacional" <?php echo $estadoAtual === 'inoperacional' ? 'selected' : ''; ?>>Inoperacional</option>
                     <option value="avariado" <?php echo $estadoAtual === 'avariado' ? 'selected' : ''; ?>>Avariado</option>
                 </select>
+                <select name="ordenar" class="form-select" aria-label="Ordenar por">
+                    <option value="tipo_nome" <?php echo $ordenarAtual === 'tipo_nome' ? 'selected' : ''; ?>>Ordenar: Tipo</option>
+                    <option value="localizacao" <?php echo $ordenarAtual === 'localizacao' ? 'selected' : ''; ?>>Ordenar: Localizacao</option>
+                    <option value="estado" <?php echo $ordenarAtual === 'estado' ? 'selected' : ''; ?>>Ordenar: Estado</option>
+                    <option value="proxima_manutencao" <?php echo $ordenarAtual === 'proxima_manutencao' ? 'selected' : ''; ?>>Ordenar: Proxima manutencao</option>
+                </select>
+                <select name="direcao" class="form-select" aria-label="Direção da ordenação">
+                    <option value="asc" <?php echo $direcaoAtual === 'asc' ? 'selected' : ''; ?>>Ascendente</option>
+                    <option value="desc" <?php echo $direcaoAtual === 'desc' ? 'selected' : ''; ?>>Descendente</option>
+                </select>
                 <button type="submit" class="btn btn-primary">Filtrar</button>
                 <a href="index.php?controler=equipamento&acao=listar" class="btn btn-outline-secondary">Limpar</a>
             </div>
@@ -124,6 +139,14 @@ if ($estadoAtual !== '') {
                 <?php
                 $estado = $equip['estado'] ?? '';
                 $estadoClass = $estado === 'operacional' ? 'status-pill--success' : 'status-pill--warning';
+                $proximaManutencao = $equip['data_proxima_manutencao'] ?? null;
+                $proximaManutencaoLabel = '-';
+                if (!empty($proximaManutencao) && $proximaManutencao !== '0000-00-00') {
+                    $timestamp = strtotime($proximaManutencao);
+                    if ($timestamp !== false) {
+                        $proximaManutencaoLabel = date('d/m/Y', $timestamp);
+                    }
+                }
                 ?>
                 <article class="equipamento-card">
                     <div class="equipamento-card__head">
@@ -148,6 +171,10 @@ if ($estadoAtual !== '') {
                                 <?php echo htmlspecialchars($equip['marca'] ?? '-', ENT_QUOTES, 'UTF-8'); ?> /
                                 <?php echo htmlspecialchars($equip['modelo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?>
                             </strong>
+                        </div>
+                        <div class="detail-row">
+                            <span>Proxima manutencao</span>
+                            <strong><?php echo htmlspecialchars($proximaManutencaoLabel, ENT_QUOTES, 'UTF-8'); ?></strong>
                         </div>
                     </div>
 

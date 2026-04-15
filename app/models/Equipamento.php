@@ -30,13 +30,13 @@ class Equipamento {
     /**
      * Obter equipamentos com filtros e suporte a paginação
      */
-    public function getAll($filtros = [], $limite = null, $offset = 0) {
+    public function getAll($filtros = [], $limite = null, $offset = 0, $ordenacao = []) {
         $query = "SELECT e.*, t.nome as tipo_nome
                   FROM {$this->table} e
                   JOIN tipos_equipamentos t ON e.tipo_equipamento_id = t.id";
 
         $query .= $this->buildWhereClause($filtros);
-        $query .= " ORDER BY t.nome ASC, e.localizacao ASC, e.numero_serie ASC";
+        $query .= $this->buildOrderByClause($ordenacao);
 
         if ($limite !== null) {
             $limite = max(1, (int)$limite);
@@ -345,5 +345,36 @@ class Equipamento {
         }
 
         return $where;
+    }
+
+    /**
+     * Construir cláusula ORDER BY segura
+     */
+    private function buildOrderByClause($ordenacao = []) {
+        $campo = $ordenacao['campo'] ?? 'tipo_nome';
+        $direcao = strtoupper($ordenacao['direcao'] ?? 'ASC');
+        $direcao = $direcao === 'DESC' ? 'DESC' : 'ASC';
+
+        $mapaCampos = [
+            'tipo_nome' => 't.nome',
+            'localizacao' => 'e.localizacao',
+            'estado' => 'e.estado',
+            'proxima_manutencao' => 'e.data_proxima_manutencao',
+        ];
+
+        $coluna = $mapaCampos[$campo] ?? $mapaCampos['tipo_nome'];
+
+        if ($campo === 'proxima_manutencao') {
+            return " ORDER BY
+                CASE
+                    WHEN e.data_proxima_manutencao IS NULL OR e.data_proxima_manutencao = '0000-00-00' THEN 1
+                    ELSE 0
+                END ASC,
+                {$coluna} {$direcao},
+                t.nome ASC,
+                e.localizacao ASC";
+        }
+
+        return " ORDER BY {$coluna} {$direcao}, t.nome ASC, e.localizacao ASC, e.numero_serie ASC";
     }
 }
