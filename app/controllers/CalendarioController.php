@@ -70,14 +70,36 @@ class CalendarioController extends Controller {
      */
     public function listar() {
         $filtros = [];
-        
-        if (isset($_GET['status'])) {
-            $filtros['status'] = $_GET['status'];
-        }
-        
-        $agendamentos = $this->calendario->getAll($filtros);
 
-        $this->render('calendario/listar', compact('agendamentos'));
+        $status = isset($_GET['status']) ? trim((string)$_GET['status']) : '';
+        $tipoEquipamentoId = isset($_GET['tipo']) ? (int)$_GET['tipo'] : 0;
+        $prioridade = isset($_GET['prioridade']) ? trim((string)$_GET['prioridade']) : '';
+
+        if ($status !== '') {
+            $filtros['status'] = $status;
+        }
+
+        if ($tipoEquipamentoId > 0) {
+            $filtros['tipo_equipamento_id'] = $tipoEquipamentoId;
+        }
+
+        if ($prioridade !== '') {
+            $filtros['prioridade'] = $prioridade;
+        }
+
+        $agendamentos = $this->calendario->getAll($filtros);
+        $tiposEquipamentos = $this->tiposEquipamentos;
+        $statusFiltro = $status;
+        $tipoFiltro = $tipoEquipamentoId;
+        $prioridadeFiltro = $prioridade;
+
+        $this->render('calendario/listar', compact(
+            'agendamentos',
+            'tiposEquipamentos',
+            'statusFiltro',
+            'tipoFiltro',
+            'prioridadeFiltro'
+        ));
     }
 
     /**
