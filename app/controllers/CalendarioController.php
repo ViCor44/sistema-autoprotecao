@@ -30,17 +30,39 @@ class CalendarioController extends Controller {
     public function calendario() {
         $mes = $_GET['mes'] ?? date('m');
         $ano = $_GET['ano'] ?? date('Y');
+        $tipoEquipamentoId = isset($_GET['tipo']) ? (int)$_GET['tipo'] : 0;
+        $status = $_GET['status'] ?? '';
 
         // Validar mês e ano
         $mes = min(max((int)$mes, 1), 12);
         $ano = max((int)$ano, 2000);
 
-        $agendamentos = $this->calendario->getAll([
+        $filtros = [
             'data_inicio' => "$ano-$mes-01",
             'data_fim' => date('Y-m-t', mktime(0, 0, 0, $mes, 1, $ano))
-        ]);
+        ];
 
-        $this->render('calendario/calendario', compact('mes', 'ano', 'agendamentos'));
+        if ($tipoEquipamentoId > 0) {
+            $filtros['tipo_equipamento_id'] = $tipoEquipamentoId;
+        }
+
+        if ($status !== '') {
+            $filtros['status'] = $status;
+        }
+
+        $agendamentos = $this->calendario->getAll($filtros);
+        $tiposEquipamentos = $this->tiposEquipamentos;
+        $statusFiltro = $status;
+        $tipoFiltro = $tipoEquipamentoId;
+
+        $this->render('calendario/calendario', compact(
+            'mes',
+            'ano',
+            'agendamentos',
+            'tiposEquipamentos',
+            'statusFiltro',
+            'tipoFiltro'
+        ));
     }
 
     /**
@@ -71,7 +93,69 @@ class CalendarioController extends Controller {
 
         $relatorioInspecao = $this->relatorio->getByCalendarioId((int)$id);
 
-        $this->render('calendario/ver', compact('agendamento', 'relatorioInspecao'));
+        $returnMes = isset($_GET['mes']) ? (int)$_GET['mes'] : (int)date('m', strtotime($agendamento['data_inspecao']));
+        $returnAno = isset($_GET['ano']) ? (int)$_GET['ano'] : (int)date('Y', strtotime($agendamento['data_inspecao']));
+
+        $this->render('calendario/ver', compact('agendamento', 'relatorioInspecao', 'returnMes', 'returnAno'));
+    }
+
+    /**
+     * Formulário para editar agendamento
+     */
+    public function editar($id) {
+        $agendamento = $this->calendario->getById($id);
+
+        if (!$agendamento) {
+            $this->flash('Agendamento não encontrado.', 'erro');
+            $this->redirect('calendario', 'listar');
+        }
+
+        $equipamentos = $this->equipamento->getAll();
+        $tiposEquipamentos = $this->tiposEquipamentos;
+        $returnMes = isset($_GET['mes']) ? (int)$_GET['mes'] : (int)date('m', strtotime($agendamento['data_inspecao']));
+        $returnAno = isset($_GET['ano']) ? (int)$_GET['ano'] : (int)date('Y', strtotime($agendamento['data_inspecao']));
+
+        $this->render('calendario/editar', compact(
+            'agendamento',
+            'equipamentos',
+            'tiposEquipamentos',
+            'returnMes',
+            'returnAno'
+        ));
+    }
+
+    /**
+     * Atualizar agendamento
+     */
+    public function atualizar($id) {
+        $this->requirePost('calendario', 'listar');
+
+        $dados = [
+            'tipo_equipamento_id' => (int)($_POST['tipo_equipamento_id'] ?? 0),
+            'equipamento_id' => $_POST['equipamento_id'] ?? 0,
+            'tipo_inspecao' => $_POST['tipo_inspecao'] ?? 'inspecao',
+            'descricao' => $_POST['descricao'] ?? '',
+            'responsavel_id' => !empty($_POST['responsavel_id']) ? (int)$_POST['responsavel_id'] : null,
+            'status' => $_POST['status'] ?? 'agendado',
+            'prioridade' => $_POST['prioridade'] ?? 'normal'
+        ];
+
+        if ($dados['tipo_equipamento_id'] <= 0) {
+            $this->flash('Selecione o tipo de equipamento para o agendamento.', 'erro');
+            $this->redirect('calendario', 'editar', ['id' => $id]);
+        }
+
+        if ($this->calendario->update($id, $dados)) {
+            $this->flash('Agendamento atualizado com sucesso!', 'sucesso');
+            $this->redirect('calendario', 'ver', [
+                'id' => $id,
+                'mes' => (int)($_POST['return_mes'] ?? date('m')),
+                'ano' => (int)($_POST['return_ano'] ?? date('Y')),
+            ]);
+        }
+
+        $this->flash('Erro ao atualizar agendamento.', 'erro');
+        $this->redirect('calendario', 'editar', ['id' => $id]);
     }
 
     /**
@@ -80,7 +164,18 @@ class CalendarioController extends Controller {
     public function agendar($equipamento_id = null) {
         $equipamentos = $this->equipamento->getAll();
         $tiposEquipamentos = $this->tiposEquipamentos;
-        $this->render('calendario/agendar', compact('equipamento_id', 'equipamentos', 'tiposEquipamentos'));
+        $dataSelecionada = $_GET['data'] ?? date('Y-m-d');
+        $returnMes = isset($_GET['mes']) ? (int)$_GET['mes'] : (int)date('m', strtotime($dataSelecionada));
+        $returnAno = isset($_GET['ano']) ? (int)$_GET['ano'] : (int)date('Y', strtotime($dataSelecionada));
+
+        $this->render('calendario/agendar', compact(
+            'equipamento_id',
+            'equipamentos',
+            'tiposEquipamentos',
+            'dataSelecionada',
+            'returnMes',
+            'returnAno'
+        ));
     }
 
     /**
@@ -102,7 +197,11 @@ class CalendarioController extends Controller {
 
         if ($dados['tipo_equipamento_id'] <= 0) {
             $this->flash('Selecione o tipo de equipamento para a inspeção.', 'erro');
-            $this->redirect('calendario', 'agendar');
+            $this->redirect('calendario', 'agendar', [
+                'data' => $dados['data_inspecao'],
+                'mes' => (int)($_POST['return_mes'] ?? date('m', strtotime($dados['data_inspecao']))),
+                'ano' => (int)($_POST['return_ano'] ?? date('Y', strtotime($dados['data_inspecao']))),
+            ]);
         }
 
         $agendamentoId = $this->calendario->create($dados);
@@ -117,10 +216,17 @@ class CalendarioController extends Controller {
             } else {
                 $this->flash('Agendamento criado, mas não foi possível gerar o relatório automático.', 'erro');
             }
-            $this->redirect('calendario', 'listar');
+            $this->redirect('calendario', 'calendario', [
+                'mes' => (int)($_POST['return_mes'] ?? date('m', strtotime($dados['data_inspecao']))),
+                'ano' => (int)($_POST['return_ano'] ?? date('Y', strtotime($dados['data_inspecao']))),
+            ]);
         } else {
             $this->flash('Erro ao criar agendamento.', 'erro');
-            $this->redirect('calendario', 'agendar');
+            $this->redirect('calendario', 'agendar', [
+                'data' => $dados['data_inspecao'],
+                'mes' => (int)($_POST['return_mes'] ?? date('m', strtotime($dados['data_inspecao']))),
+                'ano' => (int)($_POST['return_ano'] ?? date('Y', strtotime($dados['data_inspecao']))),
+            ]);
         }
     }
 

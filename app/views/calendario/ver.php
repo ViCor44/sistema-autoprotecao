@@ -21,6 +21,11 @@
                 </p>
             </div>
             <div class="card-footer bg-white">
+                <?php if (($agendamento['status'] ?? '') !== 'concluido'): ?>
+                    <a href="index.php?controler=calendario&acao=editar&id=<?php echo (int)$agendamento['id']; ?>&mes=<?php echo (int)$returnMes; ?>&ano=<?php echo (int)$returnAno; ?>" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-pencil-square"></i> Editar agendamento
+                    </a>
+                <?php endif; ?>
                 <?php if (!empty($relatorioInspecao)): ?>
                     <a href="index.php?controler=relatorio&acao=ver&id=<?php echo $relatorioInspecao['id']; ?>" class="btn btn-primary">
                         <i class="bi bi-file-earmark-text"></i> Ver Relatório da Inspeção
@@ -39,7 +44,7 @@
                         <i class="bi bi-clipboard-check"></i> Registar Execução da Inspeção
                     </a>
                 <?php endif; ?>
-                <a href="index.php?controler=calendario&acao=listar" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+                <a href="index.php?controler=calendario&acao=calendario&mes=<?php echo (int)$returnMes; ?>&ano=<?php echo (int)$returnAno; ?>" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
             </div>
         </div>
     </div>

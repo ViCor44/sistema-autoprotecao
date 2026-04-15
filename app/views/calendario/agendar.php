@@ -1,9 +1,23 @@
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <h1 class="mb-4"><i class="bi bi-calendar-plus"></i> Agendar Inspeção</h1>
+<section class="page-shell page-shell--narrow">
+    <div class="page-hero compact">
+        <div>
+            <span class="page-hero__eyebrow">Novo agendamento</span>
+            <h1><i class="bi bi-calendar-plus"></i> Agendar inspeção</h1>
+            <p>O formulário abre já associado ao dia selecionado no calendário para acelerar o planeamento.</p>
+        </div>
+    </div>
 
-        <form method="POST" action="index.php?controler=calendario&acao=salvar" class="card">
-            <div class="card-body">
+    <form method="POST" action="index.php?controler=calendario&acao=salvar" class="panel-surface modern-form">
+        <input type="hidden" name="return_mes" value="<?php echo (int)$returnMes; ?>">
+        <input type="hidden" name="return_ano" value="<?php echo (int)$returnAno; ?>">
+        <div class="panel-surface__header compact">
+            <div>
+                <span class="panel-surface__eyebrow">Planeamento</span>
+                <h2>Dados do agendamento</h2>
+            </div>
+        </div>
+
+        <div class="card-body px-0 pb-0">
                 <div class="mb-3">
                     <label for="tipo_equipamento_id" class="form-label">Tipo de Equipamento *</label>
                     <select name="tipo_equipamento_id" id="tipo_equipamento_id" class="form-select" required>
@@ -28,7 +42,7 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="data_inspecao" class="form-label">Data da Inspeção *</label>
-                        <input type="date" class="form-control" name="data_inspecao" id="data_inspecao" required>
+                        <input type="date" class="form-control" name="data_inspecao" id="data_inspecao" value="<?php echo htmlspecialchars($dataSelecionada); ?>" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="tipo_inspecao" class="form-label">Tipo de Inspeção</label>
@@ -60,15 +74,14 @@
                         <input type="text" class="form-control" name="responsavel_id" id="responsavel_id" placeholder="Opcional">
                     </div>
                 </div>
-            </div>
 
-            <div class="card-footer bg-white">
+            <div class="form-actions-bar">
                 <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Agendar</button>
-                <a href="index.php?controler=calendario&acao=listar" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Cancelar</a>
+                <a href="index.php?controler=calendario&acao=calendario&mes=<?php echo (int)$returnMes; ?>&ano=<?php echo (int)$returnAno; ?>" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Cancelar</a>
             </div>
-        </form>
-    </div>
-</div>
+        </div>
+    </form>
+</section>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
