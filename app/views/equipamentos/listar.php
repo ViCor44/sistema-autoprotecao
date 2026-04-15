@@ -1,14 +1,29 @@
 <?php
-$totalEquipamentos = count($equipamentos);
-$operacionais = 0;
-$emFalha = 0;
+$totalEquipamentos = (int)($resumo['total'] ?? 0);
+$operacionais = (int)($resumo['operacionais'] ?? 0);
+$emFalha = (int)($resumo['anomalias'] ?? 0);
+$localizacaoAtual = $filtros['localizacao'] ?? '';
+$tipoAtual = (int)($filtros['tipo_equipamento_id'] ?? 0);
+$estadoAtual = $filtros['estado'] ?? '';
+$resultadosNaPagina = count($equipamentos);
+$inicioPagina = $totalResultados > 0 ? ($offset + 1) : 0;
+$fimPagina = $offset + $resultadosNaPagina;
 
-foreach ($equipamentos as $equipamento) {
-    if (($equipamento['estado'] ?? '') === 'operacional') {
-        $operacionais++;
-    } else {
-        $emFalha++;
-    }
+$queryBase = [
+    'controler' => 'equipamento',
+    'acao' => 'listar',
+];
+
+if ($localizacaoAtual !== '') {
+    $queryBase['localizacao'] = $localizacaoAtual;
+}
+
+if ($tipoAtual > 0) {
+    $queryBase['tipo'] = $tipoAtual;
+}
+
+if ($estadoAtual !== '') {
+    $queryBase['estado'] = $estadoAtual;
 }
 ?>
 
@@ -18,7 +33,7 @@ foreach ($equipamentos as $equipamento) {
             <span class="page-hero__eyebrow">Inventario Tecnico</span>
             <h1><i class="bi bi-tools"></i> Equipamentos</h1>
             <p>
-                Consulte o estado operacional de cada equipamento, filtre por localizacao e mantenha o parque de autoprotecao sempre atualizado.
+                Consulte o estado operacional de cada equipamento, filtre por tipo, estado e localizacao, e mantenha o parque de autoprotecao sempre atualizado.
             </p>
         </div>
         <div class="page-hero__actions">
@@ -60,13 +75,35 @@ foreach ($equipamentos as $equipamento) {
                     type="text"
                     name="localizacao"
                     class="form-control"
-                    placeholder="Ex.: Cozinha, Sala tecnica, Armazem..."
-                    value="<?php echo htmlspecialchars($_GET['localizacao'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                    placeholder="Ex.: Cozinha, Sala tecnica, Armazem ou numero de registo..."
+                    value="<?php echo htmlspecialchars($localizacaoAtual, ENT_QUOTES, 'UTF-8'); ?>"
                 >
+                <select name="tipo" class="form-select">
+                    <option value="0">Todos os tipos</option>
+                    <?php foreach ($tipos as $tipo): ?>
+                        <option value="<?php echo (int)$tipo['id']; ?>" <?php echo $tipoAtual === (int)$tipo['id'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($tipo['nome'], ENT_QUOTES, 'UTF-8'); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <select name="estado" class="form-select">
+                    <option value="">Todos os estados</option>
+                    <option value="operacional" <?php echo $estadoAtual === 'operacional' ? 'selected' : ''; ?>>Operacional</option>
+                    <option value="inoperacional" <?php echo $estadoAtual === 'inoperacional' ? 'selected' : ''; ?>>Inoperacional</option>
+                    <option value="avariado" <?php echo $estadoAtual === 'avariado' ? 'selected' : ''; ?>>Avariado</option>
+                </select>
                 <button type="submit" class="btn btn-primary">Filtrar</button>
                 <a href="index.php?controler=equipamento&acao=listar" class="btn btn-outline-secondary">Limpar</a>
             </div>
         </form>
+    </section>
+
+    <section class="equipamentos-results-meta">
+        <strong><?php echo $totalResultados; ?></strong>
+        resultados
+        <?php if ($totalResultados > 0): ?>
+            <span>(a mostrar <?php echo $inicioPagina; ?>-<?php echo $fimPagina; ?>)</span>
+        <?php endif; ?>
     </section>
 
     <?php if (empty($equipamentos)): ?>
@@ -122,5 +159,42 @@ foreach ($equipamentos as $equipamento) {
                 </article>
             <?php endforeach; ?>
         </section>
+
+        <?php if ($totalPaginas > 1): ?>
+            <nav aria-label="Paginação de equipamentos" class="equipamentos-pagination-wrap">
+                <ul class="pagination equipamentos-pagination">
+                    <?php
+                    $queryAnterior = $queryBase;
+                    $queryAnterior['pagina'] = max(1, $paginaAtual - 1);
+                    $linkAnterior = 'index.php?' . http_build_query($queryAnterior);
+
+                    $querySeguinte = $queryBase;
+                    $querySeguinte['pagina'] = min($totalPaginas, $paginaAtual + 1);
+                    $linkSeguinte = 'index.php?' . http_build_query($querySeguinte);
+                    ?>
+                    <li class="page-item <?php echo $paginaAtual <= 1 ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="<?php echo htmlspecialchars($linkAnterior, ENT_QUOTES, 'UTF-8'); ?>">Anterior</a>
+                    </li>
+
+                    <?php
+                    $inicio = max(1, $paginaAtual - 2);
+                    $fim = min($totalPaginas, $paginaAtual + 2);
+
+                    for ($pagina = $inicio; $pagina <= $fim; $pagina++):
+                        $queryPagina = $queryBase;
+                        $queryPagina['pagina'] = $pagina;
+                        $linkPagina = 'index.php?' . http_build_query($queryPagina);
+                    ?>
+                        <li class="page-item <?php echo $pagina === $paginaAtual ? 'active' : ''; ?>">
+                            <a class="page-link" href="<?php echo htmlspecialchars($linkPagina, ENT_QUOTES, 'UTF-8'); ?>"><?php echo $pagina; ?></a>
+                        </li>
+                    <?php endfor; ?>
+
+                    <li class="page-item <?php echo $paginaAtual >= $totalPaginas ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="<?php echo htmlspecialchars($linkSeguinte, ENT_QUOTES, 'UTF-8'); ?>">Seguinte</a>
+                    </li>
+                </ul>
+            </nav>
+        <?php endif; ?>
     <?php endif; ?>
 </section>

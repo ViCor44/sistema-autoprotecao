@@ -28,30 +28,59 @@ class Equipamento {
     }
 
     /**
-     * Obter todos os equipamentos
+     * Obter equipamentos com filtros e suporte a paginação
      */
-    public function getAll($filtros = []) {
-        $query = "SELECT e.*, t.nome as tipo_nome 
+    public function getAll($filtros = [], $limite = null, $offset = 0) {
+        $query = "SELECT e.*, t.nome as tipo_nome
                   FROM {$this->table} e
-                  JOIN tipos_equipamentos t ON e.tipo_equipamento_id = t.id
-                  WHERE 1=1";
+                  JOIN tipos_equipamentos t ON e.tipo_equipamento_id = t.id";
 
-        if (isset($filtros['ativo'])) {
-            $query .= " AND e.ativo = " . (int)$filtros['ativo'];
+        $query .= $this->buildWhereClause($filtros);
+        $query .= " ORDER BY t.nome ASC, e.localizacao ASC, e.numero_serie ASC";
+
+        if ($limite !== null) {
+            $limite = max(1, (int)$limite);
+            $offset = max(0, (int)$offset);
+            $query .= " LIMIT {$offset}, {$limite}";
         }
-
-        if (isset($filtros['tipo_equipamento_id'])) {
-            $query .= " AND e.tipo_equipamento_id = " . (int)$filtros['tipo_equipamento_id'];
-        }
-
-        if (isset($filtros['localizacao'])) {
-            $query .= " AND e.localizacao LIKE '%" . $this->db->escape($filtros['localizacao']) . "%'";
-        }
-
-        $query .= " ORDER BY e.localizacao ASC";
 
         $resultado = $this->db->query($query);
-        return $resultado->fetch_all(MYSQLI_ASSOC);
+        return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
+    }
+
+    /**
+     * Total de equipamentos para os filtros aplicados
+     */
+    public function getTotal($filtros = []) {
+        $query = "SELECT COUNT(*) AS total FROM {$this->table} e";
+        $query .= $this->buildWhereClause($filtros);
+
+        $resultado = $this->db->query($query);
+        $linha = $resultado ? $resultado->fetch_assoc() : null;
+
+        return (int)($linha['total'] ?? 0);
+    }
+
+    /**
+     * Resumo por estado para os filtros aplicados
+     */
+    public function getResumoEstados($filtros = []) {
+        $query = "SELECT
+                    COUNT(*) AS total,
+                    SUM(CASE WHEN e.estado = 'operacional' THEN 1 ELSE 0 END) AS operacionais,
+                    SUM(CASE WHEN e.estado <> 'operacional' OR e.estado IS NULL THEN 1 ELSE 0 END) AS anomalias
+                  FROM {$this->table} e";
+
+        $query .= $this->buildWhereClause($filtros);
+
+        $resultado = $this->db->query($query);
+        $linha = $resultado ? $resultado->fetch_assoc() : [];
+
+        return [
+            'total' => (int)($linha['total'] ?? 0),
+            'operacionais' => (int)($linha['operacionais'] ?? 0),
+            'anomalias' => (int)($linha['anomalias'] ?? 0),
+        ];
     }
 
     public function atualizarProximaManutencaoPorAgendamento($agendamentoId, $proximaInspecao) {
@@ -284,5 +313,37 @@ class Equipamento {
 
         $this->camposDinamicosDisponiveis = ($resCampos && $resCampos->num_rows > 0) && ($resValores && $resValores->num_rows > 0);
         return $this->camposDinamicosDisponiveis;
+    }
+
+    /**
+     * Construir cláusula WHERE dos filtros
+     */
+    private function buildWhereClause($filtros = []) {
+        $where = " WHERE 1=1";
+
+        if (isset($filtros['ativo'])) {
+            $where .= " AND e.ativo = " . (int)$filtros['ativo'];
+        }
+
+        if (!empty($filtros['tipo_equipamento_id'])) {
+            $where .= " AND e.tipo_equipamento_id = " . (int)$filtros['tipo_equipamento_id'];
+        }
+
+        if (!empty($filtros['estado'])) {
+            $estado = $this->db->escape($filtros['estado']);
+            $where .= " AND e.estado = '{$estado}'";
+        }
+
+        if (!empty($filtros['localizacao'])) {
+            $texto = $this->db->escape($filtros['localizacao']);
+            $where .= " AND (
+                e.localizacao LIKE '%{$texto}%'
+                OR e.numero_serie LIKE '%{$texto}%'
+                OR e.marca LIKE '%{$texto}%'
+                OR e.modelo LIKE '%{$texto}%'
+            )";
+        }
+
+        return $where;
     }
 }

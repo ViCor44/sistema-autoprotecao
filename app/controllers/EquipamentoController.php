@@ -29,18 +29,51 @@ class EquipamentoController extends Controller {
      * Listar todos os equipamentos
      */
     public function listar() {
-        $filtros = [];
-        
-        if (isset($_GET['tipo'])) {
-            $filtros['tipo_equipamento_id'] = (int)$_GET['tipo'];
-        }
-        if (isset($_GET['localizacao'])) {
-            $filtros['localizacao'] = $_GET['localizacao'];
-        }
-        
-        $equipamentos = $this->equipamento->getAll($filtros);
+        $filtros = ['ativo' => 1];
 
-        $this->render('equipamentos/listar', compact('equipamentos'));
+        $tipo = isset($_GET['tipo']) ? (int)$_GET['tipo'] : 0;
+        $estado = isset($_GET['estado']) ? trim((string)$_GET['estado']) : '';
+        $localizacao = isset($_GET['localizacao']) ? trim((string)$_GET['localizacao']) : '';
+
+        if ($tipo > 0) {
+            $filtros['tipo_equipamento_id'] = $tipo;
+        }
+
+        if ($estado !== '') {
+            $filtros['estado'] = $estado;
+        }
+
+        if ($localizacao !== '') {
+            $filtros['localizacao'] = $localizacao;
+        }
+
+        $porPagina = 24;
+        $paginaAtual = max(1, (int)($_GET['pagina'] ?? 1));
+
+        $totalResultados = $this->equipamento->getTotal($filtros);
+        $totalPaginas = max(1, (int)ceil($totalResultados / $porPagina));
+
+        if ($paginaAtual > $totalPaginas) {
+            $paginaAtual = $totalPaginas;
+        }
+
+        $offset = ($paginaAtual - 1) * $porPagina;
+
+        $equipamentos = $this->equipamento->getAll($filtros, $porPagina, $offset);
+        $resumo = $this->equipamento->getResumoEstados($filtros);
+        $tipos = $this->tiposEquipamentos;
+
+        $this->render('equipamentos/listar', compact(
+            'equipamentos',
+            'tipos',
+            'filtros',
+            'resumo',
+            'paginaAtual',
+            'porPagina',
+            'totalPaginas',
+            'totalResultados',
+            'offset'
+        ));
     }
 
     /**

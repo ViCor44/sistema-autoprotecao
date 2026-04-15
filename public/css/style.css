@@ -801,9 +801,44 @@ footer {
 
 .equipamentos-filter-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(260px, 1.2fr) minmax(190px, 0.7fr) minmax(190px, 0.7fr) auto auto;
     gap: 12px;
     align-items: center;
+}
+
+.equipamentos-results-meta {
+    color: #5f6b7a;
+    font-size: 0.95rem;
+}
+
+.equipamentos-results-meta strong {
+    color: #0f172a;
+    font-size: 1.05rem;
+}
+
+.equipamentos-pagination-wrap {
+    display: flex;
+    justify-content: center;
+    padding-top: 8px;
+}
+
+.equipamentos-pagination .page-link {
+    border: none;
+    border-radius: 12px;
+    margin: 0 4px;
+    color: #1545b3;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+}
+
+.equipamentos-pagination .page-item.active .page-link {
+    color: #fff;
+    background: linear-gradient(135deg, #165dff, #1d9bf0);
+}
+
+.equipamentos-pagination .page-item.disabled .page-link {
+    color: #9aa6b5;
+    background: rgba(255, 255, 255, 0.65);
 }
 
 .equipamentos-grid {
