@@ -1,78 +1,106 @@
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <h1 class="mb-4"><i class="bi bi-clipboard-check"></i> Relatório</h1>
-
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5 class="mb-0">Informações do Relatório</h5>
-            </div>
-            <div class="card-body">
-                <p>
-                    <strong>Equipamento:</strong> <?php echo $relatorio['tipo_equipamento']; ?> (<?php echo $relatorio['localizacao'] ?: 'Todos os equipamentos do tipo'; ?>)<br>
-                    <strong>Data:</strong> <?php echo date('d/m/Y', strtotime($relatorio['data_relatorio'])); ?><br>
-                    <strong>Tipo:</strong> <?php echo ucfirst($relatorio['tipo_relatorio']); ?><br>
-                    <strong>Responsável:</strong> <?php echo $relatorio['responsavel_nome']; ?><br>
-                    <strong>Condição:</strong> <?php echo ucfirst($relatorio['condicoes_encontradas'] ?? '-'); ?><br>
-                    <strong>Estado:</strong> 
-                    <span class="badge bg-<?php echo $relatorio['assinado'] ? 'success' : 'warning'; ?>">
-                        <?php echo $relatorio['assinado'] ? 'Assinado' : 'Pendente de Assinatura'; ?>
-                    </span><br>
-                    <strong>Descrição:</strong> <?php echo nl2br($relatorio['descricao']); ?><br>
-                    <strong>Observações:</strong> <?php echo nl2br($relatorio['observacoes'] ?: '-'); ?><br>
-                    <strong>Próxima Inspeção:</strong> <?php echo $relatorio['proxima_inspecao'] ? date('d/m/Y', strtotime($relatorio['proxima_inspecao'])) : '-'; ?>
-                </p>
-            </div>
+<section class="page-shell page-shell--narrow">
+    <div class="page-hero compact">
+        <div>
+            <span class="page-hero__eyebrow">Documento técnico</span>
+            <h1><i class="bi bi-clipboard-check"></i> Relatório</h1>
+            <p>Consulte os dados do relatório, o estado de assinatura e os itens de verificação associados.</p>
         </div>
-
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5 class="mb-0">Itens de Verificação</h5>
-            </div>
-            <div class="card-body">
-                <?php if (empty($itens)): ?>
-                    <p class="text-muted">Nenhum item registado.</p>
-                <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Verificação</th>
-                                    <th>Resultado</th>
-                                    <th>Observação</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($itens as $item): ?>
-                                    <tr>
-                                        <td><?php echo $item['descricao_verificacao']; ?></td>
-                                        <td><?php echo ucfirst($item['resultado']); ?></td>
-                                        <td><?php echo $item['observacao']; ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <div class="card-footer bg-white">
+        <div class="page-hero__actions">
             <?php if (!$relatorio['assinado']): ?>
-                <a href="index.php?controler=relatorio&acao=editar&id=<?php echo $relatorio['id']; ?>" class="btn btn-warning">
-                    <i class="bi bi-pencil-square"></i> Preencher/Editar Formulário
+                <a href="index.php?controler=relatorio&acao=editar&id=<?php echo $relatorio['id']; ?>" class="btn btn-dashboard-primary">
+                    <i class="bi bi-pencil-square"></i> Editar
                 </a>
             <?php endif; ?>
-            <?php if (!$relatorio['assinado']): ?>
-                <a href="index.php?controler=relatorio&acao=assinar&id=<?php echo $relatorio['id']; ?>" class="btn btn-success" onclick="return confirm('Tem a certeza que deseja assinar este relatório?');">
-                    <i class="bi bi-check-circle"></i> Assinar
-                </a>
-            <?php endif; ?>
-            <a href="index.php?controler=relatorio&acao=exportar_pdf&id=<?php echo $relatorio['id']; ?>" class="btn btn-outline-secondary">
+            <a href="index.php?controler=relatorio&acao=exportar_pdf&id=<?php echo $relatorio['id']; ?>" class="btn btn-dashboard-secondary">
                 <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
-            </a>
-            <a href="index.php?controler=relatorio&acao=listar" class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i> Voltar
             </a>
         </div>
     </div>
-</div>
+
+    <div class="content-grid-two">
+        <section class="panel-surface">
+            <div class="panel-surface__header compact">
+                <div>
+                    <span class="panel-surface__eyebrow">Metadados</span>
+                    <h2>Informações do relatório</h2>
+                </div>
+            </div>
+            <div class="detail-stack">
+                <div class="detail-row"><span>Equipamento</span><strong><?php echo htmlspecialchars($relatorio['tipo_equipamento'] . ' (' . ($relatorio['localizacao'] ?: 'Todos os equipamentos do tipo') . ')'); ?></strong></div>
+                <div class="detail-row"><span>Data</span><strong><?php echo date('d/m/Y', strtotime($relatorio['data_relatorio'])); ?></strong></div>
+                <div class="detail-row"><span>Tipo</span><strong><?php echo ucfirst($relatorio['tipo_relatorio']); ?></strong></div>
+                <div class="detail-row"><span>Responsável</span><strong><?php echo htmlspecialchars($relatorio['responsavel_nome']); ?></strong></div>
+                <div class="detail-row"><span>Condição</span><strong><?php echo ucfirst($relatorio['condicoes_encontradas'] ?? '-'); ?></strong></div>
+                <div class="detail-row"><span>Estado</span><strong><?php echo $relatorio['assinado'] ? 'Assinado' : 'Pendente de assinatura'; ?></strong></div>
+                <div class="detail-row"><span>Próxima inspeção</span><strong><?php echo $relatorio['proxima_inspecao'] ? date('d/m/Y', strtotime($relatorio['proxima_inspecao'])) : '-'; ?></strong></div>
+            </div>
+        </section>
+
+        <section class="panel-surface">
+            <div class="panel-surface__header compact">
+                <div>
+                    <span class="panel-surface__eyebrow">Conteúdo</span>
+                    <h2>Descrição e observações</h2>
+                </div>
+            </div>
+            <div class="narrative-block">
+                <h3>Descrição</h3>
+                <p><?php echo nl2br(htmlspecialchars($relatorio['descricao'])); ?></p>
+            </div>
+            <div class="narrative-block compact">
+                <h3>Observações</h3>
+                <p><?php echo nl2br(htmlspecialchars($relatorio['observacoes'] ?: '-')); ?></p>
+            </div>
+        </section>
+    </div>
+
+    <section class="panel-surface">
+        <div class="panel-surface__header compact">
+            <div>
+                <span class="panel-surface__eyebrow">Checklist</span>
+                <h2>Itens de verificação</h2>
+            </div>
+        </div>
+        <?php if (empty($itens)): ?>
+            <div class="dashboard-empty-state">
+                <div class="dashboard-empty-state__icon"><i class="bi bi-list-check"></i></div>
+                <div>
+                    <strong>Sem itens registados</strong>
+                    <p>Este relatório ainda não tem itens de verificação associados.</p>
+                </div>
+            </div>
+        <?php else: ?>
+            <div class="table-responsive modern-table-wrap">
+                <table class="table modern-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Verificação</th>
+                            <th>Resultado</th>
+                            <th>Observação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($itens as $item): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($item['descricao_verificacao']); ?></td>
+                                <td><span class="status-pill status-pill--info"><?php echo ucfirst($item['resultado']); ?></span></td>
+                                <td><?php echo htmlspecialchars($item['observacao']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </section>
+
+    <div class="form-actions-bar top-padding">
+        <?php if (!$relatorio['assinado']): ?>
+            <a href="index.php?controler=relatorio&acao=assinar&id=<?php echo $relatorio['id']; ?>" class="btn btn-success" onclick="return confirm('Tem a certeza que deseja assinar este relatório?');">
+                <i class="bi bi-check-circle"></i> Assinar
+            </a>
+        <?php endif; ?>
+        <a href="index.php?controler=relatorio&acao=listar" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</section>

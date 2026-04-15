@@ -1,121 +1,177 @@
-<div class="row">
-    <div class="col-md-12">
-        <h1 class="mb-4"><i class="bi bi-speedometer2"></i> Dashboard</h1>
-    </div>
-</div>
+<?php
+$totalProximas = count($proximasManutencoes);
+$totalVencidas = count($manutencoeVencidas);
+$totalRelatorios = count($relatoriosRecentes);
+$totalAgendadas = $totalInspecoesAgendadas ?? 0;
+$proximaInspecao = $proximasManutencoes[0] ?? null;
+$estadoOperacional = $totalVencidas > 0 ? 'Atenção imediata' : ($totalProximas > 0 ? 'Sob controlo' : 'Sem pressão imediata');
+$estadoClasse = $totalVencidas > 0 ? 'is-critical' : ($totalProximas > 0 ? 'is-warning' : 'is-stable');
+?>
 
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                <h5 class="card-title">Total de Equipamentos</h5>
-                <h2><?php echo $totalEquipamentos; ?></h2>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-warning text-white">
-            <div class="card-body">
-                <h5 class="card-title">Inspeções Próximas (7 dias)</h5>
-                <h2><?php echo count($proximasManutencoes); ?></h2>
-                <a href="index.php?controler=calendario&acao=dashboard" class="btn btn-sm btn-light">Ver</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-danger text-white">
-            <div class="card-body">
-                <h5 class="card-title">Inspeções em Atraso</h5>
-                <h2><?php echo count($manutencoeVencidas); ?></h2>
-                <a href="index.php?controler=calendario&acao=dashboard" class="btn btn-sm btn-light">Ver</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-info text-white">
-            <div class="card-body">
-                <h5 class="card-title">Relatórios Recentes (30 dias)</h5>
-                <h2><?php echo count($relatoriosRecentes); ?></h2>
-                <a href="index.php?controler=relatorio&acao=listar" class="btn btn-sm btn-light">Ver</a>
-            </div>
-        </div>
-    </div>
-</div>
+<section class="dashboard-page">
+    <div class="dashboard-hero">
+        <div class="dashboard-hero__content">
+            <span class="dashboard-eyebrow">Centro de controlo</span>
+            <h1><i class="bi bi-speedometer2"></i> Dashboard</h1>
+            <p>
+                Monitorize o plano de inspeções, identifique atrasos e avance rapidamente para o registo das medidas de autoproteção.
+            </p>
 
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body">
-                <h5 class="card-title">Inspeções Agendadas</h5>
-                <h2><?php echo $totalInspecoesAgendadas ?? 0; ?></h2>
-                <a href="index.php?controler=inspecao&acao=listar" class="btn btn-sm btn-light">Ver</a>
+            <div class="dashboard-hero__actions">
+                <a href="index.php?controler=inspecao&acao=listar" class="btn btn-dashboard-primary">
+                    <i class="bi bi-clipboard-check"></i> Registar inspeção
+                </a>
+                <a href="index.php?controler=calendario&acao=dashboard" class="btn btn-dashboard-secondary">
+                    <i class="bi bi-calendar3"></i> Ver agenda operacional
+                </a>
             </div>
         </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                <h5 class="card-title">Preencher Inspeção</h5>
-                <a href="index.php?controler=inspecao&acao=listar" class="btn btn-sm btn-light">Aceder</a>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-calendar-event"></i> Próximas Inspeções</h5>
-            </div>
-            <div class="card-body">
-                <?php if (empty($proximasManutencoes)): ?>
-                    <p class="text-muted">Nenhuma inspeção agendada para os próximos 7 dias.</p>
+        <aside class="dashboard-hero__panel <?php echo $estadoClasse; ?>">
+            <div class="dashboard-hero__panel-label">Estado operacional</div>
+            <div class="dashboard-hero__panel-value"><?php echo $estadoOperacional; ?></div>
+            <p>
+                <?php if ($proximaInspecao): ?>
+                    Próxima ação a <?php echo date('d/m/Y', strtotime($proximaInspecao['data_inspecao'])); ?> em <?php echo htmlspecialchars($proximaInspecao['localizacao'] ?: $proximaInspecao['tipo_equipamento']); ?>.
                 <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Equipamento</th>
-                                    <th>Tipo</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($proximasManutencoes as $manutencao): ?>
-                                    <tr>
-                                        <td><?php echo date('d/m/Y', strtotime($manutencao['data_inspecao'])); ?></td>
-                                        <td><?php echo $manutencao['localizacao']; ?></td>
-                                        <td><span class="badge bg-info"><?php echo ucfirst($manutencao['tipo_inspecao']); ?></span></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                    Não existem inspeções agendadas para os próximos dias.
                 <?php endif; ?>
-            </div>
-        </div>
+            </p>
+        </aside>
     </div>
 
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Ações Rápidas</h5>
+    <div class="dashboard-stats-grid">
+        <article class="dashboard-stat-card tone-ocean">
+            <div class="dashboard-stat-card__icon"><i class="bi bi-tools"></i></div>
+            <div>
+                <span class="dashboard-stat-card__label">Equipamentos registados</span>
+                <strong class="dashboard-stat-card__value"><?php echo $totalEquipamentos; ?></strong>
+                <span class="dashboard-stat-card__meta">Base instalada sob gestão</span>
             </div>
-            <div class="card-body">
-                <a href="index.php?controler=equipamento&acao=criar" class="btn btn-primary btn-sm w-100 mb-2">
-                    <i class="bi bi-plus-circle"></i> Registar Novo Equipamento
-                </a>
-                <a href="index.php?controler=relatorio&acao=criar" class="btn btn-success btn-sm w-100 mb-2">
-                    <i class="bi bi-file-earmark-plus"></i> Criar Novo Relatório
-                </a>
-                <a href="index.php?controler=calendario&acao=agendar" class="btn btn-info btn-sm w-100 mb-2">
-                    <i class="bi bi-calendar-plus"></i> Agendar Inspeção
-                </a>
-                <a href="index.php?controler=relatorio&acao=pendentes" class="btn btn-warning btn-sm w-100">
-                    <i class="bi bi-clock-history"></i> Relatórios Pendentes
-                </a>
+        </article>
+
+        <article class="dashboard-stat-card tone-gold">
+            <div class="dashboard-stat-card__icon"><i class="bi bi-calendar-event"></i></div>
+            <div>
+                <span class="dashboard-stat-card__label">Inspeções nos próximos 7 dias</span>
+                <strong class="dashboard-stat-card__value"><?php echo $totalProximas; ?></strong>
+                <span class="dashboard-stat-card__meta">Janela curta de planeamento</span>
             </div>
-        </div>
+        </article>
+
+        <article class="dashboard-stat-card tone-coral">
+            <div class="dashboard-stat-card__icon"><i class="bi bi-exclamation-triangle"></i></div>
+            <div>
+                <span class="dashboard-stat-card__label">Inspeções em atraso</span>
+                <strong class="dashboard-stat-card__value"><?php echo $totalVencidas; ?></strong>
+                <span class="dashboard-stat-card__meta">Itens que exigem recuperação</span>
+            </div>
+        </article>
+
+        <article class="dashboard-stat-card tone-mint">
+            <div class="dashboard-stat-card__icon"><i class="bi bi-file-earmark-text"></i></div>
+            <div>
+                <span class="dashboard-stat-card__label">Relatórios recentes</span>
+                <strong class="dashboard-stat-card__value"><?php echo $totalRelatorios; ?></strong>
+                <span class="dashboard-stat-card__meta">Últimos 30 dias</span>
+            </div>
+        </article>
     </div>
-</div>
+
+    <div class="dashboard-panels-grid">
+        <section class="dashboard-panel dashboard-panel--wide">
+            <div class="dashboard-panel__header">
+                <div>
+                    <span class="dashboard-panel__eyebrow">Planeamento</span>
+                    <h2>Próximas inspeções</h2>
+                </div>
+                <a href="index.php?controler=calendario&acao=dashboard" class="dashboard-panel__link">Ver agenda</a>
+            </div>
+
+            <?php if (empty($proximasManutencoes)): ?>
+                <div class="dashboard-empty-state">
+                    <div class="dashboard-empty-state__icon"><i class="bi bi-calendar2-check"></i></div>
+                    <div>
+                        <strong>Sem inspeções imediatas</strong>
+                        <p>Nenhuma inspeção está prevista para os próximos 7 dias.</p>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="dashboard-list">
+                    <?php foreach ($proximasManutencoes as $manutencao): ?>
+                        <article class="dashboard-list__item">
+                            <div class="dashboard-list__date">
+                                <span><?php echo date('d', strtotime($manutencao['data_inspecao'])); ?></span>
+                                <small><?php echo date('M', strtotime($manutencao['data_inspecao'])); ?></small>
+                            </div>
+                            <div class="dashboard-list__content">
+                                <h3><?php echo htmlspecialchars($manutencao['localizacao'] ?: $manutencao['tipo_equipamento']); ?></h3>
+                                <p><?php echo htmlspecialchars($manutencao['tipo_equipamento']); ?></p>
+                            </div>
+                            <span class="dashboard-chip"><?php echo ucfirst($manutencao['tipo_inspecao']); ?></span>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </section>
+
+        <section class="dashboard-panel">
+            <div class="dashboard-panel__header">
+                <div>
+                    <span class="dashboard-panel__eyebrow">Execução</span>
+                    <h2>Atalhos rápidos</h2>
+                </div>
+            </div>
+
+            <div class="dashboard-action-grid">
+                <a href="index.php?controler=equipamento&acao=criar" class="dashboard-action-card">
+                    <i class="bi bi-plus-square"></i>
+                    <strong>Novo equipamento</strong>
+                    <span>Adicionar um registo ao inventário</span>
+                </a>
+
+                <a href="index.php?controler=calendario&acao=agendar" class="dashboard-action-card">
+                    <i class="bi bi-calendar-plus"></i>
+                    <strong>Agendar inspeção</strong>
+                    <span>Planear a próxima ação preventiva</span>
+                </a>
+
+                <a href="index.php?controler=inspecao&acao=listar" class="dashboard-action-card">
+                    <i class="bi bi-clipboard-data"></i>
+                    <strong>Executar inspeção</strong>
+                    <span>Preencher inspeções previstas no calendário</span>
+                </a>
+
+                <a href="index.php?controler=relatorio&acao=pendentes" class="dashboard-action-card accent-warning">
+                    <i class="bi bi-clock-history"></i>
+                    <strong>Relatórios pendentes</strong>
+                    <span>Fechar relatórios ainda por assinar</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="dashboard-panel">
+            <div class="dashboard-panel__header">
+                <div>
+                    <span class="dashboard-panel__eyebrow">Resumo</span>
+                    <h2>Leitura rápida</h2>
+                </div>
+            </div>
+
+            <div class="dashboard-summary-stack">
+                <article class="dashboard-summary-row">
+                    <span>Inspeções agendadas</span>
+                    <strong><?php echo $totalAgendadas; ?></strong>
+                </article>
+                <article class="dashboard-summary-row">
+                    <span>Relatórios dos últimos 30 dias</span>
+                    <strong><?php echo $totalRelatorios; ?></strong>
+                </article>
+                <article class="dashboard-summary-row">
+                    <span>Ocorrências em atraso</span>
+                    <strong class="<?php echo $totalVencidas > 0 ? 'text-danger' : 'text-success'; ?>"><?php echo $totalVencidas; ?></strong>
+                </article>
+            </div>
+        </section>
+    </div>
+</section>
