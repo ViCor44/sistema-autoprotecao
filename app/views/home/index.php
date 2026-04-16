@@ -3,7 +3,14 @@ $totalProximas = count($proximasManutencoes);
 $totalVencidas = count($manutencoeVencidas);
 $totalRelatorios = count($relatoriosRecentes);
 $totalAgendadas = $totalInspecoesAgendadas ?? 0;
-$proximaInspecao = $proximasManutencoes[0] ?? null;
+$proximaInspecao = null;
+foreach ($proximasManutencoes as $item) {
+    $statusItem = strtolower((string)($item['status'] ?? ''));
+    if (!in_array($statusItem, ['concluido', 'concluida', 'cancelado'], true)) {
+        $proximaInspecao = $item;
+        break;
+    }
+}
 $estadoOperacional = $totalVencidas > 0 ? 'Atenção imediata' : ($totalProximas > 0 ? 'Sob controlo' : 'Sem pressão imediata');
 $estadoClasse = $totalVencidas > 0 ? 'is-critical' : ($totalProximas > 0 ? 'is-warning' : 'is-stable');
 ?>
