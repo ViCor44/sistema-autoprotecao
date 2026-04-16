@@ -56,6 +56,8 @@ $scriptVersion = file_exists(PUBLIC_PATH . DIRECTORY_SEPARATOR . 'js' . DIRECTOR
                                 <i class="bi bi-person-circle"></i> <?php echo $_SESSION['utilizador_nome'] ?? 'Utilizador'; ?>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="index.php?controler=perfil&acao=editar"><i class="bi bi-person-gear"></i> Meu perfil</a></li>
+                                <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="index.php?controler=home&acao=logout"><i class="bi bi-box-arrow-right"></i> Sair</a></li>
                             </ul>
                         </li>

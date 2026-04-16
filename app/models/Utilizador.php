@@ -148,6 +148,28 @@ class Utilizador {
     }
 
     /**
+     * Atualizar dados pessoais (sem alterar função)
+     */
+    public function atualizarPerfil($id, $dados) {
+        $query = "UPDATE {$this->table} SET
+                  nome = ?,
+                  email = ?,
+                  telefone = ?
+                  WHERE id = ?";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param(
+            "sssi",
+            $dados['nome'],
+            $dados['email'],
+            $dados['telefone'],
+            $id
+        );
+
+        return $stmt->execute();
+    }
+
+    /**
      * Atualizar senha
      */
     public function atualizarSenha($id, $novaSenha) {
