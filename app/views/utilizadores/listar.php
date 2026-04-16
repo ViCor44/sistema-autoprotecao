@@ -72,6 +72,10 @@ $utilizadoresAprovados = array_filter($utilizadores, function ($utilizador) {
                                 <td><?php echo date('d/m/Y H:i', strtotime($pendente['data_criacao'])); ?></td>
                                 <td class="table-actions">
                                     <form method="POST" action="index.php?controler=utilizador&acao=aprovar&id=<?php echo (int)$pendente['id']; ?>" class="d-inline">
+                                        <select name="funcao" class="form-select form-select-sm d-inline-block me-2" style="width: auto;">
+                                            <option value="tecnico" selected>Técnico</option>
+                                            <option value="administrador">Administrador</option>
+                                        </select>
                                         <button type="submit" class="btn btn-sm btn-success">Aprovar</button>
                                     </form>
                                 </td>

@@ -213,15 +213,16 @@ class Utilizador {
         return !empty($resultado['ok']);
     }
 
-    public function aprovar($id, $adminId) {
+    public function aprovar($id, $adminId, $funcao = 'tecnico') {
         $query = "UPDATE {$this->table}
                   SET ativo = TRUE,
                       aprovado = TRUE,
+                      funcao = ?,
                       aprovado_por = ?,
                       data_aprovacao = NOW()
                   WHERE id = ?";
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param("ii", $adminId, $id);
+        $stmt->bind_param("sii", $funcao, $adminId, $id);
         return $stmt->execute();
     }
 

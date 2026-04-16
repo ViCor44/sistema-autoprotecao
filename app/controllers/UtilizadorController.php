@@ -2,6 +2,7 @@
 
 class UtilizadorController extends Controller {
     private $utilizador;
+    private $rolesPermitidas = ['tecnico', 'administrador'];
 
     public function __construct() {
         $this->requireAdmin();
@@ -17,7 +18,13 @@ class UtilizadorController extends Controller {
     public function aprovar($id) {
         $this->requirePost('utilizador', 'listar');
 
-        if ($this->utilizador->aprovar($id, (int)($_SESSION['utilizador_id'] ?? 0))) {
+        $funcao = strtolower(trim((string)($_POST['funcao'] ?? 'tecnico')));
+        if (!in_array($funcao, $this->rolesPermitidas, true)) {
+            $this->flash('Selecione uma função válida para aprovar o utilizador.', 'erro');
+            $this->redirect('utilizador', 'listar');
+        }
+
+        if ($this->utilizador->aprovar($id, (int)($_SESSION['utilizador_id'] ?? 0), $funcao)) {
             $this->flash('Utilizador aprovado com sucesso.', 'sucesso');
         } else {
             $this->flash('Não foi possível aprovar o utilizador.', 'erro');
