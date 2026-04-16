@@ -216,6 +216,11 @@ class CalendarioManutencao {
             $params[] = $dados['condicoes_encontradas'];
             $types .= 's';
         }
+        if (isset($dados['responsavel_id'])) {
+            $campos[] = "responsavel_id = NULLIF(?, 0)";
+            $params[] = (int)$dados['responsavel_id'];
+            $types .= 'i';
+        }
         if (array_key_exists('proxima_inspecao', $dados)) {
             $campos[] = "proxima_inspecao = ?";
             $params[] = $dados['proxima_inspecao'];

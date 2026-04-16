@@ -21,6 +21,9 @@ class InspecaoController extends Controller {
             $this->flash('Inspeção agendada não encontrada.', 'erro');
             $this->redirect('inspecao', 'listar');
         }
+        if (empty($inspecao['responsavel_nome']) && !empty($_SESSION['utilizador_nome'])) {
+            $inspecao['responsavel_nome'] = $_SESSION['utilizador_nome'];
+        }
         // Pré-preencher próxima inspeção com a data já agendada para este tipo, se existir
         if (empty($inspecao['proxima_inspecao'])) {
             $proximaAgendada = $this->calendario->getProximaAgendadaPorTipo(
@@ -36,6 +39,7 @@ class InspecaoController extends Controller {
 
     public function guardar($id) {
         $this->requirePost('inspecao', 'listar');
+        $responsavelId = (int)($_SESSION['utilizador_id'] ?? 0);
         $proximaInspecao = !empty($_POST['proxima_inspecao']) ? $_POST['proxima_inspecao'] : null;
 
         // Se não foi preenchida manualmente, tentar obter do próximo agendamento existente
@@ -54,6 +58,7 @@ class InspecaoController extends Controller {
             'equipamentos_avariados' => $_POST['equipamentos_avariados'] ?? '',
             'observacoes' => $_POST['observacoes'] ?? '',
             'condicoes_encontradas' => $_POST['condicoes_encontradas'] ?? '',
+            'responsavel_id' => $responsavelId,
             'proxima_inspecao' => $proximaInspecao,
         ];
         $this->calendario->atualizarInspecao($id, $dados);
