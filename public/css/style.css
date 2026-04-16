@@ -1459,6 +1459,17 @@ h2 {
     }
 }
 
+@media (max-width: 1200px) {
+    .app-navbar__links .nav-link {
+        font-size: 0.88rem;
+        padding: 8px 9px;
+    }
+
+    .app-navbar__user-trigger {
+        padding-right: 8px;
+    }
+}
+
 @media (max-width: 992px) {
     .app-navbar__brand strong {
         font-size: 1.08rem;

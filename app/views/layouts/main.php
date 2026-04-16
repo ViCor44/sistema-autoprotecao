@@ -26,7 +26,7 @@ $scriptVersion = file_exists(PUBLIC_PATH . DIRECTORY_SEPARATOR . 'js' . DIRECTOR
         $nomeUtilizador = $_SESSION['utilizador_nome'] ?? 'Utilizador';
         $inicialUtilizador = strtoupper(substr($nomeUtilizador, 0, 1));
         ?>
-        <nav class="navbar navbar-expand-lg app-navbar">
+        <nav class="navbar navbar-expand-xl app-navbar">
             <div class="container-fluid app-navbar__inner">
                 <a class="navbar-brand app-navbar__brand" href="index.php">
                     <span class="app-navbar__brand-icon"><i class="bi bi-shield-check"></i></span>
