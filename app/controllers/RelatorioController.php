@@ -21,6 +21,24 @@ class RelatorioController extends Controller {
         return empty($relatorio['calendario_id']) || ($relatorio['calendario_status'] ?? null) === 'concluido';
     }
 
+    private function preencherProximaInspecao($relatorio) {
+        if (empty($relatorio)) {
+            return $relatorio;
+        }
+
+        if ((empty($relatorio['proxima_inspecao']) || $relatorio['proxima_inspecao'] === '0000-00-00') && !empty($relatorio['calendario_id'])) {
+            $proxima = $this->calendario->getProximaAgendadaPorTipo(
+                $relatorio['tipo_equipamento_id'],
+                $relatorio['calendario_id']
+            );
+            if ($proxima) {
+                $relatorio['proxima_inspecao'] = $proxima;
+            }
+        }
+
+        return $relatorio;
+    }
+
     /**
      * Listar todos os relatórios
      */
@@ -54,16 +72,7 @@ class RelatorioController extends Controller {
         }
 
         $itens = $this->relatorio->getItensRelatorio($id);
-        // Se proxima_inspecao não foi guardada, tentar obter do calendário
-        if ((empty($relatorio['proxima_inspecao']) || $relatorio['proxima_inspecao'] === '0000-00-00') && !empty($relatorio['calendario_id'])) {
-            $proxima = $this->calendario->getProximaAgendadaPorTipo(
-                $relatorio['tipo_equipamento_id'],
-                $relatorio['calendario_id']
-            );
-            if ($proxima) {
-                $relatorio['proxima_inspecao'] = $proxima;
-            }
-        }
+        $relatorio = $this->preencherProximaInspecao($relatorio);
         $this->render('relatorios/ver', compact('relatorio', 'itens'));
     }
 
@@ -194,6 +203,7 @@ class RelatorioController extends Controller {
             $this->flash('Relatório não encontrado.', 'erro');
             $this->redirect('relatorio', 'listar');
         }
+        $relatorio = $this->preencherProximaInspecao($relatorio);
         $itens = $this->relatorio->getItensRelatorio($id);
 
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
@@ -204,7 +214,9 @@ class RelatorioController extends Controller {
         $tecnico         = $relatorio['responsavel_nome'] ?: '-';
         $dataDocumento   = date('d/m/Y', strtotime($relatorio['data_relatorio']));
         $ambito          = !empty($relatorio['localizacao']) ? $relatorio['localizacao'] : '-';
-        $proximaInsp     = !empty($relatorio['proxima_inspecao']) ? date('d/m/Y', strtotime($relatorio['proxima_inspecao'])) : '-';
+        $proximaInsp     = (!empty($relatorio['proxima_inspecao']) && $relatorio['proxima_inspecao'] !== '0000-00-00')
+            ? date('d/m/Y', strtotime($relatorio['proxima_inspecao']))
+            : '-';
 
         // ── Cabeçalho ────────────────────────────────────────────────────────
         // Faixa azul-escura
