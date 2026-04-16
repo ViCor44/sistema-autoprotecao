@@ -163,6 +163,7 @@ class RelatorioController extends Controller {
             $this->flash('Relatório não encontrado.', 'erro');
             $this->redirect('relatorio', 'listar');
         }
+        $itens = $this->relatorio->getItensRelatorio($id);
         // Geração simples de PDF (exemplo com FPDF)
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
         $pdf = new FPDF();
