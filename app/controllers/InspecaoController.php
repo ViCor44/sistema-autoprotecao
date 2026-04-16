@@ -75,6 +75,16 @@ class InspecaoController extends Controller {
             $this->flash('Inspeção agendada não encontrada.', 'erro');
             $this->redirect('inspecao', 'listar');
         }
+        // Se proxima_inspecao não foi guardada, tentar obter do calendário
+        if (empty($inspecao['proxima_inspecao']) || $inspecao['proxima_inspecao'] === '0000-00-00') {
+            $proxima = $this->calendario->getProximaAgendadaPorTipo(
+                $inspecao['tipo_equipamento_id'],
+                $id
+            );
+            if ($proxima) {
+                $inspecao['proxima_inspecao'] = $proxima;
+            }
+        }
         $relatorio = $this->relatorio->getByCalendarioId($id);
         $this->render('inspecoes/ver', compact('inspecao', 'relatorio'));
     }

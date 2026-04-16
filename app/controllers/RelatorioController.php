@@ -5,10 +5,12 @@
 class RelatorioController extends Controller {
     private $relatorio;
     private $equipamento;
+    private $calendario;
 
     public function __construct() {
         $this->relatorio = new Relatorio();
         $this->equipamento = new Equipamento();
+        $this->calendario = new CalendarioManutencao();
     }
 
     /**
@@ -44,6 +46,16 @@ class RelatorioController extends Controller {
         }
 
         $itens = $this->relatorio->getItensRelatorio($id);
+        // Se proxima_inspecao não foi guardada, tentar obter do calendário
+        if ((empty($relatorio['proxima_inspecao']) || $relatorio['proxima_inspecao'] === '0000-00-00') && !empty($relatorio['calendario_id'])) {
+            $proxima = $this->calendario->getProximaAgendadaPorTipo(
+                $relatorio['tipo_equipamento_id'],
+                $relatorio['calendario_id']
+            );
+            if ($proxima) {
+                $relatorio['proxima_inspecao'] = $proxima;
+            }
+        }
         $this->render('relatorios/ver', compact('relatorio', 'itens'));
     }
 
