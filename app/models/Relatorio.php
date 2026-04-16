@@ -22,7 +22,7 @@ class Relatorio {
                   LEFT JOIN equipamentos e ON r.equipamento_id = e.id
                   LEFT JOIN tipos_equipamentos t ON t.id = COALESCE(r.tipo_equipamento_id, e.tipo_equipamento_id)
                 LEFT JOIN calendarios_manutencao c ON r.calendario_id = c.id
-                  JOIN utilizadores u ON r.responsavel_id = u.id
+                  JOIN utilizadores u ON u.id = COALESCE(c.responsavel_id, r.responsavel_id)
                 WHERE (r.calendario_id IS NULL OR c.status = 'concluido')";
 
         if (isset($filtros['data_inicio']) && isset($filtros['data_fim'])) {
@@ -54,7 +54,7 @@ class Relatorio {
                   LEFT JOIN equipamentos e ON r.equipamento_id = e.id
                   LEFT JOIN tipos_equipamentos t ON t.id = COALESCE(r.tipo_equipamento_id, e.tipo_equipamento_id)
                 LEFT JOIN calendarios_manutencao c ON r.calendario_id = c.id
-                  JOIN utilizadores u ON r.responsavel_id = u.id
+                  JOIN utilizadores u ON u.id = COALESCE(c.responsavel_id, r.responsavel_id)
                   WHERE r.id = ?";
 
         $stmt = $this->db->prepare($query);
@@ -134,12 +134,27 @@ class Relatorio {
         ];
 
         if ($existente) {
-            $this->atualizar((int)$existente['id'], [
-                'descricao' => $dados['descricao'],
-                'observacoes' => $dados['observacoes'],
-                'condicoes_encontradas' => $dados['condicoes_encontradas'],
-                'proxima_inspecao' => $dados['proxima_inspecao'],
-            ]);
+            $query = "UPDATE {$this->table}
+                      SET responsavel_id = ?,
+                          data_relatorio = ?,
+                          descricao = ?,
+                          observacoes = ?,
+                          condicoes_encontradas = ?,
+                          proxima_inspecao = NULLIF(?, '')
+                      WHERE id = ?";
+            $stmt = $this->db->prepare($query);
+            $proximaInspecao = !empty($dados['proxima_inspecao']) ? $dados['proxima_inspecao'] : '';
+            $stmt->bind_param(
+                "isssssi",
+                $dados['responsavel_id'],
+                $dados['data_relatorio'],
+                $dados['descricao'],
+                $dados['observacoes'],
+                $dados['condicoes_encontradas'],
+                $proximaInspecao,
+                $existente['id']
+            );
+            $stmt->execute();
             return (int)$existente['id'];
         }
 
@@ -219,7 +234,7 @@ class Relatorio {
                   LEFT JOIN equipamentos e ON r.equipamento_id = e.id
                   LEFT JOIN tipos_equipamentos t ON t.id = COALESCE(r.tipo_equipamento_id, e.tipo_equipamento_id)
                   LEFT JOIN calendarios_manutencao c ON r.calendario_id = c.id
-                  JOIN utilizadores u ON r.responsavel_id = u.id
+                  JOIN utilizadores u ON u.id = COALESCE(c.responsavel_id, r.responsavel_id)
                   WHERE r.assinado = FALSE
                   AND (r.calendario_id IS NULL OR c.status = 'concluido')
                   ORDER BY r.data_criacao DESC";
