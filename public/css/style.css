@@ -28,6 +28,134 @@ body {
     box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 }
 
+.app-navbar {
+    background: linear-gradient(90deg, rgba(16, 25, 38, 0.97), rgba(20, 40, 64, 0.94));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.app-navbar__inner {
+    max-width: 1460px;
+}
+
+.app-navbar__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #f8fafc;
+    text-decoration: none;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.app-navbar__brand:hover {
+    color: #ffffff;
+}
+
+.app-navbar__brand span {
+    display: grid;
+    line-height: 1.05;
+}
+
+.app-navbar__brand strong {
+    font-size: 1.38rem;
+}
+
+.app-navbar__brand small {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    opacity: 0.72;
+    font-weight: 700;
+}
+
+.app-navbar__brand-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(22, 93, 255, 0.22);
+    color: #dbeafe;
+    font-size: 1.05rem;
+}
+
+.app-navbar__links {
+    gap: 4px;
+    align-items: center;
+}
+
+.app-navbar__links .nav-link {
+    border-radius: 10px;
+    color: rgba(226, 232, 240, 0.84);
+    padding: 8px 12px;
+    font-weight: 700;
+    font-size: 0.93rem;
+    transition: background-color .2s ease, color .2s ease;
+}
+
+.app-navbar__links .nav-link:hover,
+.app-navbar__links .nav-link.active {
+    color: #ffffff;
+    background: rgba(148, 163, 184, 0.22);
+}
+
+.app-navbar__user {
+    margin-left: 8px;
+}
+
+.app-navbar__user-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 999px;
+    padding: 4px 10px 4px 6px;
+    color: #f8fafc;
+    background: rgba(15, 23, 42, 0.25);
+}
+
+.app-navbar__avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    color: #fff;
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
+.app-navbar__dropdown {
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 14px;
+    padding: 6px;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.2);
+}
+
+.app-navbar__dropdown .dropdown-item {
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 8px 10px;
+}
+
+.app-navbar__dropdown .dropdown-item i {
+    margin-right: 8px;
+}
+
+.app-navbar__toggler {
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.app-navbar__toggler:focus {
+    box-shadow: 0 0 0 0.18rem rgba(59, 130, 246, 0.38);
+}
+
 .card {
     border: none;
     border-radius: 20px;
@@ -1218,6 +1346,32 @@ footer {
 }
 
 @media (max-width: 992px) {
+    .app-navbar__brand strong {
+        font-size: 1.08rem;
+    }
+
+    .app-navbar__brand small {
+        display: none;
+    }
+
+    .app-navbar__links {
+        margin-top: 10px;
+        gap: 6px;
+    }
+
+    .app-navbar__links .nav-link {
+        padding: 10px 12px;
+    }
+
+    .app-navbar__user {
+        margin-left: 0;
+    }
+
+    .app-navbar__user-trigger {
+        justify-content: flex-start;
+        border-radius: 12px;
+    }
+
     .dashboard-hero {
         grid-template-columns: 1fr;
     }

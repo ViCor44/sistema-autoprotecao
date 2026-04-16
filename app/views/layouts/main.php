@@ -21,41 +21,51 @@ $scriptVersion = file_exists(PUBLIC_PATH . DIRECTORY_SEPARATOR . 'js' . DIRECTOR
 </head>
 <body>
     <?php if (isset($_SESSION['utilizador_id'])): ?>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="index.php">
-                    <i class="bi bi-shield-check"></i> <?php echo APP_NAME; ?>
+        <?php
+        $controllerAtual = $_GET['controler'] ?? $_GET['controller'] ?? 'home';
+        $nomeUtilizador = $_SESSION['utilizador_nome'] ?? 'Utilizador';
+        $inicialUtilizador = strtoupper(substr($nomeUtilizador, 0, 1));
+        ?>
+        <nav class="navbar navbar-expand-lg app-navbar">
+            <div class="container-fluid app-navbar__inner">
+                <a class="navbar-brand app-navbar__brand" href="index.php">
+                    <span class="app-navbar__brand-icon"><i class="bi bi-shield-check"></i></span>
+                    <span>
+                        <strong><?php echo APP_NAME; ?></strong>
+                        <small>Centro operacional</small>
+                    </span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <button class="navbar-toggler app-navbar__toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Alternar menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav ms-auto app-navbar__links">
                         <li class="nav-item">
-                            <a class="nav-link" href="index.php"><i class="bi bi-house"></i> Início</a>
+                            <a class="nav-link <?php echo $controllerAtual === 'home' ? 'active' : ''; ?>" href="index.php"><i class="bi bi-house"></i> Início</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="index.php?controler=equipamento&acao=listar"><i class="bi bi-tools"></i> Equipamentos</a>
+                            <a class="nav-link <?php echo $controllerAtual === 'equipamento' ? 'active' : ''; ?>" href="index.php?controler=equipamento&acao=listar"><i class="bi bi-tools"></i> Equipamentos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="index.php?controler=tipo_equipamento&acao=listar"><i class="bi bi-sliders"></i> Tipos de Equipamentos</a>
+                            <a class="nav-link <?php echo $controllerAtual === 'tipo_equipamento' ? 'active' : ''; ?>" href="index.php?controler=tipo_equipamento&acao=listar"><i class="bi bi-sliders"></i> Tipos de Equipamentos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="index.php?controler=relatorio&acao=listar"><i class="bi bi-clipboard-data"></i> Relatórios</a>
+                            <a class="nav-link <?php echo $controllerAtual === 'relatorio' ? 'active' : ''; ?>" href="index.php?controler=relatorio&acao=listar"><i class="bi bi-clipboard-data"></i> Relatórios</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="index.php?controler=calendario&acao=calendario"><i class="bi bi-calendar3"></i> Calendário</a>
+                            <a class="nav-link <?php echo $controllerAtual === 'calendario' ? 'active' : ''; ?>" href="index.php?controler=calendario&acao=calendario"><i class="bi bi-calendar3"></i> Calendário</a>
                         </li>
                         <?php if (($_SESSION['utilizador_funcao'] ?? '') === 'administrador'): ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="index.php?controler=utilizador&acao=listar"><i class="bi bi-people"></i> Utilizadores</a>
+                                <a class="nav-link <?php echo $controllerAtual === 'utilizador' ? 'active' : ''; ?>" href="index.php?controler=utilizador&acao=listar"><i class="bi bi-people"></i> Utilizadores</a>
                             </li>
                         <?php endif; ?>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle"></i> <?php echo $_SESSION['utilizador_nome'] ?? 'Utilizador'; ?>
+                        <li class="nav-item dropdown app-navbar__user">
+                            <a class="nav-link dropdown-toggle app-navbar__user-trigger" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="app-navbar__avatar"><?php echo htmlspecialchars($inicialUtilizador); ?></span>
+                                <span><?php echo htmlspecialchars($nomeUtilizador); ?></span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <ul class="dropdown-menu dropdown-menu-end app-navbar__dropdown" aria-labelledby="userDropdown">
                                 <li><a class="dropdown-item" href="index.php?controler=perfil&acao=editar"><i class="bi bi-person-gear"></i> Meu perfil</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="index.php?controler=home&acao=logout"><i class="bi bi-box-arrow-right"></i> Sair</a></li>
