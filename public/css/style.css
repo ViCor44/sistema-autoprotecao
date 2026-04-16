@@ -1054,11 +1054,65 @@ footer {
     display: inline-flex;
     align-items: center;
     padding: 7px 10px;
+    position: relative;
     border-radius: 999px;
     background: rgba(22, 93, 255, 0.1);
     color: #1545b3;
     font-size: 0.78rem;
     font-weight: 700;
+}
+
+.calendar-event-tooltip {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    transform: translateX(-50%) translateY(6px);
+    min-width: 190px;
+    max-width: 240px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.96);
+    color: #f8fafc;
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.28);
+    display: grid;
+    gap: 4px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+    z-index: 30;
+    text-align: left;
+    white-space: normal;
+}
+
+.calendar-event-tooltip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%);
+    border-width: 7px 6px 0 6px;
+    border-style: solid;
+    border-color: rgba(15, 23, 42, 0.96) transparent transparent transparent;
+}
+
+.calendar-event-tooltip strong {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.calendar-event-tooltip span {
+    font-size: 0.72rem;
+    line-height: 1.35;
+    color: rgba(241, 245, 249, 0.88);
+}
+
+.calendar-event-pill:hover .calendar-event-tooltip,
+.calendar-event-pill:focus-within .calendar-event-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
 }
 
 .calendar-day__more {
