@@ -231,9 +231,13 @@ class RelatorioController extends Controller {
 
         // Texto do cabeçalho (branco)
         $pdf->SetTextColor(255, 255, 255);
-        $pdf->SetFont('Arial', 'B', 13);
-        $pdf->SetXY(8, 5);
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->SetXY(8, 4.5);
         $pdf->Cell(70, 8, APP_NAME, 0, 0, 'L');
+
+        $pdf->SetFont('Arial', '', 6.4);
+        $pdf->SetXY(8, 11.2);
+        $pdf->Cell(70, 4, 'Gestão técnica de inspeções e medidas de autoproteção.', 0, 0, 'L');
 
         $pdf->SetFont('Arial', 'B', 11);
         $pdf->SetXY(70, 5);

@@ -297,6 +297,46 @@ h2 {
     font-size: 0.84rem;
 }
 
+.report-brand-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: -8px;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(22, 93, 255, 0.16);
+    background: linear-gradient(135deg, rgba(16, 25, 38, 0.96), rgba(19, 45, 78, 0.94));
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+    color: #dbeafe;
+}
+
+.report-brand-banner__icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(59, 130, 246, 0.24);
+    color: #bfdbfe;
+    font-size: 0.98rem;
+}
+
+.report-brand-banner strong {
+    display: block;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 800;
+    margin-bottom: 3px;
+}
+
+.report-brand-banner p {
+    margin: 0;
+    color: rgba(203, 213, 225, 0.9);
+    font-size: 0.88rem;
+}
+
 .bg-light-warning {
     background-color: #fff3cd !important;
 }
