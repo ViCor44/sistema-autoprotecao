@@ -21,6 +21,11 @@ class InspecaoController extends Controller {
             $this->flash('Inspeção agendada não encontrada.', 'erro');
             $this->redirect('inspecao', 'listar');
         }
+        $dataInspecao = !empty($inspecao['data_inspecao']) ? date('Y-m-d', strtotime($inspecao['data_inspecao'])) : null;
+        if (!empty($dataInspecao) && $dataInspecao > date('Y-m-d')) {
+            $this->flash('A inspeção só pode ser preenchida na data agendada ou depois.', 'aviso');
+            $this->redirect('inspecao', 'listar');
+        }
         if (empty($inspecao['responsavel_nome']) && !empty($_SESSION['utilizador_nome'])) {
             $inspecao['responsavel_nome'] = $_SESSION['utilizador_nome'];
         }
@@ -39,12 +44,22 @@ class InspecaoController extends Controller {
 
     public function guardar($id) {
         $this->requirePost('inspecao', 'listar');
+        $inspecaoAtual = $this->calendario->getById($id);
+        if (!$inspecaoAtual) {
+            $this->flash('Inspeção agendada não encontrada.', 'erro');
+            $this->redirect('inspecao', 'listar');
+        }
+        $dataInspecao = !empty($inspecaoAtual['data_inspecao']) ? date('Y-m-d', strtotime($inspecaoAtual['data_inspecao'])) : null;
+        if (!empty($dataInspecao) && $dataInspecao > date('Y-m-d')) {
+            $this->flash('A inspeção só pode ser preenchida na data agendada ou depois.', 'aviso');
+            $this->redirect('inspecao', 'listar');
+        }
+
         $responsavelId = (int)($_SESSION['utilizador_id'] ?? 0);
         $proximaInspecao = !empty($_POST['proxima_inspecao']) ? $_POST['proxima_inspecao'] : null;
 
         // Se não foi preenchida manualmente, tentar obter do próximo agendamento existente
         if (empty($proximaInspecao)) {
-            $inspecaoAtual = $this->calendario->getById($id);
             if ($inspecaoAtual) {
                 $proximaInspecao = $this->calendario->getProximaAgendadaPorTipo(
                     $inspecaoAtual['tipo_equipamento_id'],

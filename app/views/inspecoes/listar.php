@@ -4,6 +4,7 @@ $inspecoesConcluidas = count(array_filter($inspecoes, function ($insp) {
     return ($insp['status'] ?? '') === 'concluido';
 }));
 $inspecoesPendentes = $totalInspecoes - $inspecoesConcluidas;
+$hoje = date('Y-m-d');
 ?>
 
 <section class="page-shell">
@@ -66,6 +67,10 @@ $inspecoesPendentes = $totalInspecoes - $inspecoesConcluidas;
                     </thead>
                     <tbody>
                         <?php foreach ($inspecoes as $insp): ?>
+                            <?php
+                            $dataInspecao = !empty($insp['data_inspecao']) ? date('Y-m-d', strtotime($insp['data_inspecao'])) : null;
+                            $agendadaNoFuturo = !empty($dataInspecao) && $dataInspecao > $hoje;
+                            ?>
                             <tr>
                                 <td>
                                     <strong><?php echo date('d/m/Y', strtotime($insp['data_inspecao'])); ?></strong>
@@ -80,7 +85,11 @@ $inspecoesPendentes = $totalInspecoes - $inspecoesConcluidas;
                                 <td><?php echo htmlspecialchars($insp['responsavel_nome'] ?? '-'); ?></td>
                                 <td class="table-actions">
                                     <?php if ($insp['status'] !== 'concluido'): ?>
-                                        <a href="index.php?controler=inspecao&acao=preencher&id=<?php echo $insp['id']; ?>" class="btn btn-sm btn-warning">Preencher</a>
+                                        <?php if ($agendadaNoFuturo): ?>
+                                            <a href="#" class="btn btn-sm btn-secondary disabled" aria-disabled="true" title="Disponível a partir de <?php echo date('d/m/Y', strtotime($insp['data_inspecao'])); ?>">Preencher</a>
+                                        <?php else: ?>
+                                            <a href="index.php?controler=inspecao&acao=preencher&id=<?php echo $insp['id']; ?>" class="btn btn-sm btn-warning">Preencher</a>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <a href="index.php?controler=inspecao&acao=ver&id=<?php echo $insp['id']; ?>" class="btn btn-sm btn-primary">Ver relatório</a>
                                         <a href="index.php?controler=inspecao&acao=exportar_pdf&id=<?php echo $insp['id']; ?>" class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener noreferrer">PDF</a>
