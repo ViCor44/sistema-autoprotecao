@@ -81,7 +81,7 @@ class Relatorio {
             $dados['descricao'],
             $dados['observacoes'],
             $dados['condicoes_encontradas'],
-            $dados['proxima_inspecao']
+            $dados['proxima_inspecao'] ?: null
         );
 
         if ($stmt->execute()) {

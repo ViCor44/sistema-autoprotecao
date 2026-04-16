@@ -32,7 +32,8 @@
                 <div class="detail-row"><span>Responsável</span><strong><?php echo htmlspecialchars($relatorio['responsavel_nome']); ?></strong></div>
                 <div class="detail-row"><span>Condição</span><strong><?php echo ucfirst($relatorio['condicoes_encontradas'] ?? '-'); ?></strong></div>
                 <div class="detail-row"><span>Estado</span><strong><?php echo $relatorio['assinado'] ? 'Assinado' : 'Pendente de assinatura'; ?></strong></div>
-                <div class="detail-row"><span>Próxima inspeção</span><strong><?php echo $relatorio['proxima_inspecao'] ? date('d/m/Y', strtotime($relatorio['proxima_inspecao'])) : '-'; ?></strong></div>
+                <?php $proximaTs = !empty($relatorio['proxima_inspecao']) && $relatorio['proxima_inspecao'] !== '0000-00-00' ? strtotime($relatorio['proxima_inspecao']) : false; ?>
+                <div class="detail-row"><span>Próxima inspeção</span><strong><?php echo $proximaTs ? date('d/m/Y', $proximaTs) : '-'; ?></strong></div>
             </div>
         </section>
 
