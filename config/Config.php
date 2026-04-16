@@ -13,7 +13,7 @@ define('DB_CHARSET', 'utf8mb4');
 
 // Configuração da Aplicação
 define('APP_NAME', 'Sistema Autoproteção');
-define('APP_URL', 'http://localhost/sistema-autoprotecao');
+define('APP_URL', 'http://192.168.63.253/sistema-autoprotecao');
 define('APP_ENV', 'development');
 define('APP_DEBUG', true);
 
