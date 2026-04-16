@@ -36,12 +36,25 @@ class InspecaoController extends Controller {
 
     public function guardar($id) {
         $this->requirePost('inspecao', 'listar');
+        $proximaInspecao = !empty($_POST['proxima_inspecao']) ? $_POST['proxima_inspecao'] : null;
+
+        // Se não foi preenchida manualmente, tentar obter do próximo agendamento existente
+        if (empty($proximaInspecao)) {
+            $inspecaoAtual = $this->calendario->getById($id);
+            if ($inspecaoAtual) {
+                $proximaInspecao = $this->calendario->getProximaAgendadaPorTipo(
+                    $inspecaoAtual['tipo_equipamento_id'],
+                    $id
+                );
+            }
+        }
+
         $dados = [
             'parecer' => $_POST['parecer'] ?? '',
             'equipamentos_avariados' => $_POST['equipamentos_avariados'] ?? '',
             'observacoes' => $_POST['observacoes'] ?? '',
             'condicoes_encontradas' => $_POST['condicoes_encontradas'] ?? '',
-            'proxima_inspecao' => $_POST['proxima_inspecao'] ?? null,
+            'proxima_inspecao' => $proximaInspecao,
         ];
         $this->calendario->atualizarInspecao($id, $dados);
 
