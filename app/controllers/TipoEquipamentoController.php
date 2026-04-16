@@ -99,6 +99,11 @@ class TipoEquipamentoController extends Controller {
             $this->redirect('tipo_equipamento', 'criar');
         }
 
+        if ($this->tipoEquipamento->existeNome($dados['nome'])) {
+            $this->flash('Já existe um tipo de equipamento com esse nome.', 'erro');
+            $this->redirect('tipo_equipamento', 'criar');
+        }
+
         $id = $this->tipoEquipamento->create($dados);
 
         if ($id) {
@@ -147,6 +152,11 @@ class TipoEquipamentoController extends Controller {
 
         if (empty($dados['nome'])) {
             $this->flash('O nome do tipo é obrigatório.', 'erro');
+            $this->redirect('tipo_equipamento', 'editar', ['id' => $id]);
+        }
+
+        if ($this->tipoEquipamento->existeNome($dados['nome'], $id)) {
+            $this->flash('Já existe um tipo de equipamento com esse nome.', 'erro');
             $this->redirect('tipo_equipamento', 'editar', ['id' => $id]);
         }
 

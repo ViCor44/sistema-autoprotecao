@@ -69,13 +69,18 @@ class TipoEquipamento {
      * Criar novo tipo de equipamento
      */
     public function create($dados) {
-        $nome = $this->db->escape($dados['nome'] ?? '');
+        $nomeOriginal = trim((string)($dados['nome'] ?? ''));
+        $nome = $this->db->escape($nomeOriginal);
         $descricao = $this->db->escape($dados['descricao'] ?? '');
         $icone = $this->db->escape($dados['icone'] ?? 'bi-tools');
         $prefixo = $this->db->escape($dados['prefixo_numeracao'] ?? '');
         $frequencia = isset($dados['frequencia_inspecao']) ? (int)$dados['frequencia_inspecao'] : null;
 
-        if (empty($nome)) {
+        if ($nomeOriginal === '') {
+            return false;
+        }
+
+        if ($this->existeNome($nomeOriginal)) {
             return false;
         }
 
@@ -95,13 +100,18 @@ class TipoEquipamento {
      */
     public function update($id, $dados) {
         $id = (int)$id;
-        $nome = $this->db->escape($dados['nome'] ?? '');
+        $nomeOriginal = trim((string)($dados['nome'] ?? ''));
+        $nome = $this->db->escape($nomeOriginal);
         $descricao = $this->db->escape($dados['descricao'] ?? '');
         $icone = $this->db->escape($dados['icone'] ?? 'bi-tools');
         $prefixo = $this->db->escape($dados['prefixo_numeracao'] ?? '');
         $frequencia = isset($dados['frequencia_inspecao']) ? (int)$dados['frequencia_inspecao'] : null;
 
-        if (empty($nome)) {
+        if ($nomeOriginal === '') {
+            return false;
+        }
+
+        if ($this->existeNome($nomeOriginal, $id)) {
             return false;
         }
 
@@ -155,6 +165,23 @@ class TipoEquipamento {
         $resultado = $this->db->query($query);
         $row = $resultado->fetch_assoc();
         return (int)$row['total'];
+    }
+
+    /**
+     * Verificar se já existe tipo com o mesmo nome
+     */
+    public function existeNome($nome, $ignorarId = null) {
+        $nomeEscapado = $this->db->escape(trim((string)$nome));
+        $ignorarId = $ignorarId !== null ? (int)$ignorarId : null;
+
+        $query = "SELECT id FROM {$this->table} WHERE LOWER(nome) = LOWER('{$nomeEscapado}')";
+        if ($ignorarId !== null) {
+            $query .= " AND id <> {$ignorarId}";
+        }
+        $query .= " LIMIT 1";
+
+        $resultado = $this->db->query($query);
+        return $resultado && $resultado->num_rows > 0;
     }
 
     /**
