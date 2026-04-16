@@ -8,6 +8,10 @@ class FPDF {
     private $fontSize = 12;
     private $pageStarted = false;
 
+    public function __construct($orientation = 'P', $unit = 'mm', $size = 'A4') {
+        // Assinatura compatível com FPDF oficial.
+    }
+
     public function AddPage() {
         if ($this->pageStarted) {
             $this->lines[] = '';
@@ -94,7 +98,17 @@ class FPDF {
     private function sanitizeText($txt) {
         $text = (string)$txt;
         $text = str_replace(["\r\n", "\r"], "\n", $text);
-        $text = preg_replace('/[^\x09\x0A\x20-\x7E]/', '?', $text);
+
+        // Se vier em UTF-8, converte para Windows-1252 (WinAnsi), compatível com fontes Type1.
+        if ($this->isUtf8($text)) {
+            $converted = @iconv('UTF-8', 'Windows-1252//TRANSLIT', $text);
+            if ($converted !== false) {
+                $text = $converted;
+            }
+        }
+
+        // Remove apenas control chars inválidos para stream PDF, preservando acentos (0x80-0xFF).
+        $text = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', ' ', $text);
         return trim((string)$text);
     }
 
@@ -187,5 +201,9 @@ class FPDF {
         }
 
         return $name;
+    }
+
+    private function isUtf8($text) {
+        return preg_match('//u', (string)$text) === 1;
     }
 }
