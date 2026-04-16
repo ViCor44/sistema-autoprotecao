@@ -38,6 +38,9 @@ $scriptVersion = file_exists(PUBLIC_PATH . DIRECTORY_SEPARATOR . 'js' . DIRECTOR
                             <a class="nav-link" href="index.php?controler=equipamento&acao=listar"><i class="bi bi-tools"></i> Equipamentos</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="index.php?controler=tipo_equipamento&acao=listar"><i class="bi bi-sliders"></i> Tipos de Equipamentos</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="index.php?controler=relatorio&acao=listar"><i class="bi bi-clipboard-data"></i> Relatórios</a>
                         </li>
                         <li class="nav-item">
