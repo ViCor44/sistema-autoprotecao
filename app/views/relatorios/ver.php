@@ -21,7 +21,7 @@
         <div class="report-brand-banner__icon"><i class="bi bi-shield-lock"></i></div>
         <div>
             <strong><?php echo APP_NAME; ?></strong>
-            <p>Gestão técnica de inspeções e medidas de autoproteção.</p>
+            <p>Gestão técnica de medidas de autoproteção.</p>
         </div>
     </div>
 

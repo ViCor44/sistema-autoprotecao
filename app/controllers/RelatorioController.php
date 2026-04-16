@@ -238,7 +238,7 @@ class RelatorioController extends Controller {
 
         $pdf->SetFont('Arial', '', 6.4);
         $pdf->SetXY(8, 11.2);
-        $pdf->Cell(70, 4, 'Gestão técnica de inspeções e medidas de autoproteção.', 0, 0, 'L');
+        $pdf->Cell(70, 4, 'Gestão técnica de medidas de autoproteção.', 0, 0, 'L');
 
         $pdf->SetFont('Arial', 'B', 11);
         $pdf->SetXY(70, 5);
