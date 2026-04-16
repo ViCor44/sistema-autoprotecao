@@ -13,6 +13,9 @@ $prioridadeClass = 'status-pill--info';
 if ($prioridade === 'alta' || $prioridade === 'urgente') {
     $prioridadeClass = 'status-pill--warning';
 }
+
+$dataAgendadaIso = !empty($agendamento['data_inspecao']) ? date('Y-m-d', strtotime($agendamento['data_inspecao'])) : null;
+$podeExecutarInspecao = !empty($dataAgendadaIso) ? ($dataAgendadaIso <= date('Y-m-d')) : true;
 ?>
 
 <section class="page-shell page-shell--narrow">
@@ -88,9 +91,15 @@ if ($prioridade === 'alta' || $prioridade === 'urgente') {
                     </a>
                 <?php endif; ?>
             <?php elseif (($agendamento['tipo_inspecao'] ?? '') === 'inspecao'): ?>
-                <a href="index.php?controler=inspecao&acao=preencher&id=<?php echo (int)$agendamento['id']; ?>" class="btn btn-warning">
-                    <i class="bi bi-clipboard-check"></i> Registar execucao da inspecao
-                </a>
+                <?php if ($podeExecutarInspecao): ?>
+                    <a href="index.php?controler=inspecao&acao=preencher&id=<?php echo (int)$agendamento['id']; ?>" class="btn btn-warning">
+                        <i class="bi bi-clipboard-check"></i> Registar execucao da inspecao
+                    </a>
+                <?php else: ?>
+                    <a href="#" class="btn btn-secondary disabled" aria-disabled="true" title="Disponível a partir de <?php echo htmlspecialchars(date('d/m/Y', strtotime($agendamento['data_inspecao'])), ENT_QUOTES, 'UTF-8'); ?>">
+                        <i class="bi bi-clipboard-check"></i> Registar execucao da inspecao
+                    </a>
+                <?php endif; ?>
             <?php endif; ?>
 
             <a href="index.php?controler=calendario&acao=calendario&mes=<?php echo (int)$returnMes; ?>&ano=<?php echo (int)$returnAno; ?>" class="btn btn-secondary">
