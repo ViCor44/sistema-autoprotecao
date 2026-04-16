@@ -1052,31 +1052,12 @@ footer {
 
 .calendar-event-pill {
     display: inline-flex;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 7px 10px;
+    align-items: center;
     padding: 7px 10px;
     border-radius: 999px;
     background: rgba(22, 93, 255, 0.1);
     color: #1545b3;
     font-size: 0.78rem;
-    line-height: 1.2;
-}
-
-.calendar-event-pill strong {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 0.76rem;
-}
-
-.calendar-event-pill small {
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    opacity: 0.82;
     font-weight: 700;
 }
 
