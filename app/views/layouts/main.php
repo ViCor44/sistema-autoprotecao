@@ -102,29 +102,9 @@ $scriptVersion = file_exists(PUBLIC_PATH . DIRECTORY_SEPARATOR . 'js' . DIRECTOR
         <?php endif; ?>
     </main>
 
-    <footer class="app-footer mt-5">
-        <div class="container app-footer__inner">
-            <div class="app-footer__brand">
-                <div class="app-footer__logo"><i class="bi bi-shield-lock"></i></div>
-                <div>
-                    <strong><?php echo APP_NAME; ?></strong>
-                    <p>Gestão técnica de medidas de autoproteção.</p>
-                </div>
-            </div>
-
-            <div class="app-footer__links">
-                <a href="index.php">Início</a>
-                <a href="index.php?controler=calendario&acao=calendario">Calendário</a>
-                <a href="index.php?controler=relatorio&acao=listar">Relatórios</a>
-                <?php if (isset($_SESSION['utilizador_id'])): ?>
-                    <a href="index.php?controler=perfil&acao=editar">Meu perfil</a>
-                <?php else: ?>
-                    <a href="index.php?controler=home&acao=login">Entrar</a>
-                <?php endif; ?>
-            </div>
-        </div>
+    <footer class="app-footer app-footer--minimal mt-5">
         <div class="app-footer__bottom">
-            <div class="container">
+            <div class="container text-center">
                 <span>&copy; <?php echo date('Y'); ?> <?php echo APP_NAME; ?>. Todos os direitos reservados.</span>
             </div>
         </div>

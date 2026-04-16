@@ -301,6 +301,12 @@ h2 {
     font-size: 0.84rem;
 }
 
+.app-footer--minimal .app-footer__bottom {
+    border-top: none;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
 .report-brand-banner {
     display: flex;
     align-items: flex-start;
