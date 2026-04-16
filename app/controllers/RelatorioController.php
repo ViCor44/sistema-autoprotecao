@@ -213,7 +213,9 @@ class RelatorioController extends Controller {
         $numeroDocumento = 'REL-' . str_pad((string)$relatorio['id'], 4, '0', STR_PAD_LEFT);
         $tecnico         = $relatorio['responsavel_nome'] ?: '-';
         $dataDocumento   = date('d/m/Y', strtotime($relatorio['data_relatorio']));
-        $ambito          = !empty($relatorio['localizacao']) ? $relatorio['localizacao'] : '-';
+        $ambito          = !empty($relatorio['localizacao'])
+            ? $relatorio['localizacao']
+            : (!empty($relatorio['equipamento_id']) ? '-' : 'Todos os equipamentos do tipo');
         $proximaInsp     = (!empty($relatorio['proxima_inspecao']) && $relatorio['proxima_inspecao'] !== '0000-00-00')
             ? date('d/m/Y', strtotime($relatorio['proxima_inspecao']))
             : '-';

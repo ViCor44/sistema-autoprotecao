@@ -108,7 +108,9 @@ class InspecaoController extends Controller {
         $numero  = 'INS-' . str_pad((string)$relatorio['id'], 4, '0', STR_PAD_LEFT);
         $tecnico = $relatorio['responsavel_nome'] ?: '-';
         $data    = date('d/m/Y', strtotime($relatorio['data_relatorio']));
-        $ambito  = !empty($relatorio['localizacao']) ? $relatorio['localizacao'] : '-';
+        $ambito  = !empty($relatorio['localizacao'])
+            ? $relatorio['localizacao']
+            : (!empty($relatorio['equipamento_id']) ? '-' : 'Todos os equipamentos do tipo');
 
         // ── Cabeçalho ─────────────────────────────────────────────────────────
         $pdf->SetFillColor(26, 58, 92);
