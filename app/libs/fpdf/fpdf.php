@@ -341,7 +341,7 @@ class FPDF {
 
         $fontObjectId = 3;
         foreach ($fontMap as $fontName) {
-            $objects[] = $fontObjectId . " 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /{$fontName} >>\nendobj\n";
+            $objects[] = $fontObjectId . " 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /{$fontName} /Encoding /WinAnsiEncoding >>\nendobj\n";
             $fontObjectId++;
         }
 
