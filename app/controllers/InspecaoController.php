@@ -63,21 +63,40 @@ class InspecaoController extends Controller {
             $this->redirect('inspecao', 'listar');
         }
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
-        $pdf = new FPDF();
+        $pdf = new FPDF('P', 'mm', 'A5');
         $pdf->AddPage();
-        $pdf->SetFont('Arial','B',16);
-        $pdf->Cell(0,10,'Relatório de Inspeção',0,1,'C');
-        $pdf->SetFont('Arial','',12);
-        $pdf->Ln(5);
+        $pdf->SetFont('Arial','B',14);
+        $pdf->Cell(0,8,'Relatório de Inspeção',0,1,'C');
+        $pdf->SetFont('Arial','',10);
+        $pdf->Cell(0,6,APP_NAME,0,1,'C');
+        $pdf->Cell(0,6,'Data de emissão: ' . date('d/m/Y H:i'),0,1,'C');
+
+        $pdf->Ln(2);
+        $pdf->Cell(0,6,str_repeat('-', 60),0,1);
+
         $ambito = !empty($relatorio['localizacao']) ? $relatorio['localizacao'] : 'Todos os equipamentos do tipo';
-        $pdf->Cell(0,10,utf8_decode('Equipamento: ' . $relatorio['tipo_equipamento'] . ' (' . $ambito . ')'),0,1);
-        $pdf->Cell(0,10,'Data: ' . date('d/m/Y', strtotime($relatorio['data_relatorio'])),0,1);
-        $pdf->Cell(0,10,utf8_decode('Responsável: ' . $relatorio['responsavel_nome']),0,1);
-        $pdf->Cell(0,10,utf8_decode('Condição: ' . ucfirst($relatorio['condicoes_encontradas'] ?: '-')),0,1);
-        $pdf->Ln(5);
-        $pdf->MultiCell(0,8,utf8_decode('Descrição: ' . ($relatorio['descricao'] ?: '-')));
-        $pdf->Ln(5);
-        $pdf->MultiCell(0,8,utf8_decode('Observações: ' . ($relatorio['observacoes'] ?: '-')));
+        $pdf->SetFont('Arial','B',11);
+        $pdf->Cell(0,7,'Informações do Relatório',0,1);
+        $pdf->SetFont('Arial','',10);
+        $pdf->Cell(0,6,'Equipamento: ' . $relatorio['tipo_equipamento'] . ' (' . $ambito . ')',0,1);
+        $pdf->Cell(0,6,'Data: ' . date('d/m/Y', strtotime($relatorio['data_relatorio'])),0,1);
+        $pdf->Cell(0,6,'Responsável: ' . ($relatorio['responsavel_nome'] ?: '-'),0,1);
+        $pdf->Cell(0,6,'Condição: ' . ucfirst((string)($relatorio['condicoes_encontradas'] ?: '-')),0,1);
+
+        $pdf->Ln(2);
+        $pdf->Cell(0,6,str_repeat('-', 60),0,1);
+        $pdf->SetFont('Arial','B',11);
+        $pdf->Cell(0,7,'Descrição e Observações',0,1);
+        $pdf->SetFont('Arial','',10);
+        $pdf->MultiCell(0,6,'Descrição: ' . ($relatorio['descricao'] ?: '-'));
+        $pdf->Ln(1);
+        $pdf->MultiCell(0,6,'Observações: ' . ($relatorio['observacoes'] ?: '-'));
+
+        $pdf->Ln(2);
+        $pdf->Cell(0,6,str_repeat('-', 60),0,1);
+        $pdf->SetFont('Arial','',9);
+        $pdf->Cell(0,5,'Documento gerado automaticamente por ' . APP_NAME,0,1,'C');
+
         $pdf->Output('I', 'relatorio_inspecao_'.$id.'.pdf');
         exit;
     }

@@ -164,39 +164,61 @@ class RelatorioController extends Controller {
             $this->redirect('relatorio', 'listar');
         }
         $itens = $this->relatorio->getItensRelatorio($id);
-        // Geração simples de PDF (exemplo com FPDF)
+
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
-        $pdf = new FPDF();
+        $pdf = new FPDF('P', 'mm', 'A5');
         $pdf->AddPage();
-        $pdf->SetFont('Arial','B',16);
-        $pdf->Cell(0,10,'Relatório de Inspeção',0,1,'C');
-        $pdf->SetFont('Arial','',12);
-        $pdf->Ln(5);
+        $pdf->SetFont('Arial','B',14);
+        $pdf->Cell(0,8,'Relatório de Inspeção',0,1,'C');
+        $pdf->SetFont('Arial','',10);
+        $pdf->Cell(0,6,APP_NAME,0,1,'C');
+        $pdf->Cell(0,6,'Data de emissão: ' . date('d/m/Y H:i'),0,1,'C');
+
+        $pdf->Ln(2);
+        $pdf->Cell(0,6,str_repeat('-', 60),0,1);
+
         $ambito = !empty($relatorio['localizacao']) ? $relatorio['localizacao'] : 'Todos os equipamentos do tipo';
-        $pdf->Cell(0,10,utf8_decode('Equipamento: ' . $relatorio['tipo_equipamento'] . ' (' . $ambito . ')'),0,1);
-        $pdf->Cell(0,10,'Data: ' . date('d/m/Y', strtotime($relatorio['data_relatorio'])),0,1);
-        $pdf->Cell(0,10,utf8_decode('Responsável: ' . $relatorio['responsavel_nome']),0,1);
-        $pdf->Cell(0,10,utf8_decode('Condição: ' . ucfirst($relatorio['condicoes_encontradas'] ?: '-')),0,1);
-        $pdf->Ln(5);
-        $pdf->MultiCell(0,8,utf8_decode('Descrição: ' . ($relatorio['descricao'] ?: '-')));
-        $pdf->Ln(5);
-        $pdf->MultiCell(0,8,utf8_decode('Observações: ' . ($relatorio['observacoes'] ?: '-')));
+        $pdf->SetFont('Arial','B',11);
+        $pdf->Cell(0,7,'Informações do Relatório',0,1);
+        $pdf->SetFont('Arial','',10);
+        $pdf->Cell(0,6,'Equipamento: ' . $relatorio['tipo_equipamento'] . ' (' . $ambito . ')',0,1);
+        $pdf->Cell(0,6,'Data: ' . date('d/m/Y', strtotime($relatorio['data_relatorio'])),0,1);
+        $pdf->Cell(0,6,'Tipo: ' . ucfirst((string)$relatorio['tipo_relatorio']),0,1);
+        $pdf->Cell(0,6,'Responsável: ' . ($relatorio['responsavel_nome'] ?: '-'),0,1);
+        $pdf->Cell(0,6,'Condição: ' . ucfirst((string)($relatorio['condicoes_encontradas'] ?: '-')),0,1);
+        $pdf->Cell(0,6,'Estado: ' . ($relatorio['assinado'] ? 'Assinado' : 'Pendente de assinatura'),0,1);
+        $pdf->Cell(0,6,'Próxima inspeção: ' . (!empty($relatorio['proxima_inspecao']) ? date('d/m/Y', strtotime($relatorio['proxima_inspecao'])) : '-'),0,1);
+
+        $pdf->Ln(2);
+        $pdf->Cell(0,6,str_repeat('-', 60),0,1);
+        $pdf->SetFont('Arial','B',11);
+        $pdf->Cell(0,7,'Descrição e Observações',0,1);
+        $pdf->SetFont('Arial','',10);
+        $pdf->MultiCell(0,6,'Descrição: ' . ($relatorio['descricao'] ?: '-'));
+        $pdf->Ln(1);
+        $pdf->MultiCell(0,6,'Observações: ' . ($relatorio['observacoes'] ?: '-'));
 
         if (!empty($itens)) {
-            $pdf->Ln(5);
-            $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(0, 10, utf8_decode('Itens de Verificação'), 0, 1);
-            $pdf->SetFont('Arial', '', 11);
+            $pdf->Ln(2);
+            $pdf->Cell(0,6,str_repeat('-', 60),0,1);
+            $pdf->SetFont('Arial', 'B', 11);
+            $pdf->Cell(0, 7, 'Itens de Verificação', 0, 1);
+            $pdf->SetFont('Arial', '', 10);
             foreach ($itens as $item) {
-                $linha = sprintf(
-                    '%s | %s | %s',
-                    $item['descricao_verificacao'],
-                    strtoupper((string)$item['resultado']),
-                    $item['observacao'] ?: '-'
-                );
-                $pdf->MultiCell(0, 7, utf8_decode($linha));
+                $linha1 = '- Verificação: ' . ($item['descricao_verificacao'] ?: '-');
+                $linha2 = '  Resultado: ' . ucfirst((string)($item['resultado'] ?: '-'));
+                $linha3 = '  Observação: ' . ($item['observacao'] ?: '-');
+                $pdf->MultiCell(0, 6, $linha1);
+                $pdf->MultiCell(0, 6, $linha2);
+                $pdf->MultiCell(0, 6, $linha3);
+                $pdf->Ln(1);
             }
         }
+
+        $pdf->Ln(2);
+        $pdf->Cell(0,6,str_repeat('-', 60),0,1);
+        $pdf->SetFont('Arial','',9);
+        $pdf->Cell(0,5,'Documento gerado automaticamente por ' . APP_NAME,0,1,'C');
 
         $pdf->Output('I', 'relatorio_inspecao_'.$id.'.pdf');
         exit;
