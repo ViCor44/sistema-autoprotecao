@@ -108,7 +108,30 @@ $mostrarAtual = $mostrar ?? 'todos';
                             </div>
                         </div>
 
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+                        <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                            <div style="display: flex; gap: 6px;">
+                                <a href="index.php?controler=tipo_equipamento&acao=editar&id=<?php echo (int)$tipo['id']; ?>" 
+                                   class="btn btn-sm" style="background: #0066cc; color: white; padding: 6px 10px; border-radius: 4px; text-decoration: none; font-size: 12px;">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </a>
+                                <a href="index.php?controler=tipo_equipamento&acao=ver&id=<?php echo (int)$tipo['id']; ?>" 
+                                   class="btn btn-sm" style="background: #6c757d; color: white; padding: 6px 10px; border-radius: 4px; text-decoration: none; font-size: 12px;">
+                                    <i class="bi bi-eye"></i> Ver
+                                </a>
+                                <a href="index.php?controler=tipo_equipamento&acao=toggleAtivo&id=<?php echo (int)$tipo['id']; ?>" 
+                                   class="btn btn-sm" style="background: <?php echo $tipo['ativo'] ? '#ffc107' : '#28a745'; ?>; color: <?php echo $tipo['ativo'] ? '#000' : 'white'; ?>; padding: 6px 10px; border-radius: 4px; text-decoration: none; font-size: 12px;"
+                                   onclick="return confirm('Tem a certeza que deseja <?php echo $tipo['ativo'] ? 'inativar' : 'ativar'; ?> este tipo?');">
+                                    <i class="bi <?php echo $tipo['ativo'] ? 'bi-pause-circle' : 'bi-play-circle'; ?>"></i> <?php echo $tipo['ativo'] ? 'Inativar' : 'Ativar'; ?>
+                                </a>
+                                <?php if ((int)$tipo['total_equipamentos'] === 0): ?>
+                                    <a href="index.php?controler=tipo_equipamento&acao=deletar&id=<?php echo (int)$tipo['id']; ?>" 
+                                       class="btn btn-sm" style="background: #dc3545; color: white; padding: 6px 10px; border-radius: 4px; text-decoration: none; font-size: 12px;"
+                                       onclick="return confirm('Tem a certeza que deseja deletar este tipo? Esta ação não pode ser desfeita.');">
+                                        <i class="bi bi-trash"></i> Deletar
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                            
                             <?php if ($tipo['ativo']): ?>
                                 <span class="badge" style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                                     <i class="bi bi-check-circle"></i> Ativo
