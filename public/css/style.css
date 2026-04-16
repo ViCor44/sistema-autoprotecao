@@ -664,6 +664,28 @@ h2 {
     color: var(--text-soft);
 }
 
+.dashboard-list__meta {
+    display: grid;
+    justify-items: end;
+    gap: 8px;
+}
+
+.dashboard-done {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(22, 163, 74, 0.12);
+    color: #15803d;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.dashboard-done i {
+    font-size: 0.82rem;
+}
+
 .dashboard-chip {
     display: inline-flex;
     align-items: center;

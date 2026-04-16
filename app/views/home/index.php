@@ -108,7 +108,12 @@ $estadoClasse = $totalVencidas > 0 ? 'is-critical' : ($totalProximas > 0 ? 'is-w
                                 <h3><?php echo htmlspecialchars($manutencao['localizacao'] ?: $manutencao['tipo_equipamento']); ?></h3>
                                 <p><?php echo htmlspecialchars($manutencao['tipo_equipamento']); ?></p>
                             </div>
-                            <span class="dashboard-chip"><?php echo ucfirst($manutencao['tipo_inspecao']); ?></span>
+                            <div class="dashboard-list__meta">
+                                <?php if (in_array(($manutencao['status'] ?? ''), ['concluido', 'concluida'], true)): ?>
+                                    <span class="dashboard-done"><i class="bi bi-check-circle-fill"></i> Concluída</span>
+                                <?php endif; ?>
+                                <span class="dashboard-chip"><?php echo ucfirst($manutencao['tipo_inspecao']); ?></span>
+                            </div>
                         </article>
                     <?php endforeach; ?>
                 </div>
