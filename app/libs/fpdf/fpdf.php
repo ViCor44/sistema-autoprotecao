@@ -20,6 +20,8 @@ class FPDF {
     private $fontKey = 'F1';
 
     private $drawColor = [0, 0, 0];
+    private $fillColor = [255, 255, 255];
+    private $textColor = [0, 0, 0];
     private $lineWidthMm = 0.2;
 
     private $pages = [];
@@ -74,6 +76,16 @@ class FPDF {
             $b = $r;
         }
         $this->drawColor = [(int)$r, (int)$g, (int)$b];
+    }
+
+    public function SetFillColor($r, $g = null, $b = null) {
+        if ($g === null || $b === null) { $g = $r; $b = $r; }
+        $this->fillColor = [(int)$r, (int)$g, (int)$b];
+    }
+
+    public function SetTextColor($r, $g = null, $b = null) {
+        if ($g === null || $b === null) { $g = $r; $b = $r; }
+        $this->textColor = [(int)$r, (int)$g, (int)$b];
     }
 
     public function SetLineWidth($width) {
@@ -188,10 +200,21 @@ class FPDF {
         ));
     }
 
-    public function Rect($x, $y, $w, $h) {
+    public function Rect($x, $y, $w, $h, $style = 'S') {
         $this->assertPage();
+        $style = strtoupper((string)$style);
+        if ($style === 'F') {
+            $op = 'f';
+        } elseif ($style === 'FD' || $style === 'DF') {
+            $op = 'B';
+        } else {
+            $op = 'S';
+        }
         $this->addRaw(sprintf(
-            '%.3F %.3F %.3F RG %.3F w %.3F %.3F %.3F %.3F re S',
+            '%.3F %.3F %.3F rg %.3F %.3F %.3F RG %.3F w %.3F %.3F %.3F %.3F re %s',
+            $this->fillColor[0] / 255,
+            $this->fillColor[1] / 255,
+            $this->fillColor[2] / 255,
             $this->drawColor[0] / 255,
             $this->drawColor[1] / 255,
             $this->drawColor[2] / 255,
@@ -199,7 +222,8 @@ class FPDF {
             $x * $this->k,
             ($this->pageHeightMm - $y - $h) * $this->k,
             $w * $this->k,
-            $h * $this->k
+            $h * $this->k,
+            $op
         ));
     }
 
@@ -222,7 +246,10 @@ class FPDF {
         $yPt = ($this->pageHeightMm - $yMm) * $this->k;
 
         $this->addRaw(sprintf(
-            'BT /%s %.3F Tf 1 0 0 1 %.3F %.3F Tm (%s) Tj ET',
+            '%.3F %.3F %.3F rg BT /%s %.3F Tf 1 0 0 1 %.3F %.3F Tm (%s) Tj ET 0 0 0 rg',
+            $this->textColor[0] / 255,
+            $this->textColor[1] / 255,
+            $this->textColor[2] / 255,
             $this->fontKey,
             $this->fontSizePt,
             $xPt,

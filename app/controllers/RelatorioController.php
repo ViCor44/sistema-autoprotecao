@@ -168,103 +168,223 @@ class RelatorioController extends Controller {
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
         $pdf = new FPDF('P', 'mm', 'A5');
         $pdf->AddPage();
-        $this->desenharCabecalhoPdf($pdf, 'Relatório de Inspeção');
 
-        $ambito = !empty($relatorio['localizacao']) ? $relatorio['localizacao'] : 'Todos os equipamentos do tipo';
-        $numeroDocumento = str_pad((string)$relatorio['id'], 4, '0', STR_PAD_LEFT);
-        $tecnico = $relatorio['responsavel_nome'] ?: '-';
-        $dataDocumento = date('d/m/Y', strtotime($relatorio['data_relatorio']));
+        $numeroDocumento = 'REL-' . str_pad((string)$relatorio['id'], 4, '0', STR_PAD_LEFT);
+        $tecnico         = $relatorio['responsavel_nome'] ?: '-';
+        $dataDocumento   = date('d/m/Y', strtotime($relatorio['data_relatorio']));
+        $ambito          = !empty($relatorio['localizacao']) ? $relatorio['localizacao'] : '-';
+        $proximaInsp     = !empty($relatorio['proxima_inspecao']) ? date('d/m/Y', strtotime($relatorio['proxima_inspecao'])) : '-';
 
-        $this->desenharLinhaMeta($pdf, $numeroDocumento, $tecnico, $dataDocumento);
+        // ── Cabeçalho ────────────────────────────────────────────────────────
+        // Faixa azul-escura
+        $pdf->SetFillColor(26, 58, 92);
+        $pdf->SetDrawColor(26, 58, 92);
+        $pdf->SetLineWidth(0.2);
+        $pdf->Rect(0, 0, 148, 22, 'F');
 
-        $detalhes = [];
-        $detalhes[] = 'Equipamento: ' . ($relatorio['tipo_equipamento'] ?: '-') . ' (' . $ambito . ')';
-        $detalhes[] = 'Tipo: ' . ucfirst((string)($relatorio['tipo_relatorio'] ?: '-'));
-        $detalhes[] = 'Condição: ' . ucfirst((string)($relatorio['condicoes_encontradas'] ?: '-'));
-        $detalhes[] = 'Estado: ' . ($relatorio['assinado'] ? 'Assinado' : 'Pendente de assinatura');
-        $detalhes[] = 'Próxima inspeção: ' . (!empty($relatorio['proxima_inspecao']) ? date('d/m/Y', strtotime($relatorio['proxima_inspecao'])) : '-');
-        $detalhes[] = '';
-        $detalhes[] = 'Descrição:';
-        $detalhes[] = $relatorio['descricao'] ?: '-';
-        $detalhes[] = '';
-        $detalhes[] = 'Observações:';
-        $detalhes[] = $relatorio['observacoes'] ?: '-';
+        // Listra laranja de destaque
+        $pdf->SetFillColor(220, 100, 20);
+        $pdf->Rect(0, 22, 148, 1.5, 'F');
 
+        // Texto do cabeçalho (branco)
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetFont('Arial', 'B', 13);
+        $pdf->SetXY(8, 5);
+        $pdf->Cell(70, 8, APP_NAME, 0, 0, 'L');
+
+        $pdf->SetFont('Arial', 'B', 11);
+        $pdf->SetXY(70, 5);
+        $pdf->Cell(70, 8, 'Relatório de Inspeção', 0, 0, 'R');
+
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->SetXY(8, 14);
+        $pdf->Cell(132, 5, 'Documento nº ' . $numeroDocumento . '   |   Gerado em ' . date('d/m/Y H:i'), 0, 0, 'L');
+
+        // ── Meta: Técnico / Data ──────────────────────────────────────────────
+        $metaY = 28;
+
+        // Box Técnico
+        $pdf->SetFillColor(235, 239, 245);
+        $pdf->SetDrawColor(180, 190, 205);
+        $pdf->SetLineWidth(0.3);
+        $pdf->Rect(8, $metaY, 88, 14, 'FD');
+        $pdf->SetFillColor(43, 87, 151);
+        $pdf->Rect(8, $metaY, 88, 5.5, 'F');
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->SetXY(9, $metaY + 0.5);
+        $pdf->Cell(86, 5, 'TÉCNICO RESPONSÁVEL', 0, 0, 'L');
+        $pdf->SetTextColor(30, 30, 30);
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->SetXY(9, $metaY + 6.5);
+        $pdf->Cell(86, 6, $tecnico, 0, 0, 'L');
+
+        // Box Data
+        $pdf->SetFillColor(235, 239, 245);
+        $pdf->SetDrawColor(180, 190, 205);
+        $pdf->Rect(100, $metaY, 40, 14, 'FD');
+        $pdf->SetFillColor(43, 87, 151);
+        $pdf->Rect(100, $metaY, 40, 5.5, 'F');
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetFont('Arial', 'B', 7);
+        $pdf->SetXY(101, $metaY + 0.5);
+        $pdf->Cell(38, 5, 'DATA DO RELATÓRIO', 0, 0, 'L');
+        $pdf->SetTextColor(30, 30, 30);
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->SetXY(101, $metaY + 6.5);
+        $pdf->Cell(38, 6, $dataDocumento, 0, 0, 'L');
+
+        // ── Secção: Informação Geral ─────────────────────────────────────────
+        $pdf->SetDrawColor(200, 205, 215);
+        $pdf->SetLineWidth(0.2);
+        $y = 48;
+
+        $this->pdfSeccao($pdf, $y, 'INFORMAÇÃO GERAL');
+        $y += 7;
+
+        $campos = [
+            ['Equipamento',    $relatorio['tipo_equipamento'] ?: '-'],
+            ['Âmbito',         $ambito],
+            ['Tipo de Relatório', ucfirst((string)($relatorio['tipo_relatorio'] ?: '-'))],
+            ['Condições Encontradas', ucfirst((string)($relatorio['condicoes_encontradas'] ?: '-'))],
+            ['Próxima Inspeção', $proximaInsp],
+            ['Estado', $relatorio['assinado'] ? 'Assinado' : 'Pendente de assinatura'],
+        ];
+
+        $altRow = false;
+        foreach ($campos as $campo) {
+            $pdf->SetFillColor($altRow ? 245 : 255, $altRow ? 247 : 255, $altRow ? 250 : 255);
+            $pdf->SetDrawColor(220, 225, 235);
+            $pdf->Rect(8, $y, 132, 7, 'FD');
+            $pdf->SetTextColor(90, 100, 120);
+            $pdf->SetFont('Arial', 'B', 7.5);
+            $pdf->SetXY(10, $y + 1.2);
+            $pdf->Cell(40, 5, $campo[0] . ':', 0, 0, 'L');
+            $pdf->SetTextColor(20, 20, 20);
+            $pdf->SetFont('Arial', '', 9);
+            $pdf->SetXY(52, $y + 1.2);
+            $pdf->Cell(86, 5, $campo[1], 0, 0, 'L');
+            $y += 7;
+            $altRow = !$altRow;
+        }
+
+        // ── Secção: Descrição ────────────────────────────────────────────────
+        if (!empty($relatorio['descricao'])) {
+            $y += 3;
+            $this->pdfSeccao($pdf, $y, 'DESCRIÇÃO');
+            $y += 7;
+            $pdf->SetFillColor(250, 251, 253);
+            $pdf->SetDrawColor(210, 215, 225);
+            $pdf->Rect(8, $y, 132, 0.3, 'F');
+            $pdf->SetTextColor(30, 30, 30);
+            $pdf->SetFont('Arial', '', 9);
+            $pdf->SetXY(10, $y + 1);
+            $pdf->MultiCell(128, 5, $relatorio['descricao']);
+            $y = $pdf->GetY() + 2;
+        }
+
+        // ── Secção: Observações ───────────────────────────────────────────────
+        if (!empty($relatorio['observacoes'])) {
+            $this->pdfSeccao($pdf, $y, 'OBSERVAÇÕES');
+            $y += 7;
+            $pdf->SetTextColor(30, 30, 30);
+            $pdf->SetFont('Arial', '', 9);
+            $pdf->SetXY(10, $y + 1);
+            $pdf->MultiCell(128, 5, $relatorio['observacoes']);
+            $y = $pdf->GetY() + 2;
+        }
+
+        // ── Secção: Itens de Verificação ──────────────────────────────────────
         if (!empty($itens)) {
-            $detalhes[] = '';
-            $detalhes[] = 'Itens de verificação:';
+            $this->pdfSeccao($pdf, $y, 'ITENS DE VERIFICAÇÃO');
+            $y += 7;
+
+            // Cabeçalho da tabela
+            $pdf->SetFillColor(210, 218, 232);
+            $pdf->SetDrawColor(180, 190, 205);
+            $pdf->SetLineWidth(0.2);
+            $pdf->Rect(8, $y, 100, 6, 'FD');
+            $pdf->Rect(108, $y, 32, 6, 'FD');
+            $pdf->SetTextColor(30, 50, 80);
+            $pdf->SetFont('Arial', 'B', 8);
+            $pdf->SetXY(10, $y + 1);
+            $pdf->Cell(98, 5, 'Verificação', 0, 0, 'L');
+            $pdf->SetXY(109, $y + 1);
+            $pdf->Cell(30, 5, 'Resultado', 0, 0, 'L');
+            $y += 6;
+
+            $altRow = false;
             foreach ($itens as $item) {
-                $detalhes[] = '- ' . ($item['descricao_verificacao'] ?: '-') . ' | Resultado: ' . ucfirst((string)($item['resultado'] ?: '-'));
+                $rowH = empty($item['observacao']) ? 7 : 11;
+                $pdf->SetFillColor($altRow ? 244 : 255, $altRow ? 247 : 255, $altRow ? 252 : 255);
+                $pdf->SetDrawColor(220, 225, 235);
+                $pdf->Rect(8, $y, 100, $rowH, 'FD');
+                $pdf->Rect(108, $y, 32, $rowH, 'FD');
+
+                $pdf->SetTextColor(20, 20, 20);
+                $pdf->SetFont('Arial', '', 8.5);
+                $pdf->SetXY(10, $y + 1.5);
+                $pdf->Cell(96, 5, $item['descricao_verificacao'] ?: '-', 0, 0, 'L');
                 if (!empty($item['observacao'])) {
-                    $detalhes[] = '  Obs: ' . $item['observacao'];
+                    $pdf->SetTextColor(90, 100, 115);
+                    $pdf->SetFont('Arial', '', 7.5);
+                    $pdf->SetXY(10, $y + 6);
+                    $pdf->Cell(96, 4, 'Obs: ' . $item['observacao'], 0, 0, 'L');
                 }
+
+                $resultado = strtolower((string)($item['resultado'] ?: ''));
+                if ($resultado === 'conforme') {
+                    $pdf->SetTextColor(0, 130, 60);
+                } elseif ($resultado === 'não conforme' || $resultado === 'nao conforme') {
+                    $pdf->SetTextColor(180, 30, 30);
+                } else {
+                    $pdf->SetTextColor(100, 100, 100);
+                }
+                $pdf->SetFont('Arial', 'B', 8.5);
+                $pdf->SetXY(109, $y + 1.5);
+                $pdf->Cell(30, 5, ucfirst($item['resultado'] ?: '-'), 0, 0, 'L');
+
+                $y += $rowH;
+                $altRow = !$altRow;
             }
         }
 
-        $this->desenharBlocoDetalhes($pdf, implode("\n", $detalhes));
+        // ── Assinatura ────────────────────────────────────────────────────────
+        $y += 8;
+        $pdf->SetDrawColor(160, 170, 185);
+        $pdf->SetLineWidth(0.4);
+        $pdf->Line(8, $y, 80, $y);
+        $pdf->Line(90, $y, 140, $y);
+        $pdf->SetTextColor(120, 120, 130);
+        $pdf->SetFont('Arial', '', 7.5);
+        $pdf->SetXY(8, $y + 1.5);
+        $pdf->Cell(72, 4, 'Assinatura do Responsável', 0, 0, 'C');
+        $pdf->SetXY(90, $y + 1.5);
+        $pdf->Cell(50, 4, 'Data', 0, 0, 'C');
 
-        $pdf->SetFont('Arial', '', 8);
-        $pdf->SetXY(10, 201);
-        $pdf->Cell(128, 5, 'Documento gerado automaticamente por ' . APP_NAME, 0, 1, 'C');
+        // ── Rodapé ────────────────────────────────────────────────────────────
+        $footerY = 202;
+        $pdf->SetFillColor(26, 58, 92);
+        $pdf->Rect(0, $footerY, 148, 8, 'F');
+        $pdf->SetTextColor(200, 210, 225);
+        $pdf->SetFont('Arial', '', 7);
+        $pdf->SetXY(0, $footerY + 1.5);
+        $pdf->Cell(148, 5, APP_NAME . ' — Documento gerado automaticamente em ' . date('d/m/Y H:i'), 0, 0, 'C');
 
-        $pdf->Output('I', 'relatorio_inspecao_'.$id.'.pdf');
+        $pdf->Output('I', 'relatorio_' . $id . '.pdf');
         exit;
     }
 
-    private function desenharCabecalhoPdf(FPDF $pdf, $titulo) {
-        $pdf->SetDrawColor(70, 70, 70);
-        $pdf->SetLineWidth(0.25);
-
-        $pdf->SetFont('Arial', 'B', 12);
-        $pdf->SetXY(10, 10);
-        $pdf->Cell(52, 8, APP_NAME, 0, 0, 'L');
-
-        $pdf->SetFont('Arial', 'B', 16);
-        $pdf->SetXY(70, 9);
-        $pdf->Cell(68, 10, $titulo, 0, 1, 'R');
-
-        $pdf->Line(10, 20, 138, 20);
-    }
-
-    private function desenharLinhaMeta(FPDF $pdf, $numero, $tecnico, $data) {
-        $y = 26;
-
-        $pdf->SetFont('Arial', '', 11);
-        $pdf->SetXY(12, $y + 4);
-        $pdf->Cell(8, 6, 'Nº:', 0, 0, 'L');
-        $pdf->Rect(22, $y + 2, 18, 10);
-        $pdf->SetXY(22, $y + 4);
-        $pdf->Cell(18, 6, $numero, 0, 0, 'C');
-
-        $pdf->SetXY(44, $y + 4);
-        $pdf->Cell(22, 6, 'Técnico:', 0, 0, 'L');
-        $pdf->Rect(66, $y + 2, 44, 10);
-        $pdf->SetXY(66, $y + 4);
-        $pdf->Cell(44, 6, $tecnico, 0, 0, 'C');
-
-        $pdf->SetXY(112, $y + 4);
-        $pdf->Cell(10, 6, 'Data:', 0, 0, 'L');
-        $pdf->Rect(122, $y + 2, 16, 10);
-        $pdf->SetXY(122, $y + 4);
-        $pdf->Cell(16, 6, $data, 0, 1, 'C');
-
-        $pdf->Line(10, 40, 138, 40);
-    }
-
-    private function desenharBlocoDetalhes(FPDF $pdf, $conteudo) {
-        $pdf->SetFont('Arial', '', 12);
-        $pdf->SetXY(10, 45);
-        $pdf->Cell(40, 6, 'Detalhes:', 0, 1, 'L');
-
-        $boxX = 13;
-        $boxY = 52;
-        $boxW = 122;
-        $boxH = 142;
-
-        $pdf->Rect($boxX, $boxY, $boxW, $boxH);
-
-        $pdf->SetFont('Arial', '', 10);
-        $pdf->SetXY($boxX + 2, $boxY + 3);
-        $pdf->MultiCell($boxW - 4, 5, $conteudo);
+    /**
+     * Desenha uma faixa de secção com título
+     */
+    private function pdfSeccao(FPDF $pdf, $y, $titulo) {
+        $pdf->SetFillColor(43, 87, 151);
+        $pdf->SetDrawColor(43, 87, 151);
+        $pdf->Rect(8, $y, 132, 6.5, 'F');
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetFont('Arial', 'B', 8.5);
+        $pdf->SetXY(10, $y + 0.8);
+        $pdf->Cell(128, 5.5, $titulo, 0, 0, 'L');
     }
 }
