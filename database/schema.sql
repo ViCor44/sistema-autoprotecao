@@ -19,10 +19,15 @@ CREATE TABLE IF NOT EXISTS utilizadores (
     senha VARCHAR(255) NOT NULL,
     funcao VARCHAR(50),
     ativo BOOLEAN DEFAULT TRUE,
+    aprovado BOOLEAN DEFAULT FALSE,
+    aprovado_por INT NULL,
+    data_aprovacao TIMESTAMP NULL,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (aprovado_por) REFERENCES utilizadores(id),
     INDEX idx_email (email),
-    INDEX idx_ativo (ativo)
+    INDEX idx_ativo (ativo),
+    INDEX idx_aprovado (aprovado)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ========================================
@@ -214,8 +219,8 @@ INSERT INTO tipos_equipamentos_campos (tipo_equipamento_id, nome_campo, slug, ti
 -- ========================================
 -- Dados de exemplo - Utilizador Administrador
 -- ========================================
-INSERT INTO utilizadores (nome, email, senha, funcao) VALUES
-    ('Administrador', 'admin@autoprotecao.com', '$2y$10$SomeHashedPasswordHere', 'administrador');
+INSERT INTO utilizadores (nome, email, senha, funcao, ativo, aprovado, data_aprovacao) VALUES
+    ('Administrador', 'admin@autoprotecao.com', '$2y$10$SomeHashedPasswordHere', 'administrador', TRUE, TRUE, NOW());
 
 -- Commit das alterações
 COMMIT;

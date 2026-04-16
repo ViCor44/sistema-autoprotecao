@@ -46,6 +46,8 @@ class Application {
         $publicRoutes = [
             'HomeController@login',
             'HomeController@autenticar',
+            'HomeController@registo',
+            'HomeController@registar',
             'HomeController@erro',
         ];
 
@@ -58,7 +60,7 @@ class Application {
             exit;
         }
 
-        if (isset($_SESSION['utilizador_id']) && $signature === 'HomeController@login') {
+        if (isset($_SESSION['utilizador_id']) && in_array($signature, ['HomeController@login', 'HomeController@registo'], true)) {
             header('Location: index.php');
             exit;
         }

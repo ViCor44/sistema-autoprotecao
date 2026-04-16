@@ -46,6 +46,11 @@ $scriptVersion = file_exists(PUBLIC_PATH . DIRECTORY_SEPARATOR . 'js' . DIRECTOR
                         <li class="nav-item">
                             <a class="nav-link" href="index.php?controler=calendario&acao=calendario"><i class="bi bi-calendar3"></i> Calendário</a>
                         </li>
+                        <?php if (($_SESSION['utilizador_funcao'] ?? '') === 'administrador'): ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="index.php?controler=utilizador&acao=listar"><i class="bi bi-people"></i> Utilizadores</a>
+                            </li>
+                        <?php endif; ?>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle"></i> <?php echo $_SESSION['utilizador_nome'] ?? 'Utilizador'; ?>

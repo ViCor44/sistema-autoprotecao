@@ -24,6 +24,12 @@
                     </button>
                 </form>
 
+                <div class="d-grid mt-3">
+                    <a href="index.php?controler=home&acao=registo" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-person-plus"></i> Criar conta
+                    </a>
+                </div>
+
                 <hr>
 
                 <div class="alert alert-info" role="alert">
