@@ -102,8 +102,32 @@ $scriptVersion = file_exists(PUBLIC_PATH . DIRECTORY_SEPARATOR . 'js' . DIRECTOR
         <?php endif; ?>
     </main>
 
-    <footer class="bg-dark text-white text-center py-4 mt-5">
-        <p>&copy; <?php echo date('Y'); ?> <?php echo APP_NAME; ?> - Todos os direitos reservados</p>
+    <footer class="app-footer mt-5">
+        <div class="container app-footer__inner">
+            <div class="app-footer__brand">
+                <div class="app-footer__logo"><i class="bi bi-shield-lock"></i></div>
+                <div>
+                    <strong><?php echo APP_NAME; ?></strong>
+                    <p>Gestão técnica de inspeções e medidas de autoproteção.</p>
+                </div>
+            </div>
+
+            <div class="app-footer__links">
+                <a href="index.php">Início</a>
+                <a href="index.php?controler=calendario&acao=calendario">Calendário</a>
+                <a href="index.php?controler=relatorio&acao=listar">Relatórios</a>
+                <?php if (isset($_SESSION['utilizador_id'])): ?>
+                    <a href="index.php?controler=perfil&acao=editar">Meu perfil</a>
+                <?php else: ?>
+                    <a href="index.php?controler=home&acao=login">Entrar</a>
+                <?php endif; ?>
+            </div>
+        </div>
+        <div class="app-footer__bottom">
+            <div class="container">
+                <span>&copy; <?php echo date('Y'); ?> <?php echo APP_NAME; ?>. Todos os direitos reservados.</span>
+            </div>
+        </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
