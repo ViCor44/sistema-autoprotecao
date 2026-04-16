@@ -103,7 +103,7 @@ class TipoEquipamentoController extends Controller {
 
         if ($id) {
             $this->flash('Tipo de equipamento criado com sucesso!', 'sucesso');
-            $this->redirect('tipo_equipamento', 'ver', $id);
+            $this->redirect('tipo_equipamento', 'ver', ['id' => $id]);
         } else {
             $this->flash('Erro ao criar tipo de equipamento.', 'erro');
             $this->redirect('tipo_equipamento', 'criar');
@@ -147,15 +147,15 @@ class TipoEquipamentoController extends Controller {
 
         if (empty($dados['nome'])) {
             $this->flash('O nome do tipo é obrigatório.', 'erro');
-            $this->redirect('tipo_equipamento', 'editar', $id);
+            $this->redirect('tipo_equipamento', 'editar', ['id' => $id]);
         }
 
         if ($this->tipoEquipamento->update($id, $dados)) {
             $this->flash('Tipo de equipamento atualizado com sucesso!', 'sucesso');
-            $this->redirect('tipo_equipamento', 'ver', $id);
+            $this->redirect('tipo_equipamento', 'ver', ['id' => $id]);
         } else {
             $this->flash('Erro ao atualizar tipo de equipamento.', 'erro');
-            $this->redirect('tipo_equipamento', 'editar', $id);
+            $this->redirect('tipo_equipamento', 'editar', ['id' => $id]);
         }
     }
 
@@ -175,7 +175,7 @@ class TipoEquipamentoController extends Controller {
             $this->redirect('tipo_equipamento', 'listar');
         } else {
             $this->flash('Este tipo de equipamento possui equipamentos associados e não pode ser deletado. Inative-o ou delete os equipamentos primeiro.', 'erro');
-            $this->redirect('tipo_equipamento', 'ver', $id);
+            $this->redirect('tipo_equipamento', 'ver', ['id' => $id]);
         }
     }
 
@@ -197,6 +197,6 @@ class TipoEquipamentoController extends Controller {
             $this->flash('Erro ao alterar status.', 'erro');
         }
 
-        $this->redirect('tipo_equipamento', 'ver', $id);
+        $this->redirect('tipo_equipamento', 'ver', ['id' => $id]);
     }
 }
