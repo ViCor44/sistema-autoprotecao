@@ -65,37 +65,71 @@ class InspecaoController extends Controller {
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
         $pdf = new FPDF('P', 'mm', 'A5');
         $pdf->AddPage();
-        $pdf->SetFont('Arial','B',14);
-        $pdf->Cell(0,8,'Relatório de Inspeção',0,1,'C');
-        $pdf->SetFont('Arial','',10);
-        $pdf->Cell(0,6,APP_NAME,0,1,'C');
-        $pdf->Cell(0,6,'Data de emissão: ' . date('d/m/Y H:i'),0,1,'C');
+        $pdf->SetDrawColor(70, 70, 70);
+        $pdf->SetLineWidth(0.25);
 
-        $pdf->Ln(2);
-        $pdf->Cell(0,6,str_repeat('-', 60),0,1);
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->SetXY(10, 10);
+        $pdf->Cell(52, 8, APP_NAME, 0, 0, 'L');
+
+        $pdf->SetFont('Arial', 'B', 16);
+        $pdf->SetXY(70, 9);
+        $pdf->Cell(68, 10, 'Relatório de Inspeção', 0, 1, 'R');
+        $pdf->Line(10, 20, 138, 20);
+
+        $numero = str_pad((string)$relatorio['id'], 4, '0', STR_PAD_LEFT);
+        $tecnico = $relatorio['responsavel_nome'] ?: '-';
+        $data = date('d/m/Y', strtotime($relatorio['data_relatorio']));
+
+        $y = 26;
+        $pdf->SetFont('Arial', '', 11);
+        $pdf->SetXY(12, $y + 4);
+        $pdf->Cell(8, 6, 'Nº:', 0, 0, 'L');
+        $pdf->Rect(22, $y + 2, 18, 10);
+        $pdf->SetXY(22, $y + 4);
+        $pdf->Cell(18, 6, $numero, 0, 0, 'C');
+
+        $pdf->SetXY(44, $y + 4);
+        $pdf->Cell(22, 6, 'Técnico:', 0, 0, 'L');
+        $pdf->Rect(66, $y + 2, 44, 10);
+        $pdf->SetXY(66, $y + 4);
+        $pdf->Cell(44, 6, $tecnico, 0, 0, 'C');
+
+        $pdf->SetXY(112, $y + 4);
+        $pdf->Cell(10, 6, 'Data:', 0, 0, 'L');
+        $pdf->Rect(122, $y + 2, 16, 10);
+        $pdf->SetXY(122, $y + 4);
+        $pdf->Cell(16, 6, $data, 0, 1, 'C');
+        $pdf->Line(10, 40, 138, 40);
 
         $ambito = !empty($relatorio['localizacao']) ? $relatorio['localizacao'] : 'Todos os equipamentos do tipo';
-        $pdf->SetFont('Arial','B',11);
-        $pdf->Cell(0,7,'Informações do Relatório',0,1);
-        $pdf->SetFont('Arial','',10);
-        $pdf->Cell(0,6,'Equipamento: ' . $relatorio['tipo_equipamento'] . ' (' . $ambito . ')',0,1);
-        $pdf->Cell(0,6,'Data: ' . date('d/m/Y', strtotime($relatorio['data_relatorio'])),0,1);
-        $pdf->Cell(0,6,'Responsável: ' . ($relatorio['responsavel_nome'] ?: '-'),0,1);
-        $pdf->Cell(0,6,'Condição: ' . ucfirst((string)($relatorio['condicoes_encontradas'] ?: '-')),0,1);
+        $conteudo = [];
+        $conteudo[] = 'Equipamento: ' . ($relatorio['tipo_equipamento'] ?: '-') . ' (' . $ambito . ')';
+        $conteudo[] = 'Condição: ' . ucfirst((string)($relatorio['condicoes_encontradas'] ?: '-'));
+        $conteudo[] = '';
+        $conteudo[] = 'Descrição:';
+        $conteudo[] = $relatorio['descricao'] ?: '-';
+        $conteudo[] = '';
+        $conteudo[] = 'Observações:';
+        $conteudo[] = $relatorio['observacoes'] ?: '-';
 
-        $pdf->Ln(2);
-        $pdf->Cell(0,6,str_repeat('-', 60),0,1);
-        $pdf->SetFont('Arial','B',11);
-        $pdf->Cell(0,7,'Descrição e Observações',0,1);
-        $pdf->SetFont('Arial','',10);
-        $pdf->MultiCell(0,6,'Descrição: ' . ($relatorio['descricao'] ?: '-'));
-        $pdf->Ln(1);
-        $pdf->MultiCell(0,6,'Observações: ' . ($relatorio['observacoes'] ?: '-'));
+        $pdf->SetFont('Arial', '', 12);
+        $pdf->SetXY(10, 45);
+        $pdf->Cell(40, 6, 'Detalhes:', 0, 1, 'L');
 
-        $pdf->Ln(2);
-        $pdf->Cell(0,6,str_repeat('-', 60),0,1);
-        $pdf->SetFont('Arial','',9);
-        $pdf->Cell(0,5,'Documento gerado automaticamente por ' . APP_NAME,0,1,'C');
+        $boxX = 13;
+        $boxY = 52;
+        $boxW = 122;
+        $boxH = 142;
+        $pdf->Rect($boxX, $boxY, $boxW, $boxH);
+
+        $pdf->SetFont('Arial', '', 10);
+        $pdf->SetXY($boxX + 2, $boxY + 3);
+        $pdf->MultiCell($boxW - 4, 5, implode("\n", $conteudo));
+
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetXY(10, 201);
+        $pdf->Cell(128, 5, 'Documento gerado automaticamente por ' . APP_NAME, 0, 1, 'C');
 
         $pdf->Output('I', 'relatorio_inspecao_'.$id.'.pdf');
         exit;
