@@ -77,16 +77,12 @@ if ($prioridade === 'alta' || $prioridade === 'urgente') {
                 </a>
             <?php endif; ?>
 
-            <?php if (!empty($relatorioInspecao)): ?>
+            <?php if (($agendamento['status'] ?? '') === 'concluido' && !empty($relatorioInspecao)): ?>
                 <a href="index.php?controler=relatorio&acao=ver&id=<?php echo (int)$relatorioInspecao['id']; ?>" class="btn btn-primary">
                     <i class="bi bi-file-earmark-text"></i> Ver relatorio da inspecao
                 </a>
 
-                <?php if ($agendamento['status'] !== 'concluido'): ?>
-                    <a href="index.php?controler=inspecao&acao=preencher&id=<?php echo (int)$agendamento['id']; ?>" class="btn btn-warning">
-                        <i class="bi bi-clipboard-check"></i> Registar execucao da inspecao
-                    </a>
-                <?php elseif (empty($relatorioInspecao['assinado'])): ?>
+                <?php if (empty($relatorioInspecao['assinado'])): ?>
                     <a href="index.php?controler=relatorio&acao=editar&id=<?php echo (int)$relatorioInspecao['id']; ?>" class="btn btn-warning">
                         <i class="bi bi-pencil-square"></i> Preencher formulario da inspecao
                     </a>

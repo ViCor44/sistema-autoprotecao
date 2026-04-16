@@ -229,15 +229,7 @@ class CalendarioController extends Controller {
         $agendamentoId = $this->calendario->create($dados);
 
         if ($agendamentoId) {
-            $agendamento = $this->calendario->getById((int)$agendamentoId);
-            $responsavelRelatorio = $_SESSION['utilizador_id'] ?? 0;
-            $relatorioId = $this->relatorio->createFromInspecao($agendamento, $responsavelRelatorio);
-
-            if ($relatorioId) {
-                $this->flash('Agendamento criado e relatório gerado com sucesso!', 'sucesso');
-            } else {
-                $this->flash('Agendamento criado, mas não foi possível gerar o relatório automático.', 'erro');
-            }
+            $this->flash('Agendamento criado com sucesso!', 'sucesso');
             $this->redirect('calendario', 'calendario', [
                 'mes' => (int)($_POST['return_mes'] ?? date('m', strtotime($dados['data_inspecao']))),
                 'ano' => (int)($_POST['return_ano'] ?? date('Y', strtotime($dados['data_inspecao']))),

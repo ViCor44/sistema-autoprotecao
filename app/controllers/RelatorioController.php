@@ -13,6 +13,14 @@ class RelatorioController extends Controller {
         $this->calendario = new CalendarioManutencao();
     }
 
+    private function relatorioDisponivel($relatorio) {
+        if (empty($relatorio)) {
+            return false;
+        }
+
+        return empty($relatorio['calendario_id']) || ($relatorio['calendario_status'] ?? null) === 'concluido';
+    }
+
     /**
      * Listar todos os relatórios
      */
@@ -39,8 +47,8 @@ class RelatorioController extends Controller {
      */
     public function ver($id) {
         $relatorio = $this->relatorio->getById($id);
-        
-        if (!$relatorio) {
+
+        if (!$this->relatorioDisponivel($relatorio)) {
             $this->flash('Relatório não encontrado.', 'erro');
             $this->redirect('relatorio', 'listar');
         }
@@ -114,7 +122,7 @@ class RelatorioController extends Controller {
      */
     public function editar($id) {
         $relatorio = $this->relatorio->getById($id);
-        if (!$relatorio || $relatorio['assinado']) {
+        if (!$this->relatorioDisponivel($relatorio) || $relatorio['assinado']) {
             $this->flash('Relatório não encontrado ou já assinado.', 'erro');
             $this->redirect('relatorio', 'ver', ['id' => $id]);
         }
@@ -127,6 +135,11 @@ class RelatorioController extends Controller {
      */
     public function atualizar($id) {
         $this->requirePost('relatorio', 'ver', ['id' => $id]);
+        $relatorio = $this->relatorio->getById($id);
+        if (!$this->relatorioDisponivel($relatorio)) {
+            $this->flash('Relatório não encontrado.', 'erro');
+            $this->redirect('relatorio', 'listar');
+        }
         $dados = [
             'descricao' => $_POST['descricao'] ?? '',
             'observacoes' => $_POST['observacoes'] ?? '',
@@ -142,6 +155,12 @@ class RelatorioController extends Controller {
      * Assinar relatório
      */
     public function assinar($id) {
+        $relatorio = $this->relatorio->getById($id);
+        if (!$this->relatorioDisponivel($relatorio)) {
+            $this->flash('Relatório não encontrado.', 'erro');
+            $this->redirect('relatorio', 'listar');
+        }
+
         if ($this->relatorio->assinar($id)) {
             $this->flash('Relatório assinado com sucesso!', 'sucesso');
         } else {
@@ -171,7 +190,7 @@ class RelatorioController extends Controller {
      */
     public function exportar_pdf($id) {
         $relatorio = $this->relatorio->getById($id);
-        if (!$relatorio) {
+        if (!$this->relatorioDisponivel($relatorio)) {
             $this->flash('Relatório não encontrado.', 'erro');
             $this->redirect('relatorio', 'listar');
         }

@@ -16,12 +16,14 @@ class Relatorio {
      */
     public function getAll($filtros = []) {
         $query = "SELECT r.*, e.localizacao, e.numero_serie,
-                        t.nome as tipo_equipamento, u.nome as responsavel_nome
+                    t.nome as tipo_equipamento, u.nome as responsavel_nome,
+                    c.status as calendario_status
                   FROM {$this->table} r
                   LEFT JOIN equipamentos e ON r.equipamento_id = e.id
                   LEFT JOIN tipos_equipamentos t ON t.id = COALESCE(r.tipo_equipamento_id, e.tipo_equipamento_id)
+                LEFT JOIN calendarios_manutencao c ON r.calendario_id = c.id
                   JOIN utilizadores u ON r.responsavel_id = u.id
-                  WHERE 1=1";
+                WHERE (r.calendario_id IS NULL OR c.status = 'concluido')";
 
         if (isset($filtros['data_inicio']) && isset($filtros['data_fim'])) {
             $query .= " AND DATE(r.data_relatorio) BETWEEN '" . $this->db->escape($filtros['data_inicio']) . "' AND '" . $this->db->escape($filtros['data_fim']) . "'";
@@ -46,10 +48,12 @@ class Relatorio {
      */
     public function getById($id) {
         $query = "SELECT r.*, e.localizacao, e.numero_serie, e.marca, e.modelo,
-                        t.nome as tipo_equipamento, u.nome as responsavel_nome
+                    t.nome as tipo_equipamento, u.nome as responsavel_nome,
+                    c.status as calendario_status
                   FROM {$this->table} r
                   LEFT JOIN equipamentos e ON r.equipamento_id = e.id
                   LEFT JOIN tipos_equipamentos t ON t.id = COALESCE(r.tipo_equipamento_id, e.tipo_equipamento_id)
+                LEFT JOIN calendarios_manutencao c ON r.calendario_id = c.id
                   JOIN utilizadores u ON r.responsavel_id = u.id
                   WHERE r.id = ?";
 
@@ -209,12 +213,15 @@ class Relatorio {
      * Obter relatórios pendentes de assinatura
      */
     public function getRelatoriosPendentesAssinatura() {
-        $query = "SELECT r.*, e.localizacao, t.nome as tipo_equipamento, u.nome as responsavel_nome
+        $query = "SELECT r.*, e.localizacao, t.nome as tipo_equipamento, u.nome as responsavel_nome,
+                        c.status as calendario_status
                   FROM {$this->table} r
                   LEFT JOIN equipamentos e ON r.equipamento_id = e.id
                   LEFT JOIN tipos_equipamentos t ON t.id = COALESCE(r.tipo_equipamento_id, e.tipo_equipamento_id)
+                  LEFT JOIN calendarios_manutencao c ON r.calendario_id = c.id
                   JOIN utilizadores u ON r.responsavel_id = u.id
                   WHERE r.assinado = FALSE
+                  AND (r.calendario_id IS NULL OR c.status = 'concluido')
                   ORDER BY r.data_criacao DESC";
 
         $resultado = $this->db->query($query);
