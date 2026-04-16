@@ -21,6 +21,16 @@ class InspecaoController extends Controller {
             $this->flash('Inspeção agendada não encontrada.', 'erro');
             $this->redirect('inspecao', 'listar');
         }
+        // Pré-preencher próxima inspeção com a data já agendada para este tipo, se existir
+        if (empty($inspecao['proxima_inspecao'])) {
+            $proximaAgendada = $this->calendario->getProximaAgendadaPorTipo(
+                $inspecao['tipo_equipamento_id'],
+                $id
+            );
+            if ($proximaAgendada) {
+                $inspecao['proxima_inspecao'] = $proximaAgendada;
+            }
+        }
         $this->render('inspecoes/preencher', compact('inspecao'));
     }
 
@@ -65,6 +75,7 @@ class InspecaoController extends Controller {
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
         $pdf = new FPDF('P', 'mm', 'A5');
         $pdf->AddPage();
+
 
         $numero  = 'INS-' . str_pad((string)$relatorio['id'], 4, '0', STR_PAD_LEFT);
         $tecnico = $relatorio['responsavel_nome'] ?: '-';

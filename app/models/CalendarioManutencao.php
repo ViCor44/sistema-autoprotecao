@@ -234,6 +234,25 @@ class CalendarioManutencao {
         return $stmt->execute();
     }
 
+    /**
+     * Obter a próxima inspeção agendada para um tipo de equipamento (excluindo o agendamento atual)
+     */
+    public function getProximaAgendadaPorTipo($tipo_equipamento_id, $excluir_id = null) {
+        $query = "SELECT MIN(data_inspecao) as proxima_data
+                  FROM {$this->table}
+                  WHERE tipo_equipamento_id = ?
+                  AND data_inspecao > CURDATE()
+                  AND status NOT IN ('concluido', 'cancelado')";
+        if ($excluir_id !== null) {
+            $query .= " AND id != " . (int)$excluir_id;
+        }
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $tipo_equipamento_id);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        return $row['proxima_data'] ?? null;
+    }
+
     private function normalizeStatus($status) {
         return $status === 'concluida' ? 'concluido' : $status;
     }

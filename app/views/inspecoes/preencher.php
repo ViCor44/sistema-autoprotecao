@@ -45,6 +45,9 @@
                 <div class="mb-3">
                     <label for="proxima_inspecao" class="form-label">Próxima inspeção</label>
                     <input class="form-control" type="date" name="proxima_inspecao" id="proxima_inspecao" value="<?php echo htmlspecialchars($inspecao['proxima_inspecao'] ?? ''); ?>">
+                    <?php if (!empty($inspecao['proxima_inspecao'])): ?>
+                    <div class="form-text text-info"><i class="bi bi-calendar-check"></i> Data sugerida com base no próximo agendamento já existente para este tipo de equipamento.</div>
+                    <?php endif; ?>
                 </div>
             </div>
 
