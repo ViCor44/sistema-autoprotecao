@@ -134,7 +134,10 @@ foreach ($agendamentos as $ag) {
                             <span class="calendar-day__hint">Clique para agendar</span>
                         <?php else: ?>
                             <?php foreach (array_slice($itensDia, 0, 3) as $ag): ?>
-                                <span class="calendar-event-pill"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $ag['tipo_inspecao']))); ?></span>
+                                <span class="calendar-event-pill">
+                                    <strong><?php echo htmlspecialchars($ag['tipo_equipamento'] ?? 'Sem tipo'); ?></strong>
+                                    <small><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $ag['tipo_inspecao']))); ?></small>
+                                </span>
                             <?php endforeach; ?>
                             <?php if (count($itensDia) > 3): ?>
                                 <span class="calendar-day__more">+<?php echo count($itensDia) - 3; ?> mais</span>
