@@ -220,19 +220,18 @@ class RelatorioController extends Controller {
             ? date('d/m/Y', strtotime($relatorio['proxima_inspecao']))
             : '-';
 
-        // ── Cabeçalho ────────────────────────────────────────────────────────
-        // Faixa azul-escura
-        $pdf->SetFillColor(26, 58, 92);
-        $pdf->SetDrawColor(26, 58, 92);
+        // ── Cabeçalho (paleta print-friendly) ───────────────────────────────
+        $pdf->SetFillColor(242, 245, 249);
+        $pdf->SetDrawColor(205, 212, 223);
         $pdf->SetLineWidth(0.2);
-        $pdf->Rect(0, 0, 148, 22, 'F');
+        $pdf->Rect(0, 0, 148, 22, 'FD');
 
-        // Listra laranja de destaque
-        $pdf->SetFillColor(220, 100, 20);
+        // Listra de destaque suave
+        $pdf->SetFillColor(198, 206, 218);
         $pdf->Rect(0, 22, 148, 1.5, 'F');
 
-        // Texto do cabeçalho (branco)
-        $pdf->SetTextColor(255, 255, 255);
+        // Texto do cabeçalho
+        $pdf->SetTextColor(26, 38, 56);
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->SetXY(8, 4.5);
         $pdf->Cell(70, 8, APP_NAME, 0, 0, 'L');
@@ -257,9 +256,9 @@ class RelatorioController extends Controller {
         $pdf->SetDrawColor(180, 190, 205);
         $pdf->SetLineWidth(0.3);
         $pdf->Rect(8, $metaY, 88, 14, 'FD');
-        $pdf->SetFillColor(43, 87, 151);
+        $pdf->SetFillColor(222, 228, 237);
         $pdf->Rect(8, $metaY, 88, 5.5, 'F');
-        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetTextColor(44, 60, 82);
         $pdf->SetFont('Arial', 'B', 7);
         $pdf->SetXY(9, $metaY + 0.5);
         $pdf->Cell(86, 5, 'TÉCNICO RESPONSÁVEL', 0, 0, 'L');
@@ -272,9 +271,9 @@ class RelatorioController extends Controller {
         $pdf->SetFillColor(235, 239, 245);
         $pdf->SetDrawColor(180, 190, 205);
         $pdf->Rect(100, $metaY, 40, 14, 'FD');
-        $pdf->SetFillColor(43, 87, 151);
+        $pdf->SetFillColor(222, 228, 237);
         $pdf->Rect(100, $metaY, 40, 5.5, 'F');
-        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetTextColor(44, 60, 82);
         $pdf->SetFont('Arial', 'B', 7);
         $pdf->SetXY(101, $metaY + 0.5);
         $pdf->Cell(38, 5, 'DATA DO RELATÓRIO', 0, 0, 'L');
@@ -349,12 +348,12 @@ class RelatorioController extends Controller {
             $y += 7;
 
             // Cabeçalho da tabela
-            $pdf->SetFillColor(210, 218, 232);
+            $pdf->SetFillColor(236, 240, 246);
             $pdf->SetDrawColor(180, 190, 205);
             $pdf->SetLineWidth(0.2);
             $pdf->Rect(8, $y, 100, 6, 'FD');
             $pdf->Rect(108, $y, 32, 6, 'FD');
-            $pdf->SetTextColor(30, 50, 80);
+            $pdf->SetTextColor(48, 63, 84);
             $pdf->SetFont('Arial', 'B', 8);
             $pdf->SetXY(10, $y + 1);
             $pdf->Cell(98, 5, 'Verificação', 0, 0, 'L');
@@ -413,9 +412,10 @@ class RelatorioController extends Controller {
 
         // ── Rodapé ────────────────────────────────────────────────────────────
         $footerY = 202;
-        $pdf->SetFillColor(26, 58, 92);
-        $pdf->Rect(0, $footerY, 148, 8, 'F');
-        $pdf->SetTextColor(200, 210, 225);
+        $pdf->SetDrawColor(205, 212, 223);
+        $pdf->SetLineWidth(0.2);
+        $pdf->Line(8, $footerY + 1, 140, $footerY + 1);
+        $pdf->SetTextColor(110, 120, 135);
         $pdf->SetFont('Arial', '', 7);
         $pdf->SetXY(0, $footerY + 1.5);
         $pdf->Cell(148, 5, APP_NAME . ' — Documento gerado automaticamente em ' . date('d/m/Y H:i'), 0, 0, 'C');
@@ -428,10 +428,10 @@ class RelatorioController extends Controller {
      * Desenha uma faixa de secção com título
      */
     private function pdfSeccao(FPDF $pdf, $y, $titulo) {
-        $pdf->SetFillColor(43, 87, 151);
-        $pdf->SetDrawColor(43, 87, 151);
-        $pdf->Rect(8, $y, 132, 6.5, 'F');
-        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetFillColor(224, 230, 239);
+        $pdf->SetDrawColor(186, 195, 209);
+        $pdf->Rect(8, $y, 132, 6.5, 'FD');
+        $pdf->SetTextColor(44, 60, 82);
         $pdf->SetFont('Arial', 'B', 8.5);
         $pdf->SetXY(10, $y + 0.8);
         $pdf->Cell(128, 5.5, $titulo, 0, 0, 'L');
