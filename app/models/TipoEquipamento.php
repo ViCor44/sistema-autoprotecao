@@ -85,7 +85,7 @@ class TipoEquipamento {
                   VALUES ('{$nome}', '{$descricao}', '{$icone}', '{$prefixo}', {$frequenciaVal}, TRUE)";
 
         if ($this->db->query($query)) {
-            return $this->db->lastInsertId();
+            return $this->db->getLastId();
         }
         return false;
     }
