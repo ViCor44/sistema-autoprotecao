@@ -191,6 +191,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function buildEventCard(item) {
         const status = (item.status || 'agendado').replace(/_/g, ' ');
         const tipo = (item.tipo_inspecao || 'inspecao').replace(/_/g, ' ');
+        const tipoEquipamento = item.tipo_equipamento || 'Tipo de equipamento não definido';
         const local = item.localizacao || 'Todos os equipamentos do tipo';
         const verUrl = 'index.php?controler=calendario&acao=ver&id=' + item.id + '&mes=<?php echo (int)$mes; ?>&ano=<?php echo (int)$ano; ?>';
         const editarUrl = 'index.php?controler=calendario&acao=editar&id=' + item.id + '&mes=<?php echo (int)$mes; ?>&ano=<?php echo (int)$ano; ?>';
@@ -201,6 +202,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     '<strong>' + sanitize(tipo.charAt(0).toUpperCase() + tipo.slice(1)) + '</strong>' +
                     '<span class="status-pill status-pill--info">' + sanitize(status.charAt(0).toUpperCase() + status.slice(1)) + '</span>' +
                 '</div>' +
+                '<p><strong>' + sanitize(tipoEquipamento) + '</strong></p>' +
                 '<p>' + sanitize(local) + '</p>' +
                 '<div class="calendar-day-event__actions">' +
                     '<a class="btn btn-sm btn-outline-primary" href="' + verUrl + '">Ver</a>' +
