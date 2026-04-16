@@ -11,7 +11,7 @@
                     <i class="bi bi-pencil-square"></i> Editar
                 </a>
             <?php endif; ?>
-            <a href="index.php?controler=relatorio&acao=exportar_pdf&id=<?php echo $relatorio['id']; ?>" class="btn btn-dashboard-secondary">
+            <a href="index.php?controler=relatorio&acao=exportar_pdf&id=<?php echo $relatorio['id']; ?>" class="btn btn-dashboard-secondary" target="_blank" rel="noopener noreferrer">
                 <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
             </a>
         </div>

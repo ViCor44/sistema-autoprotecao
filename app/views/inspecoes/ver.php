@@ -11,7 +11,7 @@
                     <i class="bi bi-file-earmark-text"></i> Abrir relatório
                 </a>
             <?php endif; ?>
-            <a href="index.php?controler=inspecao&acao=exportar_pdf&id=<?php echo $inspecao['id']; ?>" class="btn btn-dashboard-secondary">
+            <a href="index.php?controler=inspecao&acao=exportar_pdf&id=<?php echo $inspecao['id']; ?>" class="btn btn-dashboard-secondary" target="_blank" rel="noopener noreferrer">
                 <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
             </a>
         </div>

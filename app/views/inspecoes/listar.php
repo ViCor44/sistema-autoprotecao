@@ -83,7 +83,7 @@ $inspecoesPendentes = $totalInspecoes - $inspecoesConcluidas;
                                         <a href="index.php?controler=inspecao&acao=preencher&id=<?php echo $insp['id']; ?>" class="btn btn-sm btn-warning">Preencher</a>
                                     <?php else: ?>
                                         <a href="index.php?controler=inspecao&acao=ver&id=<?php echo $insp['id']; ?>" class="btn btn-sm btn-primary">Ver relatório</a>
-                                        <a href="index.php?controler=inspecao&acao=exportar_pdf&id=<?php echo $insp['id']; ?>" class="btn btn-sm btn-outline-secondary">PDF</a>
+                                        <a href="index.php?controler=inspecao&acao=exportar_pdf&id=<?php echo $insp['id']; ?>" class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener noreferrer">PDF</a>
                                     <?php endif; ?>
                                 </td>
                             </tr>
