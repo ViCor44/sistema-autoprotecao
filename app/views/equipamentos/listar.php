@@ -156,6 +156,14 @@ $queryBase['direcao'] = $direcaoAtual;
                         </span>
                     </div>
 
+                    <div class="text-center py-2">
+                        <div
+                            class="equipamento-card__qr d-inline-block"
+                            id="qrcode-card-<?php echo (int)$equip['id']; ?>"
+                            data-qr-url="index.php?controler=qr&amp;acao=visualizar&amp;id=<?php echo (int)$equip['id']; ?>"
+                        ></div>
+                    </div>
+
                     <div class="equipamento-card__body">
                         <div class="detail-row">
                             <span>Localizacao</span>
@@ -225,3 +233,27 @@ $queryBase['direcao'] = $direcaoAtual;
         <?php endif; ?>
     <?php endif; ?>
 </section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const qrContainers = document.querySelectorAll('.equipamento-card__qr');
+    const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+
+    qrContainers.forEach(function (container) {
+        const relativeUrl = container.getAttribute('data-qr-url');
+        if (!relativeUrl) {
+            return;
+        }
+
+        new QRCode(container, {
+            text: baseUrl + relativeUrl,
+            width: 90,
+            height: 90,
+            colorDark: '#111111',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+    });
+});
+</script>
