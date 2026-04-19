@@ -159,9 +159,12 @@ class TipoEquipamento {
     /**
      * Obter quantidade de equipamentos por tipo
      */
-    public function getContagemEquipamentos($id) {
+    public function getContagemEquipamentos($id, $apenasAtivos = true) {
         $id = (int)$id;
         $query = "SELECT COUNT(*) as total FROM equipamentos WHERE tipo_equipamento_id = {$id}";
+        if ($apenasAtivos) {
+            $query .= " AND ativo = TRUE";
+        }
         $resultado = $this->db->query($query);
         $row = $resultado->fetch_assoc();
         return (int)$row['total'];

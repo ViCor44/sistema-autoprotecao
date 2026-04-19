@@ -43,7 +43,7 @@ class TipoEquipamentoController extends Controller {
 
         // Adicionar contagem de equipamentos para cada tipo
         foreach ($tipos as &$tipo) {
-            $tipo['total_equipamentos'] = $this->tipoEquipamento->getContagemEquipamentos((int)$tipo['id']);
+            $tipo['total_equipamentos'] = $this->tipoEquipamento->getContagemEquipamentos((int)$tipo['id'], true);
         }
 
         $this->render('tipos_equipamentos/listar', compact(
@@ -68,9 +68,10 @@ class TipoEquipamentoController extends Controller {
             $this->redirect('tipo_equipamento', 'listar');
         }
 
-        $totalEquipamentos = $this->tipoEquipamento->getContagemEquipamentos($id);
+        $totalEquipamentos = $this->tipoEquipamento->getContagemEquipamentos($id, true);
+        $totalEquipamentosAssociados = $this->tipoEquipamento->getContagemEquipamentos($id, false);
         
-        $this->render('tipos_equipamentos/ver', compact('tipo', 'totalEquipamentos'));
+        $this->render('tipos_equipamentos/ver', compact('tipo', 'totalEquipamentos', 'totalEquipamentosAssociados'));
     }
 
     /**

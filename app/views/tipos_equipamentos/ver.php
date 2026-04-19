@@ -7,6 +7,7 @@ $prefixo = htmlspecialchars($tipo['prefixo_numeracao'] ?? '', ENT_QUOTES, 'UTF-8
 $frequencia = (int)($tipo['frequencia_inspecao'] ?? 0);
 $ativo = (bool)($tipo['ativo'] ?? true);
 $totalEquipamentos = (int)($totalEquipamentos ?? 0);
+$totalEquipamentosAssociados = (int)($totalEquipamentosAssociados ?? $totalEquipamentos);
 ?>
 
 <section class="page-shell page-shell--narrow tipo-equipamento-ver-page">
@@ -118,7 +119,7 @@ $totalEquipamentos = (int)($totalEquipamentos ?? 0);
                 <?php echo $ativo ? 'Inativar' : 'Ativar'; ?>
             </a>
 
-            <?php if ($totalEquipamentos === 0): ?>
+            <?php if ($totalEquipamentosAssociados === 0): ?>
                 <a href="index.php?controler=tipo_equipamento&acao=deletar&id=<?php echo (int)$tipo['id']; ?>" 
                    class="btn btn-danger"
                    onclick="return confirm('Tem a certeza que deseja deletar este tipo? Esta ação não pode ser desfeita.');">
