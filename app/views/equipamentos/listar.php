@@ -158,8 +158,8 @@ $queryBase['direcao'] = $direcaoAtual;
 
                     <div class="equipamento-card__body">
                         <div class="detail-row">
-                            <span>Código de Barras</span>
-                            <strong><code><?php echo htmlspecialchars($equip['codigo_barras'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></code></strong>
+                            <span>Código</span>
+                            <strong><i class="bi bi-qrcode"></i> <?php echo htmlspecialchars($equip['codigo_barras'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></strong>
                         </div>
                         <div class="detail-row">
                             <span>Localizacao</span>

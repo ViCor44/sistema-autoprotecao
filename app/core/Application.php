@@ -49,6 +49,7 @@ class Application {
             'HomeController@registo',
             'HomeController@registar',
             'HomeController@erro',
+            'QrController@visualizar',  // Permitir visualização de QR sem autenticação
         ];
 
         $signature = $route['controller'] . '@' . $route['action'];

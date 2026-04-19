@@ -2,14 +2,15 @@
     <div class="col-md-8 offset-md-2">
         <h1 class="mb-4"><i class="bi bi-tools"></i> <?php echo $equipamento['tipo_nome']; ?></h1>
 
-        <!-- Código de Barras -->
+        <!-- Código QR -->
         <div class="card mb-3 border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-qrcode"></i> Código QR</h5>
+            </div>
             <div class="card-body text-center">
-                <div class="mb-3">
-                    <svg id="barcode"></svg>
-                </div>
+                <div id="qrcode-container" class="mb-3" style="display: flex; justify-content: center;"></div>
                 <p class="text-muted mb-0">
-                    <small><strong>Código de Barras:</strong> <?php echo $equipamento['codigo_barras']; ?></small>
+                    <small>Escaneie este código QR com um dispositivo móvel para visualizar os detalhes do equipamento</small>
                 </p>
             </div>
         </div>
@@ -61,15 +62,22 @@
     </div>
 </div>
 
-<!-- Script para gerar o código de barras -->
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<!-- Script para gerar o código QR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        JsBarcode("#barcode", "<?php echo $equipamento['codigo_barras']; ?>", {
-            format: "CODE128",
-            width: 2,
-            height: 80,
-            displayValue: true
+        // Gerar dados para o QR: contém a URL que aponta para visualização rápida
+        const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+        const qrUrl = baseUrl + 'index.php?controler=qr&acao=visualizar&id=<?php echo $equipamento['id']; ?>';
+        
+        // Criar e renderizar o QR code
+        new QRCode(document.getElementById('qrcode-container'), {
+            text: qrUrl,
+            width: 300,
+            height: 300,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
         });
     });
 </script>

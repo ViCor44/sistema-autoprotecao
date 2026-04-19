@@ -4,10 +4,17 @@
 
         <form method="POST" action="index.php?controler=equipamento&acao=atualizar&id=<?php echo $equipamento['id']; ?>" class="card">
             <div class="card-body">
-                <!-- Código de Barras (Leitura apenas) -->
+                <!-- Código QR (Leitura apenas) -->
                 <div class="alert alert-info mb-3" role="alert">
-                    <strong>Código de Barras:</strong> <code><?php echo htmlspecialchars($equipamento['codigo_barras'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></code>
-                    <small class="d-block text-muted mt-2">Este código é único e foi atribuído automaticamente.</small>
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div id="qrcode-editar" style="width: 100px; height: 100px;"></div>
+                        </div>
+                        <div class="col">
+                            <strong>Código QR do Equipamento</strong>
+                            <p class="mb-0 small text-muted">Escaneie para visualizar rapidamente os detalhes. Este código é único e foi atribuído automaticamente.</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mb-3">
@@ -162,4 +169,24 @@ document.addEventListener('DOMContentLoaded', function () {
     selectTipo.addEventListener('change', atualizarCamposDinamicos);
     atualizarCamposDinamicos();
 });
+</script>
+
+<!-- Script para gerar o código QR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gerar dados para o QR: contém a URL que aponta para visualização rápida
+        const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+        const qrUrl = baseUrl + 'index.php?controler=qr&acao=visualizar&id=<?php echo $equipamento['id']; ?>';
+        
+        // Criar e renderizar o QR code
+        new QRCode(document.getElementById('qrcode-editar'), {
+            text: qrUrl,
+            width: 100,
+            height: 100,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    });
 </script>
