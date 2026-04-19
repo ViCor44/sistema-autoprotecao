@@ -46,6 +46,15 @@ $equipamentosJson = json_encode($equipamentosPayload, JSON_UNESCAPED_UNICODE | J
                 <i class="bi bi-plus-circle"></i>
                 Novo Equipamento
             </a>
+            <a
+                href="index.php?controler=equipamento&acao=etiquetas&amp;tipo=<?php echo $tipoAtual; ?>&amp;estado=<?php echo urlencode($estadoAtual); ?>&amp;localizacao=<?php echo urlencode($localizacaoAtual); ?>"
+                class="btn btn-outline-primary"
+                target="_blank"
+                rel="noopener"
+            >
+                <i class="bi bi-printer"></i>
+                Imprimir Etiquetas
+            </a>
         </div>
     </header>
 

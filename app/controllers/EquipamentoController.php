@@ -120,6 +120,53 @@ class EquipamentoController extends Controller {
     }
 
     /**
+     * Imprimir etiquetas dos equipamentos
+     * A4 vertical: 4 colunas x 6 linhas por página
+     * Extintores: 2 etiquetas por equipamento
+     */
+    public function etiquetas() {
+        $filtros = ['ativo' => 1];
+
+        $tipo = isset($_GET['tipo']) ? (int)$_GET['tipo'] : 0;
+        $estado = isset($_GET['estado']) ? trim((string)$_GET['estado']) : '';
+        $localizacao = isset($_GET['localizacao']) ? trim((string)$_GET['localizacao']) : '';
+
+        if ($tipo > 0) {
+            $filtros['tipo_equipamento_id'] = $tipo;
+        }
+
+        if ($estado !== '') {
+            $filtros['estado'] = $estado;
+        }
+
+        if ($localizacao !== '') {
+            $filtros['localizacao'] = $localizacao;
+        }
+
+        $ordenacao = [
+            'campo' => 'tipo_nome',
+            'direcao' => 'ASC',
+        ];
+
+        $equipamentos = $this->equipamento->getAll($filtros, null, 0, $ordenacao);
+        $etiquetas = [];
+
+        foreach ($equipamentos as $equipamento) {
+            $tipoNome = strtolower((string)($equipamento['tipo_nome'] ?? ''));
+            $quantidadeEtiquetas = str_contains($tipoNome, 'extintor') ? 2 : 1;
+
+            for ($i = 0; $i < $quantidadeEtiquetas; $i++) {
+                $etiquetas[] = $equipamento;
+            }
+        }
+
+        $etiquetasPorPagina = 24; // 4 colunas x 6 linhas
+        $paginas = array_chunk($etiquetas, $etiquetasPorPagina);
+
+        $this->render('equipamentos/etiquetas', compact('paginas', 'etiquetas'));
+    }
+
+    /**
      * Ver detalhes de um equipamento
      */
     public function ver($id) {
