@@ -57,11 +57,8 @@ $totalEtiquetas = count($etiquetas ?? []);
             height: 100%;
             width: 100%;
             border-radius: 3.8mm;
-            border: 0.45mm solid #9a9a9a;
-            background:
-                radial-gradient(circle at 12% 16%, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0) 38%),
-                linear-gradient(145deg, #e6e6e6 0%, #cfcfcf 38%, #ececec 100%);
-            box-shadow: inset 0 0.2mm 0 rgba(255, 255, 255, 0.9), inset 0 -0.2mm 0 rgba(90, 90, 90, 0.25);
+            border: 0.35mm solid #b6b6b6;
+            background: #ffffff;
             padding: 2.1mm;
             display: grid;
             grid-template-columns: 23.5mm 1fr;
@@ -96,9 +93,9 @@ $totalEtiquetas = count($etiquetas ?? []);
             font-weight: 800;
             letter-spacing: 0.35px;
             text-transform: uppercase;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            overflow: visible;
+            line-height: 1.15;
             margin-bottom: 0.8mm;
         }
 
@@ -106,28 +103,30 @@ $totalEtiquetas = count($etiquetas ?? []);
             font-size: 6.6px;
             color: #1d1d1d;
             margin-bottom: 1.1mm;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            overflow: visible;
+            line-height: 1.2;
+            word-break: break-word;
         }
 
         .etiqueta__codigo {
-            font-size: 6.6mm;
+            font-size: 5.8mm;
             line-height: 1;
             font-weight: 500;
-            letter-spacing: 0.2mm;
+            letter-spacing: 0.12mm;
             margin-bottom: 0.9mm;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            overflow: visible;
+            word-break: break-word;
         }
 
         .etiqueta__linha {
             font-size: 6.9px;
             color: #1d1d1d;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            overflow: visible;
+            line-height: 1.2;
+            word-break: break-word;
         }
 
         .etiqueta__linha strong {
