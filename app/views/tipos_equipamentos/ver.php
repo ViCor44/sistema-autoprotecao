@@ -35,10 +35,16 @@ $totalEquipamentos = (int)($totalEquipamentos ?? 0);
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
         <section class="mini-stats-grid">
-            <article class="mini-stat-card">
-                <span>Total de Equipamentos</span>
-                <strong><?php echo $totalEquipamentos; ?></strong>
-            </article>
+            <a
+                href="index.php?controler=equipamento&acao=listar&tipo=<?php echo (int)$tipo['id']; ?>"
+                style="text-decoration: none; color: inherit; display: block;"
+                title="Ver equipamentos deste tipo"
+            >
+                <article class="mini-stat-card" style="cursor: pointer;">
+                    <span>Total de Equipamentos</span>
+                    <strong><?php echo $totalEquipamentos; ?></strong>
+                </article>
+            </a>
         </section>
 
         <section class="mini-stats-grid">
