@@ -4,12 +4,25 @@
  */
 class EquipamentoController extends Controller {
     private $equipamento;
+    private $tipoEquipamento;
     private $tiposEquipamentos = [];
     private $camposDinamicosPorTipo = [];
 
     public function __construct() {
         $this->equipamento = new Equipamento();
+        $this->tipoEquipamento = new TipoEquipamento();
         $this->carregarTiposEquipamentos();
+    }
+
+    private function renderStandalone($view, array $data = []) {
+        $viewPath = APP_PATH . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $view) . '.php';
+
+        if (!file_exists($viewPath)) {
+            throw new Exception('View não encontrada: ' . $view);
+        }
+
+        extract($data, EXTR_SKIP);
+        require $viewPath;
     }
 
     /**
@@ -164,6 +177,153 @@ class EquipamentoController extends Controller {
         $paginas = array_chunk($etiquetas, $etiquetasPorPagina);
 
         $this->render('equipamentos/etiquetas', compact('paginas', 'etiquetas'));
+    }
+
+    /**
+     * Lista imprimível de equipamentos por tipo
+     */
+    public function lista_imprimivel() {
+        $tipoId = isset($_GET['tipo']) ? (int)$_GET['tipo'] : 0;
+        if ($tipoId <= 0) {
+            $this->flash('Tipo de equipamento inválido.', 'erro');
+            $this->redirect('tipo_equipamento', 'listar');
+        }
+
+        $tipo = $this->tipoEquipamento->getById($tipoId);
+        if (!$tipo) {
+            $this->flash('Tipo de equipamento não encontrado.', 'erro');
+            $this->redirect('tipo_equipamento', 'listar');
+        }
+
+        $equipamentos = $this->equipamento->getAll(
+            ['ativo' => 1, 'tipo_equipamento_id' => $tipoId],
+            null,
+            0,
+            ['campo' => 'localizacao', 'direcao' => 'ASC']
+        );
+
+        $this->renderStandalone('equipamentos/lista_imprimivel', compact('tipo', 'equipamentos'));
+    }
+
+    /**
+     * Exportar lista de equipamentos por tipo em PDF
+     */
+    public function lista_pdf() {
+        $tipoId = isset($_GET['tipo']) ? (int)$_GET['tipo'] : 0;
+        if ($tipoId <= 0) {
+            $this->flash('Tipo de equipamento inválido.', 'erro');
+            $this->redirect('tipo_equipamento', 'listar');
+        }
+
+        $tipo = $this->tipoEquipamento->getById($tipoId);
+        if (!$tipo) {
+            $this->flash('Tipo de equipamento não encontrado.', 'erro');
+            $this->redirect('tipo_equipamento', 'listar');
+        }
+
+        $equipamentos = $this->equipamento->getAll(
+            ['ativo' => 1, 'tipo_equipamento_id' => $tipoId],
+            null,
+            0,
+            ['campo' => 'localizacao', 'direcao' => 'ASC']
+        );
+
+        require_once APP_PATH . '/libs/fpdf/fpdf.php';
+
+        $pdf = new FPDF('L', 'mm', 'A4');
+        $pdf->AddPage();
+
+        $pdf->SetFillColor(242, 245, 249);
+        $pdf->SetDrawColor(205, 212, 223);
+        $pdf->Rect(0, 0, 297, 20, 'FD');
+        $pdf->SetTextColor(26, 38, 56);
+        $pdf->SetFont('Arial', 'B', 14);
+        $pdf->SetXY(10, 5);
+        $pdf->Cell(140, 8, APP_NAME, 0, 0, 'L');
+        $pdf->SetFont('Arial', 'B', 13);
+        $pdf->Cell(137, 8, 'Lista de Equipamentos por Tipo', 0, 1, 'R');
+
+        $pdf->SetFont('Arial', '', 9);
+        $pdf->SetXY(10, 13);
+        $pdf->Cell(160, 5, 'Tipo: ' . ($tipo['nome'] ?? '-') . '   |   Total: ' . count($equipamentos) . '   |   Gerado em ' . date('d/m/Y H:i'), 0, 0, 'L');
+
+        $y = 28;
+        $headers = [
+            ['Nº', 35],
+            ['Localização', 78],
+            ['Marca', 40],
+            ['Modelo', 48],
+            ['Estado', 36],
+            ['Próxima Vistoria', 40],
+        ];
+
+        $pdf->SetFillColor(226, 232, 240);
+        $pdf->SetDrawColor(180, 190, 205);
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->SetXY(10, $y);
+        foreach ($headers as [$texto, $largura]) {
+            $pdf->Cell($largura, 8, $texto, 1, 0, 'L', true);
+        }
+        $pdf->Ln();
+        $y += 8;
+
+        $pdf->SetFont('Arial', '', 8.5);
+        $alt = false;
+        foreach ($equipamentos as $equipamento) {
+            if ($y > 195) {
+                $pdf->AddPage();
+                $y = 20;
+                $pdf->SetFillColor(226, 232, 240);
+                $pdf->SetDrawColor(180, 190, 205);
+                $pdf->SetFont('Arial', 'B', 9);
+                $pdf->SetXY(10, $y);
+                foreach ($headers as [$texto, $largura]) {
+                    $pdf->Cell($largura, 8, $texto, 1, 0, 'L', true);
+                }
+                $pdf->Ln();
+                $y += 8;
+                $pdf->SetFont('Arial', '', 8.5);
+            }
+
+            $fill = $alt;
+            $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
+            $pdf->SetXY(10, $y);
+            $pdf->Cell(35, 7, $this->pdfTexto(($equipamento['numero_serie'] ?? '-')), 1, 0, 'L', true);
+            $pdf->Cell(78, 7, $this->pdfTexto(($equipamento['localizacao'] ?? '-')), 1, 0, 'L', true);
+            $pdf->Cell(40, 7, $this->pdfTexto(($equipamento['marca'] ?? '-')), 1, 0, 'L', true);
+            $pdf->Cell(48, 7, $this->pdfTexto(($equipamento['modelo'] ?? '-')), 1, 0, 'L', true);
+            $pdf->Cell(36, 7, $this->pdfTexto(ucfirst((string)($equipamento['estado'] ?? '-'))), 1, 0, 'L', true);
+            $pdf->Cell(40, 7, $this->pdfTexto($this->formatarDataPdf($equipamento['data_proxima_manutencao'] ?? null)), 1, 1, 'L', true);
+            $y += 7;
+            $alt = !$alt;
+        }
+
+        $nomeFicheiro = 'equipamentos_tipo_' . $tipoId . '.pdf';
+        $pdf->Output('I', $nomeFicheiro);
+        exit;
+    }
+
+    private function formatarDataPdf($data) {
+        $data = trim((string)$data);
+        if ($data === '' || $data === '0000-00-00') {
+            return '-';
+        }
+
+        $timestamp = strtotime($data);
+        if ($timestamp === false) {
+            return '-';
+        }
+
+        return date('d/m/Y', $timestamp);
+    }
+
+    private function pdfTexto($texto) {
+        $texto = (string)$texto;
+        if ($texto === '') {
+            return '-';
+        }
+
+        return iconv('UTF-8', 'windows-1252//TRANSLIT', $texto) ?: $texto;
     }
 
     /**

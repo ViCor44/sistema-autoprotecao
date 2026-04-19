@@ -112,6 +112,22 @@ $totalEquipamentosAssociados = (int)($totalEquipamentosAssociados ?? $totalEquip
                 Imprimir Etiquetas do Tipo
             </a>
 
+            <a href="index.php?controler=equipamento&acao=lista_imprimivel&tipo=<?php echo (int)$tipo['id']; ?>" 
+               class="btn btn-outline-primary"
+               target="_blank"
+               rel="noopener">
+                <i class="bi bi-list-ul"></i>
+                Lista Imprimível
+            </a>
+
+            <a href="index.php?controler=equipamento&acao=lista_pdf&tipo=<?php echo (int)$tipo['id']; ?>" 
+               class="btn btn-outline-secondary"
+               target="_blank"
+               rel="noopener">
+                <i class="bi bi-file-earmark-pdf"></i>
+                Exportar PDF
+            </a>
+
             <a href="index.php?controler=tipo_equipamento&acao=toggleAtivo&id=<?php echo (int)$tipo['id']; ?>" 
                class="btn <?php echo $ativo ? 'btn-warning' : 'btn-success'; ?>"
                onclick="return confirm('Tem a certeza que deseja <?php echo $ativo ? 'inativar' : 'ativar'; ?> este tipo?');">
