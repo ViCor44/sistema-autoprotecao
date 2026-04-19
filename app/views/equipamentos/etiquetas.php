@@ -20,7 +20,7 @@ $totalEtiquetas = count($etiquetas ?? []);
 
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: "Segoe UI", Arial, sans-serif;
             background: #f5f5f5;
             color: #111;
         }
@@ -49,51 +49,95 @@ $totalEtiquetas = count($etiquetas ?? []);
         }
 
         .etiqueta {
-            border: 1px solid #222;
-            padding: 3mm;
-            display: grid;
-            grid-template-columns: 26mm 1fr;
-            gap: 2mm;
-            align-items: center;
+            padding: 2.2mm;
             overflow: hidden;
         }
 
+        .etiqueta__placa {
+            height: 100%;
+            width: 100%;
+            border-radius: 3.8mm;
+            border: 0.45mm solid #9a9a9a;
+            background:
+                radial-gradient(circle at 12% 16%, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0) 38%),
+                linear-gradient(145deg, #e6e6e6 0%, #cfcfcf 38%, #ececec 100%);
+            box-shadow: inset 0 0.2mm 0 rgba(255, 255, 255, 0.9), inset 0 -0.2mm 0 rgba(90, 90, 90, 0.25);
+            padding: 2.1mm;
+            display: grid;
+            grid-template-columns: 23.5mm 1fr;
+            gap: 1.8mm;
+            align-items: center;
+        }
+
         .etiqueta__qr {
-            width: 24mm;
-            height: 24mm;
+            width: 22.5mm;
+            height: 22.5mm;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: #fff;
+            border: 0.35mm solid #2d2d2d;
+            border-radius: 1.4mm;
+            padding: 0.6mm;
+        }
+
+        .etiqueta__qr img,
+        .etiqueta__qr canvas {
+            width: 100% !important;
+            height: 100% !important;
         }
 
         .etiqueta__conteudo {
             min-width: 0;
         }
 
-        .etiqueta__tipo {
-            font-size: 9px;
-            font-weight: bold;
+        .etiqueta__marca {
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 0.35px;
+            text-transform: uppercase;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-bottom: 1.5mm;
+            margin-bottom: 0.8mm;
+        }
+
+        .etiqueta__submarca {
+            font-size: 6.6px;
+            color: #1d1d1d;
+            margin-bottom: 1.1mm;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .etiqueta__codigo {
+            font-size: 6.6mm;
+            line-height: 1;
+            font-weight: 500;
+            letter-spacing: 0.2mm;
+            margin-bottom: 0.9mm;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .etiqueta__linha {
-            font-size: 8px;
-            line-height: 1.25;
+            font-size: 6.9px;
+            color: #1d1d1d;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .etiqueta__linha strong {
-            font-size: 8px;
+            font-weight: 700;
         }
 
         .etiqueta--vazia {
-            border: 1px dashed #bbb;
+            border: 1px dashed #c9c9c9;
             background: #fafafa;
+            border-radius: 3.8mm;
         }
 
         @media print {
@@ -140,14 +184,17 @@ $totalEtiquetas = count($etiquetas ?? []);
                     $tipoNome = trim((string)($equipamento['tipo_nome'] ?? 'Equipamento'));
                     ?>
                     <article class="etiqueta">
-                        <div
-                            class="etiqueta__qr js-etiqueta-qr"
-                            data-qr="NR=<?php echo htmlspecialchars($numeroSerie, ENT_QUOTES, 'UTF-8'); ?>;LOC=<?php echo htmlspecialchars($localizacao, ENT_QUOTES, 'UTF-8'); ?>"
-                        ></div>
-                        <div class="etiqueta__conteudo">
-                            <div class="etiqueta__tipo"><?php echo htmlspecialchars($tipoNome, ENT_QUOTES, 'UTF-8'); ?></div>
-                            <div class="etiqueta__linha"><strong>NR:</strong> <?php echo htmlspecialchars($numeroSerie !== '' ? $numeroSerie : '-', ENT_QUOTES, 'UTF-8'); ?></div>
-                            <div class="etiqueta__linha"><strong>Local:</strong> <?php echo htmlspecialchars($localizacao !== '' ? $localizacao : '-', ENT_QUOTES, 'UTF-8'); ?></div>
+                        <div class="etiqueta__placa">
+                            <div
+                                class="etiqueta__qr js-etiqueta-qr"
+                                data-qr="NR=<?php echo htmlspecialchars($numeroSerie, ENT_QUOTES, 'UTF-8'); ?>;LOC=<?php echo htmlspecialchars($localizacao, ENT_QUOTES, 'UTF-8'); ?>"
+                            ></div>
+                            <div class="etiqueta__conteudo">
+                                <div class="etiqueta__marca">SISTEMA AUTOPROTECAO</div>
+                                <div class="etiqueta__submarca"><?php echo htmlspecialchars($tipoNome, ENT_QUOTES, 'UTF-8'); ?></div>
+                                <div class="etiqueta__codigo"><?php echo htmlspecialchars($numeroSerie !== '' ? $numeroSerie : '-', ENT_QUOTES, 'UTF-8'); ?></div>
+                                <div class="etiqueta__linha"><strong>LOCAL:</strong> <?php echo htmlspecialchars($localizacao !== '' ? $localizacao : '-', ENT_QUOTES, 'UTF-8'); ?></div>
+                            </div>
                         </div>
                     </article>
                 <?php endforeach; ?>
