@@ -103,6 +103,14 @@ $totalEquipamentos = (int)($totalEquipamentos ?? 0);
         </div>
 
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <a href="index.php?controler=equipamento&acao=etiquetas&tipo=<?php echo (int)$tipo['id']; ?>" 
+               class="btn btn-primary"
+               target="_blank"
+               rel="noopener">
+                <i class="bi bi-printer"></i>
+                Imprimir Etiquetas do Tipo
+            </a>
+
             <a href="index.php?controler=tipo_equipamento&acao=toggleAtivo&id=<?php echo (int)$tipo['id']; ?>" 
                class="btn <?php echo $ativo ? 'btn-warning' : 'btn-success'; ?>"
                onclick="return confirm('Tem a certeza que deseja <?php echo $ativo ? 'inativar' : 'ativar'; ?> este tipo?');">
