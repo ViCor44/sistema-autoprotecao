@@ -4,6 +4,12 @@
 
         <form method="POST" action="index.php?controler=equipamento&acao=atualizar&id=<?php echo $equipamento['id']; ?>" class="card">
             <div class="card-body">
+                <!-- Código de Barras (Leitura apenas) -->
+                <div class="alert alert-info mb-3" role="alert">
+                    <strong>Código de Barras:</strong> <code><?php echo htmlspecialchars($equipamento['codigo_barras'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></code>
+                    <small class="d-block text-muted mt-2">Este código é único e foi atribuído automaticamente.</small>
+                </div>
+
                 <div class="mb-3">
                     <label for="tipo_equipamento_id" class="form-label">Tipo de Equipamento *</label>
                     <select name="tipo_equipamento_id" id="tipo_equipamento_id" class="form-select" required>

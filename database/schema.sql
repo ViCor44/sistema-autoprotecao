@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS equipamentos (
     tipo_equipamento_id INT NOT NULL,
     numero_registo VARCHAR(100) UNIQUE COMMENT 'Número interno de registo/património do equipamento',
     numero_serie VARCHAR(100) UNIQUE,
+    codigo_barras VARCHAR(100) UNIQUE COMMENT 'Código de barras único do equipamento',
     localizacao VARCHAR(255) NOT NULL,
     marca VARCHAR(100),
     modelo VARCHAR(100),
@@ -70,6 +71,7 @@ CREATE TABLE IF NOT EXISTS equipamentos (
     FOREIGN KEY (tipo_equipamento_id) REFERENCES tipos_equipamentos(id),
     INDEX idx_tipo (tipo_equipamento_id),
     INDEX idx_localizacao (localizacao),
+    INDEX idx_codigo_barras (codigo_barras),
     INDEX idx_proxima_manutencao (data_proxima_manutencao),
     INDEX idx_ativo (ativo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

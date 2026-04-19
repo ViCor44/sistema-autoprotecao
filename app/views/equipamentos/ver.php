@@ -2,6 +2,18 @@
     <div class="col-md-8 offset-md-2">
         <h1 class="mb-4"><i class="bi bi-tools"></i> <?php echo $equipamento['tipo_nome']; ?></h1>
 
+        <!-- Código de Barras -->
+        <div class="card mb-3 border-info">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <svg id="barcode"></svg>
+                </div>
+                <p class="text-muted mb-0">
+                    <small><strong>Código de Barras:</strong> <?php echo $equipamento['codigo_barras']; ?></small>
+                </p>
+            </div>
+        </div>
+
         <div class="card mb-3">
             <div class="card-body">
                 <p>
@@ -48,3 +60,16 @@
         </div>
     </div>
 </div>
+
+<!-- Script para gerar o código de barras -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        JsBarcode("#barcode", "<?php echo $equipamento['codigo_barras']; ?>", {
+            format: "CODE128",
+            width: 2,
+            height: 80,
+            displayValue: true
+        });
+    });
+</script>

@@ -13,6 +13,7 @@ class Equipamento {
     public $id;
     public $tipo_equipamento_id;
     public $numero_serie;
+    public $codigo_barras;
     public $localizacao;
     public $marca;
     public $modelo;
@@ -200,19 +201,66 @@ class Equipamento {
     }
 
     /**
+     * Gerar código de barras único para o equipamento
+     */
+    private function gerarCodigoBarras($tipoEquipamentoId) {
+        // Obter prefixo do tipo de equipamento
+        $query = "SELECT prefixo_numeracao FROM tipos_equipamentos WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $tipoEquipamentoId);
+        $stmt->execute();
+        $resultado = $stmt->get_result()->fetch_assoc();
+        
+        $prefixo = $resultado['prefixo_numeracao'] ?? 'EQP';
+        
+        // Gerar código inicial
+        $codigoBase = $prefixo . '-' . uniqid();
+        
+        // Garantir que o código é único
+        $tentativas = 0;
+        while ($tentativas < 5) {
+            if (!$this->codigoBarrasExiste($codigoBase)) {
+                return $codigoBase;
+            }
+            // Se já existe, gerar um novo com hash
+            $codigoBase = $prefixo . '-' . substr(md5(uniqid()), 0, 12);
+            $tentativas++;
+        }
+        
+        // Fallback: usar timestamp + random
+        return $prefixo . '-' . time() . rand(100, 999);
+    }
+
+    /**
+     * Verificar se código de barras já existe
+     */
+    private function codigoBarrasExiste($codigoBarras) {
+        $query = "SELECT id FROM {$this->table} WHERE codigo_barras = ? LIMIT 1";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("s", $codigoBarras);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        return $resultado->num_rows > 0;
+    }
+
+    /**
      * Inserir novo equipamento
      */
     public function create($dados) {
+        // Gerar código de barras
+        $codigoBarras = $this->gerarCodigoBarras($dados['tipo_equipamento_id']);
+        
         $query = "INSERT INTO {$this->table} 
-                  (tipo_equipamento_id, numero_serie, localizacao, marca, modelo, 
+                  (tipo_equipamento_id, numero_serie, codigo_barras, localizacao, marca, modelo, 
                    data_aquisicao, data_instalacao, data_proxima_manutencao, estado, observacoes)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($query);
         $stmt->bind_param(
-            "isssssssss",
+            "issssssssss",
             $dados['tipo_equipamento_id'],
             $dados['numero_serie'],
+            $codigoBarras,
             $dados['localizacao'],
             $dados['marca'],
             $dados['modelo'],
