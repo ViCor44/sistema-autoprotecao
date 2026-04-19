@@ -1,44 +1,43 @@
 <?php
-$totalEquipamentos = (int)($resumo['total'] ?? 0);
-$operacionais = (int)($resumo['operacionais'] ?? 0);
-$emFalha = (int)($resumo['anomalias'] ?? 0);
 $localizacaoAtual = $filtros['localizacao'] ?? '';
 $tipoAtual = (int)($filtros['tipo_equipamento_id'] ?? 0);
 $estadoAtual = $filtros['estado'] ?? '';
 $ordenarAtual = $ordenar ?? 'tipo_nome';
 $direcaoAtual = strtolower($direcao ?? 'asc');
-$resultadosNaPagina = count($equipamentos);
-$inicioPagina = $totalResultados > 0 ? ($offset + 1) : 0;
-$fimPagina = $offset + $resultadosNaPagina;
+$temPesquisaAtiva = ($localizacaoAtual !== '') || ($tipoAtual > 0) || ($estadoAtual !== '');
 
-$queryBase = [
-    'controler' => 'equipamento',
-    'acao' => 'listar',
-];
+$equipamentosPayload = [];
+foreach ($equipamentos as $equip) {
+    $id = (int)($equip['id'] ?? 0);
+    if ($id <= 0) {
+        continue;
+    }
 
-if ($localizacaoAtual !== '') {
-    $queryBase['localizacao'] = $localizacaoAtual;
+    $equipamentosPayload[$id] = [
+        'id' => $id,
+        'tipo_nome' => (string)($equip['tipo_nome'] ?? ''),
+        'estado' => (string)($equip['estado'] ?? ''),
+        'localizacao' => (string)($equip['localizacao'] ?? ''),
+        'numero_serie' => (string)($equip['numero_serie'] ?? ''),
+        'marca' => (string)($equip['marca'] ?? ''),
+        'modelo' => (string)($equip['modelo'] ?? ''),
+        'data_aquisicao' => (string)($equip['data_aquisicao'] ?? ''),
+        'data_instalacao' => (string)($equip['data_instalacao'] ?? ''),
+        'data_proxima_manutencao' => (string)($equip['data_proxima_manutencao'] ?? ''),
+        'observacoes' => (string)($equip['observacoes'] ?? ''),
+    ];
 }
 
-if ($tipoAtual > 0) {
-    $queryBase['tipo'] = $tipoAtual;
-}
-
-if ($estadoAtual !== '') {
-    $queryBase['estado'] = $estadoAtual;
-}
-
-$queryBase['ordenar'] = $ordenarAtual;
-$queryBase['direcao'] = $direcaoAtual;
+$equipamentosJson = json_encode($equipamentosPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
 ?>
 
 <section class="page-shell page-shell--narrow equipamentos-page">
     <header class="page-hero compact equipamentos-hero">
         <div>
             <span class="page-hero__eyebrow">Inventario Tecnico</span>
-            <h1><i class="bi bi-tools"></i> Equipamentos</h1>
+            <h1><i class="bi bi-search"></i> Pesquisa de Equipamentos</h1>
             <p>
-                Consulte o estado operacional de cada equipamento, filtre por tipo, estado e localizacao, e mantenha o parque de autoprotecao sempre atualizado.
+                Pesquise por localizacao, tipo e estado. Ao pesquisar, os detalhes do equipamento abrem em modal com QR grande e acoes rapidas.
             </p>
         </div>
         <div class="page-hero__actions">
@@ -49,26 +48,11 @@ $queryBase['direcao'] = $direcaoAtual;
         </div>
     </header>
 
-    <section class="mini-stats-grid equipamentos-stats">
-        <article class="mini-stat-card">
-            <span>Total Registados</span>
-            <strong><?php echo $totalEquipamentos; ?></strong>
-        </article>
-        <article class="mini-stat-card">
-            <span>Operacionais</span>
-            <strong><?php echo $operacionais; ?></strong>
-        </article>
-        <article class="mini-stat-card">
-            <span>Com anomalias</span>
-            <strong><?php echo $emFalha; ?></strong>
-        </article>
-    </section>
-
     <section class="panel-surface equipamentos-filter-panel">
         <div class="panel-surface__header compact">
             <div>
                 <span class="panel-surface__eyebrow">Pesquisa</span>
-                <h2>Filtrar equipamentos</h2>
+                <h2>Encontrar equipamento</h2>
             </div>
         </div>
         <form method="GET" action="index.php" class="modern-form equipamentos-filter-form">
@@ -96,6 +80,8 @@ $queryBase['direcao'] = $direcaoAtual;
                     <option value="operacional" <?php echo $estadoAtual === 'operacional' ? 'selected' : ''; ?>>Operacional</option>
                     <option value="inoperacional" <?php echo $estadoAtual === 'inoperacional' ? 'selected' : ''; ?>>Inoperacional</option>
                     <option value="avariado" <?php echo $estadoAtual === 'avariado' ? 'selected' : ''; ?>>Avariado</option>
+                    <option value="inservivel" <?php echo $estadoAtual === 'inservivel' ? 'selected' : ''; ?>>Inservivel</option>
+                    <option value="aguardando_reparacao" <?php echo $estadoAtual === 'aguardando_reparacao' ? 'selected' : ''; ?>>Aguardando reparacao</option>
                 </select>
                 <select name="ordenar" class="form-select" aria-label="Ordenar por">
                     <option value="tipo_nome" <?php echo $ordenarAtual === 'tipo_nome' ? 'selected' : ''; ?>>Ordenar: Tipo</option>
@@ -103,25 +89,29 @@ $queryBase['direcao'] = $direcaoAtual;
                     <option value="estado" <?php echo $ordenarAtual === 'estado' ? 'selected' : ''; ?>>Ordenar: Estado</option>
                     <option value="proxima_manutencao" <?php echo $ordenarAtual === 'proxima_manutencao' ? 'selected' : ''; ?>>Ordenar: Proxima manutencao</option>
                 </select>
-                <select name="direcao" class="form-select" aria-label="Direção da ordenação">
+                <select name="direcao" class="form-select" aria-label="Direcao da ordenacao">
                     <option value="asc" <?php echo $direcaoAtual === 'asc' ? 'selected' : ''; ?>>Ascendente</option>
                     <option value="desc" <?php echo $direcaoAtual === 'desc' ? 'selected' : ''; ?>>Descendente</option>
                 </select>
-                <button type="submit" class="btn btn-primary">Filtrar</button>
+                <button type="submit" class="btn btn-primary">Pesquisar</button>
                 <a href="index.php?controler=equipamento&acao=listar" class="btn btn-outline-secondary">Limpar</a>
             </div>
         </form>
     </section>
 
-    <section class="equipamentos-results-meta">
-        <strong><?php echo $totalResultados; ?></strong>
-        resultados
-        <?php if ($totalResultados > 0): ?>
-            <span>(a mostrar <?php echo $inicioPagina; ?>-<?php echo $fimPagina; ?>)</span>
-        <?php endif; ?>
-    </section>
-
-    <?php if (empty($equipamentos)): ?>
+    <?php if (!$temPesquisaAtiva): ?>
+        <section class="panel-surface">
+            <div class="dashboard-empty-state">
+                <div class="dashboard-empty-state__icon">
+                    <i class="bi bi-search"></i>
+                </div>
+                <div>
+                    <strong>Inicie uma pesquisa para abrir o modal do equipamento</strong>
+                    <p>Use os filtros acima. Se houver resultados, pode abrir os detalhes por modal.</p>
+                </div>
+            </div>
+        </section>
+    <?php elseif (empty($equipamentos)): ?>
         <section class="panel-surface">
             <div class="dashboard-empty-state">
                 <div class="dashboard-empty-state__icon">
@@ -129,130 +119,158 @@ $queryBase['direcao'] = $direcaoAtual;
                 </div>
                 <div>
                     <strong>Nenhum equipamento encontrado</strong>
-                    <p>Registe o primeiro equipamento ou ajuste os filtros para visualizar resultados.</p>
+                    <p>Ajuste os filtros para encontrar um equipamento.</p>
                 </div>
             </div>
         </section>
     <?php else: ?>
-        <section class="equipamentos-grid">
-            <?php foreach ($equipamentos as $equip): ?>
-                <?php
-                $estado = $equip['estado'] ?? '';
-                $estadoClass = $estado === 'operacional' ? 'status-pill--success' : 'status-pill--warning';
-                $proximaManutencao = $equip['data_proxima_manutencao'] ?? null;
-                $proximaManutencaoLabel = '-';
-                if (!empty($proximaManutencao) && $proximaManutencao !== '0000-00-00') {
-                    $timestamp = strtotime($proximaManutencao);
-                    if ($timestamp !== false) {
-                        $proximaManutencaoLabel = date('d/m/Y', $timestamp);
-                    }
-                }
-                ?>
-                <article class="equipamento-card">
-                    <div class="equipamento-card__head">
-                        <h3><?php echo htmlspecialchars($equip['tipo_nome'] ?? 'Equipamento', ENT_QUOTES, 'UTF-8'); ?></h3>
-                        <span class="status-pill <?php echo $estadoClass; ?>">
-                            <?php echo htmlspecialchars(ucfirst($estado ?: 'indefinido'), ENT_QUOTES, 'UTF-8'); ?>
+        <section class="panel-surface">
+            <div class="panel-surface__header compact">
+                <div>
+                    <span class="panel-surface__eyebrow">Resultados</span>
+                    <h2><?php echo (int)$totalResultados; ?> equipamento(s) encontrado(s)</h2>
+                    <p class="text-muted mb-0">Clique num equipamento da lista para abrir o detalhe em modal.</p>
+                </div>
+            </div>
+            <div class="list-group list-group-flush">
+                <?php foreach ($equipamentos as $equip): ?>
+                    <button
+                        type="button"
+                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center js-abrir-equipamento"
+                        data-equip-id="<?php echo (int)$equip['id']; ?>"
+                    >
+                        <span>
+                            <strong><?php echo htmlspecialchars($equip['tipo_nome'] ?? 'Equipamento', ENT_QUOTES, 'UTF-8'); ?></strong>
+                            <span class="text-muted"> - <?php echo htmlspecialchars($equip['localizacao'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
                         </span>
-                    </div>
-
-                    <div class="text-center py-2">
-                        <div
-                            class="equipamento-card__qr d-inline-block"
-                            id="qrcode-card-<?php echo (int)$equip['id']; ?>"
-                            data-qr-url="index.php?controler=qr&amp;acao=visualizar&amp;id=<?php echo (int)$equip['id']; ?>"
-                        ></div>
-                    </div>
-
-                    <div class="equipamento-card__body">
-                        <div class="detail-row">
-                            <span>Localizacao</span>
-                            <strong><?php echo htmlspecialchars($equip['localizacao'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></strong>
-                        </div>
-                        <div class="detail-row">
-                            <span>Numero de registo</span>
-                            <strong><?php echo htmlspecialchars($equip['numero_serie'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></strong>
-                        </div>
-                        <div class="detail-row">
-                            <span>Marca e modelo</span>
-                            <strong>
-                                <?php echo htmlspecialchars($equip['marca'] ?? '-', ENT_QUOTES, 'UTF-8'); ?> /
-                                <?php echo htmlspecialchars($equip['modelo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?>
-                            </strong>
-                        </div>
-                        <div class="detail-row">
-                            <span>Proxima manutencao</span>
-                            <strong><?php echo htmlspecialchars($proximaManutencaoLabel, ENT_QUOTES, 'UTF-8'); ?></strong>
-                        </div>
-                    </div>
-
-                    <footer class="equipamento-card__actions">
-                        <a href="index.php?controler=equipamento&acao=ver&id=<?php echo $equip['id']; ?>" class="btn btn-sm btn-primary">Ver</a>
-                        <a href="index.php?controler=equipamento&acao=editar&id=<?php echo $equip['id']; ?>" class="btn btn-sm btn-warning">Editar</a>
-                        <a href="index.php?controler=equipamento&acao=deletar&id=<?php echo $equip['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Tem a certeza?');">Deletar</a>
-                    </footer>
-                </article>
-            <?php endforeach; ?>
+                        <span class="badge bg-secondary"><?php echo htmlspecialchars($equip['numero_serie'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
+                    </button>
+                <?php endforeach; ?>
+            </div>
         </section>
-
-        <?php if ($totalPaginas > 1): ?>
-            <nav aria-label="Paginação de equipamentos" class="equipamentos-pagination-wrap">
-                <ul class="pagination equipamentos-pagination">
-                    <?php
-                    $queryAnterior = $queryBase;
-                    $queryAnterior['pagina'] = max(1, $paginaAtual - 1);
-                    $linkAnterior = 'index.php?' . http_build_query($queryAnterior);
-
-                    $querySeguinte = $queryBase;
-                    $querySeguinte['pagina'] = min($totalPaginas, $paginaAtual + 1);
-                    $linkSeguinte = 'index.php?' . http_build_query($querySeguinte);
-                    ?>
-                    <li class="page-item <?php echo $paginaAtual <= 1 ? 'disabled' : ''; ?>">
-                        <a class="page-link" href="<?php echo htmlspecialchars($linkAnterior, ENT_QUOTES, 'UTF-8'); ?>">Anterior</a>
-                    </li>
-
-                    <?php
-                    $inicio = max(1, $paginaAtual - 2);
-                    $fim = min($totalPaginas, $paginaAtual + 2);
-
-                    for ($pagina = $inicio; $pagina <= $fim; $pagina++):
-                        $queryPagina = $queryBase;
-                        $queryPagina['pagina'] = $pagina;
-                        $linkPagina = 'index.php?' . http_build_query($queryPagina);
-                    ?>
-                        <li class="page-item <?php echo $pagina === $paginaAtual ? 'active' : ''; ?>">
-                            <a class="page-link" href="<?php echo htmlspecialchars($linkPagina, ENT_QUOTES, 'UTF-8'); ?>"><?php echo $pagina; ?></a>
-                        </li>
-                    <?php endfor; ?>
-
-                    <li class="page-item <?php echo $paginaAtual >= $totalPaginas ? 'disabled' : ''; ?>">
-                        <a class="page-link" href="<?php echo htmlspecialchars($linkSeguinte, ENT_QUOTES, 'UTF-8'); ?>">Seguinte</a>
-                    </li>
-                </ul>
-            </nav>
-        <?php endif; ?>
     <?php endif; ?>
 </section>
+
+<div class="modal fade" id="equipamentoDetalheModal" tabindex="-1" aria-labelledby="equipamentoDetalheModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="equipamentoDetalheModalLabel">Detalhes do Equipamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 align-items-start">
+                    <div class="col-md-5 text-center">
+                        <div id="equipamento-modal-qr" class="d-inline-block"></div>
+                        <p class="small text-muted mt-2 mb-0">QR para leitura rapida dos detalhes</p>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="mb-2"><strong>Tipo:</strong> <span id="modal-tipo">-</span></div>
+                        <div class="mb-2"><strong>Estado:</strong> <span id="modal-estado" class="badge bg-secondary">-</span></div>
+                        <div class="mb-2"><strong>Localizacao:</strong> <span id="modal-localizacao">-</span></div>
+                        <div class="mb-2"><strong>Numero de registo:</strong> <span id="modal-numero-serie">-</span></div>
+                        <div class="mb-2"><strong>Marca:</strong> <span id="modal-marca">-</span></div>
+                        <div class="mb-2"><strong>Modelo:</strong> <span id="modal-modelo">-</span></div>
+                        <div class="mb-2"><strong>Data de aquisicao:</strong> <span id="modal-data-aquisicao">-</span></div>
+                        <div class="mb-2"><strong>Data de instalacao:</strong> <span id="modal-data-instalacao">-</span></div>
+                        <div class="mb-2"><strong>Proxima vistoria:</strong> <span id="modal-data-proxima">-</span></div>
+                        <div class="mb-2"><strong>Observacoes:</strong></div>
+                        <div id="modal-observacoes" class="p-2 bg-light rounded small">-</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <div>
+                    <a id="modal-link-ver" href="#" class="btn btn-primary">Ver completo</a>
+                </div>
+                <div class="d-flex gap-2">
+                    <a id="modal-link-editar" href="#" class="btn btn-warning">Editar</a>
+                    <a id="modal-link-deletar" href="#" class="btn btn-danger" onclick="return confirm('Tem a certeza?');">Eliminar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const qrContainers = document.querySelectorAll('.equipamento-card__qr');
-    const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+    const equipamentos = <?php echo $equipamentosJson; ?>;
+    const modalEl = document.getElementById('equipamentoDetalheModal');
+    const modalQr = document.getElementById('equipamento-modal-qr');
+    const btnAbrir = document.querySelectorAll('.js-abrir-equipamento');
 
-    qrContainers.forEach(function (container) {
-        const relativeUrl = container.getAttribute('data-qr-url');
-        if (!relativeUrl) {
+    function valorOuTraco(valor) {
+        return valor && String(valor).trim() !== '' ? String(valor) : '-';
+    }
+
+    function formatarData(dataIso) {
+        if (!dataIso || dataIso === '0000-00-00') {
+            return '-';
+        }
+
+        const partes = String(dataIso).split('-');
+        if (partes.length !== 3) {
+            return String(dataIso);
+        }
+
+        return partes[2] + '/' + partes[1] + '/' + partes[0];
+    }
+
+    function atualizarEstado(estado) {
+        const estadoEl = document.getElementById('modal-estado');
+        const texto = valorOuTraco(estado);
+        estadoEl.textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
+        estadoEl.className = 'badge ' + (estado === 'operacional' ? 'bg-success' : 'bg-danger');
+    }
+
+    function abrirModalEquipamento(id) {
+        const equipamento = equipamentos[id];
+        if (!equipamento || !window.bootstrap) {
             return;
         }
 
-        new QRCode(container, {
-            text: baseUrl + relativeUrl,
-            width: 90,
-            height: 90,
+        document.getElementById('modal-tipo').textContent = valorOuTraco(equipamento.tipo_nome);
+        document.getElementById('modal-localizacao').textContent = valorOuTraco(equipamento.localizacao);
+        document.getElementById('modal-numero-serie').textContent = valorOuTraco(equipamento.numero_serie);
+        document.getElementById('modal-marca').textContent = valorOuTraco(equipamento.marca);
+        document.getElementById('modal-modelo').textContent = valorOuTraco(equipamento.modelo);
+        document.getElementById('modal-data-aquisicao').textContent = formatarData(equipamento.data_aquisicao);
+        document.getElementById('modal-data-instalacao').textContent = formatarData(equipamento.data_instalacao);
+        document.getElementById('modal-data-proxima').textContent = formatarData(equipamento.data_proxima_manutencao);
+        document.getElementById('modal-observacoes').textContent = valorOuTraco(equipamento.observacoes);
+        atualizarEstado(equipamento.estado);
+
+        const linkVer = 'index.php?controler=equipamento&acao=ver&id=' + id;
+        const linkEditar = 'index.php?controler=equipamento&acao=editar&id=' + id;
+        const linkDeletar = 'index.php?controler=equipamento&acao=deletar&id=' + id;
+
+        document.getElementById('modal-link-ver').setAttribute('href', linkVer);
+        document.getElementById('modal-link-editar').setAttribute('href', linkEditar);
+        document.getElementById('modal-link-deletar').setAttribute('href', linkDeletar);
+
+        modalQr.innerHTML = '';
+        const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+        const qrUrl = baseUrl + 'index.php?controler=qr&acao=visualizar&id=' + id;
+
+        new QRCode(modalQr, {
+            text: qrUrl,
+            width: 220,
+            height: 220,
             colorDark: '#111111',
             colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+
+    btnAbrir.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const id = parseInt(btn.getAttribute('data-equip-id'), 10);
+            if (!Number.isNaN(id)) {
+                abrirModalEquipamento(id);
+            }
         });
     });
 });
