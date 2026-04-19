@@ -61,9 +61,25 @@ $totalEtiquetas = count($etiquetas ?? []);
             background: #ffffff;
             padding: 2.1mm;
             display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 1.4mm;
+        }
+
+        .etiqueta__topo {
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            line-height: 1.15;
+            text-align: left;
+        }
+
+        .etiqueta__meio {
+            display: grid;
             grid-template-columns: 23.5mm 1fr;
             gap: 1.8mm;
             align-items: center;
+            min-height: 0;
         }
 
         .etiqueta__qr {
@@ -88,36 +104,19 @@ $totalEtiquetas = count($etiquetas ?? []);
             min-width: 0;
         }
 
-        .etiqueta__marca {
-            font-size: 8px;
-            font-weight: 800;
-            letter-spacing: 0.35px;
-            text-transform: uppercase;
-            white-space: normal;
-            overflow: visible;
-            line-height: 1.15;
-            margin-bottom: 0.8mm;
-        }
-
-        .etiqueta__submarca {
-            font-size: 6.6px;
-            color: #1d1d1d;
-            margin-bottom: 1.1mm;
-            white-space: normal;
-            overflow: visible;
-            line-height: 1.2;
-            word-break: break-word;
-        }
-
         .etiqueta__codigo {
             font-size: 5.8mm;
             line-height: 1;
             font-weight: 500;
             letter-spacing: 0.12mm;
-            margin-bottom: 0.9mm;
             white-space: normal;
             overflow: visible;
             word-break: break-word;
+        }
+
+        .etiqueta__rodape {
+            border-top: 0.25mm solid #d2d2d2;
+            padding-top: 1mm;
         }
 
         .etiqueta__linha {
@@ -184,15 +183,18 @@ $totalEtiquetas = count($etiquetas ?? []);
                     ?>
                     <article class="etiqueta">
                         <div class="etiqueta__placa">
-                            <div
-                                class="etiqueta__qr js-etiqueta-qr"
-                                data-qr="NR=<?php echo htmlspecialchars($numeroSerie, ENT_QUOTES, 'UTF-8'); ?>;LOC=<?php echo htmlspecialchars($localizacao, ENT_QUOTES, 'UTF-8'); ?>"
-                            ></div>
-                            <div class="etiqueta__conteudo">
-                                <div class="etiqueta__marca">SISTEMA AUTOPROTECAO</div>
-                                <div class="etiqueta__submarca"><?php echo htmlspecialchars($tipoNome, ENT_QUOTES, 'UTF-8'); ?></div>
-                                <div class="etiqueta__codigo"><?php echo htmlspecialchars($numeroSerie !== '' ? $numeroSerie : '-', ENT_QUOTES, 'UTF-8'); ?></div>
-                                <div class="etiqueta__linha"><strong>LOCAL:</strong> <?php echo htmlspecialchars($localizacao !== '' ? $localizacao : '-', ENT_QUOTES, 'UTF-8'); ?></div>
+                            <div class="etiqueta__topo">Sistema Autoprotecao</div>
+                            <div class="etiqueta__meio">
+                                <div
+                                    class="etiqueta__qr js-etiqueta-qr"
+                                    data-qr="NR=<?php echo htmlspecialchars($numeroSerie, ENT_QUOTES, 'UTF-8'); ?>;LOC=<?php echo htmlspecialchars($localizacao, ENT_QUOTES, 'UTF-8'); ?>"
+                                ></div>
+                                <div class="etiqueta__conteudo">
+                                    <div class="etiqueta__codigo"><?php echo htmlspecialchars($numeroSerie !== '' ? $numeroSerie : '-', ENT_QUOTES, 'UTF-8'); ?></div>
+                                </div>
+                            </div>
+                            <div class="etiqueta__rodape">
+                                <div class="etiqueta__linha"><strong>LOCALIZACAO:</strong> <?php echo htmlspecialchars($localizacao !== '' ? $localizacao : '-', ENT_QUOTES, 'UTF-8'); ?></div>
                             </div>
                         </div>
                     </article>
