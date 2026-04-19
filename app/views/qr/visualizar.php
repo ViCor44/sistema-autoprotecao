@@ -1,3 +1,25 @@
+<?php
+$formatarDataSegura = function ($data) {
+    $data = trim((string)$data);
+
+    if ($data === '' || $data === '0000-00-00') {
+        return '-';
+    }
+
+    $timestamp = strtotime($data);
+    if ($timestamp === false) {
+        return '-';
+    }
+
+    $ano = (int)date('Y', $timestamp);
+    if ($ano <= 1) {
+        return '-';
+    }
+
+    return date('d/m/Y', $timestamp);
+};
+?>
+
 <div class="qr-visualizacao-container">
     <div class="qr-header bg-primary text-white p-4 text-center">
         <h1 class="mb-0"><i class="bi bi-qrcode"></i></h1>
@@ -59,29 +81,29 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div class="row g-2 small">
-                    <?php if (!empty($equipamento['data_aquisicao']) && $equipamento['data_aquisicao'] !== '0000-00-00'): ?>
+                    <?php if ($formatarDataSegura($equipamento['data_aquisicao'] ?? null) !== '-'): ?>
                         <div class="col-6">
                             <small class="text-muted">Aquisição</small>
                             <p class="mb-0">
-                                <i class="bi bi-calendar"></i> <?php echo date('d/m/Y', strtotime($equipamento['data_aquisicao'])); ?>
+                                <i class="bi bi-calendar"></i> <?php echo $formatarDataSegura($equipamento['data_aquisicao'] ?? null); ?>
                             </p>
                         </div>
                     <?php endif; ?>
 
-                    <?php if (!empty($equipamento['data_instalacao']) && $equipamento['data_instalacao'] !== '0000-00-00'): ?>
+                    <?php if ($formatarDataSegura($equipamento['data_instalacao'] ?? null) !== '-'): ?>
                         <div class="col-6">
                             <small class="text-muted">Instalação</small>
                             <p class="mb-0">
-                                <i class="bi bi-calendar"></i> <?php echo date('d/m/Y', strtotime($equipamento['data_instalacao'])); ?>
+                                <i class="bi bi-calendar"></i> <?php echo $formatarDataSegura($equipamento['data_instalacao'] ?? null); ?>
                             </p>
                         </div>
                     <?php endif; ?>
 
-                    <?php if (!empty($equipamento['data_proxima_manutencao']) && $equipamento['data_proxima_manutencao'] !== '0000-00-00'): ?>
+                    <?php if ($formatarDataSegura($equipamento['data_proxima_manutencao'] ?? null) !== '-'): ?>
                         <div class="col-12">
                             <small class="text-muted">Próxima Vistoria</small>
                             <p class="mb-0">
-                                <i class="bi bi-calendar-check"></i> <?php echo date('d/m/Y', strtotime($equipamento['data_proxima_manutencao'])); ?>
+                                <i class="bi bi-calendar-check"></i> <?php echo $formatarDataSegura($equipamento['data_proxima_manutencao'] ?? null); ?>
                             </p>
                         </div>
                     <?php endif; ?>

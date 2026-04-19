@@ -216,6 +216,11 @@ document.addEventListener('DOMContentLoaded', function () {
             return String(dataIso);
         }
 
+        const ano = parseInt(partes[0], 10);
+        if (Number.isNaN(ano) || ano <= 1) {
+            return '-';
+        }
+
         return partes[2] + '/' + partes[1] + '/' + partes[0];
     }
 

@@ -1,3 +1,25 @@
+<?php
+$formatarDataSegura = function ($data) {
+    $data = trim((string)$data);
+
+    if ($data === '' || $data === '0000-00-00') {
+        return '-';
+    }
+
+    $timestamp = strtotime($data);
+    if ($timestamp === false) {
+        return '-';
+    }
+
+    $ano = (int)date('Y', $timestamp);
+    if ($ano <= 1) {
+        return '-';
+    }
+
+    return date('d/m/Y', $timestamp);
+};
+?>
+
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <h1 class="mb-4"><i class="bi bi-tools"></i> <?php echo $equipamento['tipo_nome']; ?></h1>
@@ -22,9 +44,9 @@
                     <strong>Número de Registo:</strong> <?php echo $equipamento['numero_serie'] ?? '-'; ?><br>
                     <strong>Marca:</strong> <?php echo $equipamento['marca'] ?? '-'; ?><br>
                     <strong>Modelo:</strong> <?php echo $equipamento['modelo'] ?? '-'; ?><br>
-                    <strong>Data de Aquisição:</strong> <?php echo $equipamento['data_aquisicao'] ? date('d/m/Y', strtotime($equipamento['data_aquisicao'])) : '-'; ?><br>
-                    <strong>Data de Instalação:</strong> <?php echo $equipamento['data_instalacao'] ? date('d/m/Y', strtotime($equipamento['data_instalacao'])) : '-'; ?><br>
-                    <strong>Próxima Vistoria:</strong> <?php echo $equipamento['data_proxima_manutencao'] ? date('d/m/Y', strtotime($equipamento['data_proxima_manutencao'])) : '-'; ?><br>
+                    <strong>Data de Aquisição:</strong> <?php echo $formatarDataSegura($equipamento['data_aquisicao'] ?? null); ?><br>
+                    <strong>Data de Instalação:</strong> <?php echo $formatarDataSegura($equipamento['data_instalacao'] ?? null); ?><br>
+                    <strong>Próxima Vistoria:</strong> <?php echo $formatarDataSegura($equipamento['data_proxima_manutencao'] ?? null); ?><br>
                     <strong>Estado:</strong> 
                     <span class="badge bg-<?php echo $equipamento['estado'] === 'operacional' ? 'success' : 'danger'; ?>">
                         <?php echo ucfirst($equipamento['estado']); ?>
@@ -54,6 +76,9 @@
         <div class="card-footer bg-white">
             <a href="index.php?controler=equipamento&acao=editar&id=<?php echo $equipamento['id']; ?>" class="btn btn-warning">
                 <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a href="index.php?controler=equipamento&acao=deletar&id=<?php echo $equipamento['id']; ?>" class="btn btn-danger" onclick="return confirm('Tem a certeza?');">
+                <i class="bi bi-trash"></i> Eliminar
             </a>
             <a href="index.php?controler=equipamento&acao=listar" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Voltar
