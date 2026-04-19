@@ -5,6 +5,7 @@ $estadoAtual = $filtros['estado'] ?? '';
 $ordenarAtual = $ordenar ?? 'tipo_nome';
 $direcaoAtual = strtolower($direcao ?? 'asc');
 $temPesquisaAtiva = ($localizacaoAtual !== '') || ($tipoAtual > 0) || ($estadoAtual !== '');
+$autoAbrirEquipamentoId = isset($autoAbrirEquipamentoId) ? (int)$autoAbrirEquipamentoId : 0;
 
 $equipamentosPayload = [];
 foreach ($equipamentos as $equip) {
@@ -162,7 +163,7 @@ $equipamentosJson = json_encode($equipamentosPayload, JSON_UNESCAPED_UNICODE | J
                 <div class="row g-3 align-items-start">
                     <div class="col-md-5 text-center">
                         <div id="equipamento-modal-qr" class="d-inline-block"></div>
-                        <p class="small text-muted mt-2 mb-0">QR para leitura rapida dos detalhes</p>
+                        <p class="small text-muted mt-2 mb-0">QR com numero de registo e localizacao</p>
                     </div>
                     <div class="col-md-7">
                         <div class="mb-2"><strong>Tipo:</strong> <span id="modal-tipo">-</span></div>
@@ -199,6 +200,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalEl = document.getElementById('equipamentoDetalheModal');
     const modalQr = document.getElementById('equipamento-modal-qr');
     const btnAbrir = document.querySelectorAll('.js-abrir-equipamento');
+    const autoAbrirEquipamentoId = <?php echo (int)$autoAbrirEquipamentoId; ?>;
 
     function valorOuTraco(valor) {
         return valor && String(valor).trim() !== '' ? String(valor) : '-';
@@ -250,11 +252,12 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('modal-link-deletar').setAttribute('href', linkDeletar);
 
         modalQr.innerHTML = '';
-        const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-        const qrUrl = baseUrl + 'index.php?controler=qr&acao=visualizar&id=' + id;
+        const numeroSerie = valorOuTraco(equipamento.numero_serie);
+        const localizacao = valorOuTraco(equipamento.localizacao);
+        const qrPayload = 'NR=' + numeroSerie + ';LOC=' + localizacao;
 
         new QRCode(modalQr, {
-            text: qrUrl,
+            text: qrPayload,
             width: 220,
             height: 220,
             colorDark: '#111111',
@@ -273,5 +276,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    if (autoAbrirEquipamentoId > 0) {
+        abrirModalEquipamento(autoAbrirEquipamentoId);
+    }
 });
 </script>

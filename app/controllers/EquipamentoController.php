@@ -30,6 +30,7 @@ class EquipamentoController extends Controller {
      */
     public function listar() {
         $filtros = ['ativo' => 1];
+        $autoAbrirEquipamentoId = null;
 
         $tipo = isset($_GET['tipo']) ? (int)$_GET['tipo'] : 0;
         $estado = isset($_GET['estado']) ? trim((string)$_GET['estado']) : '';
@@ -54,7 +55,18 @@ class EquipamentoController extends Controller {
             $filtros['estado'] = $estado;
         }
 
-        if ($localizacao !== '') {
+        $qrNumero = null;
+        $qrLocalizacao = null;
+
+        if ($localizacao !== '' && preg_match('/^NR=(.+);LOC=(.+)$/i', $localizacao, $matches)) {
+            $qrNumero = trim((string)$matches[1]);
+            $qrLocalizacao = trim((string)$matches[2]);
+        }
+
+        if ($qrNumero !== null && $qrLocalizacao !== null && $qrNumero !== '' && $qrLocalizacao !== '') {
+            $filtros['qr_numero'] = $qrNumero;
+            $filtros['qr_localizacao'] = $qrLocalizacao;
+        } elseif ($localizacao !== '') {
             $filtros['localizacao'] = $localizacao;
         }
 
@@ -75,6 +87,19 @@ class EquipamentoController extends Controller {
         ];
 
         $equipamentos = $this->equipamento->getAll($filtros, $porPagina, $offset, $ordenacao);
+
+        if ($qrNumero !== null && $qrLocalizacao !== null) {
+            foreach ($equipamentos as $equip) {
+                $numeroSerie = trim((string)($equip['numero_serie'] ?? ''));
+                $localizacaoEquip = trim((string)($equip['localizacao'] ?? ''));
+
+                if (strcasecmp($numeroSerie, $qrNumero) === 0 && strcasecmp($localizacaoEquip, $qrLocalizacao) === 0) {
+                    $autoAbrirEquipamentoId = (int)$equip['id'];
+                    break;
+                }
+            }
+        }
+
         $resumo = $this->equipamento->getResumoEstados($filtros);
         $tipos = $this->tiposEquipamentos;
 
@@ -89,7 +114,8 @@ class EquipamentoController extends Controller {
             'totalResultados',
             'offset',
             'ordenar',
-            'direcao'
+            'direcao',
+            'autoAbrirEquipamentoId'
         ));
     }
 

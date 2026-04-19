@@ -10,7 +10,7 @@
             <div class="card-body text-center">
                 <div id="qrcode-container" class="mb-3" style="display: flex; justify-content: center;"></div>
                 <p class="text-muted mb-0">
-                    <small>Escaneie este código QR com um dispositivo móvel para visualizar os detalhes do equipamento</small>
+                    <small>QR com numero de registo e localizacao do equipamento</small>
                 </p>
             </div>
         </div>
@@ -66,13 +66,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Gerar dados para o QR: contém a URL que aponta para visualização rápida
-        const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-        const qrUrl = baseUrl + 'index.php?controler=qr&acao=visualizar&id=<?php echo $equipamento['id']; ?>';
+        const numeroSerie = <?php echo json_encode((string)($equipamento['numero_serie'] ?? ''), JSON_UNESCAPED_UNICODE); ?>;
+        const localizacao = <?php echo json_encode((string)($equipamento['localizacao'] ?? ''), JSON_UNESCAPED_UNICODE); ?>;
+        const qrPayload = 'NR=' + numeroSerie + ';LOC=' + localizacao;
         
-        // Criar e renderizar o QR code
         new QRCode(document.getElementById('qrcode-container'), {
-            text: qrUrl,
+            text: qrPayload,
             width: 300,
             height: 300,
             colorDark: '#000000',

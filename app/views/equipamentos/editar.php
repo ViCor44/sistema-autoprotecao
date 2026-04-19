@@ -12,7 +12,7 @@
                         </div>
                         <div class="col">
                             <strong>Código QR do Equipamento</strong>
-                            <p class="mb-0 small text-muted">Escaneie para visualizar rapidamente os detalhes. Este código é único e foi atribuído automaticamente.</p>
+                            <p class="mb-0 small text-muted">QR com numero de registo e localizacao do equipamento.</p>
                         </div>
                     </div>
                 </div>
@@ -175,13 +175,12 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Gerar dados para o QR: contém a URL que aponta para visualização rápida
-        const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-        const qrUrl = baseUrl + 'index.php?controler=qr&acao=visualizar&id=<?php echo $equipamento['id']; ?>';
+        const numeroSerie = <?php echo json_encode((string)($equipamento['numero_serie'] ?? ''), JSON_UNESCAPED_UNICODE); ?>;
+        const localizacao = <?php echo json_encode((string)($equipamento['localizacao'] ?? ''), JSON_UNESCAPED_UNICODE); ?>;
+        const qrPayload = 'NR=' + numeroSerie + ';LOC=' + localizacao;
         
-        // Criar e renderizar o QR code
         new QRCode(document.getElementById('qrcode-editar'), {
-            text: qrUrl,
+            text: qrPayload,
             width: 100,
             height: 100,
             colorDark: '#000000',
