@@ -30,7 +30,7 @@ class EquipamentoController extends Controller {
      */
     private function carregarTiposEquipamentos() {
         $db = new Database();
-        $resultado = $db->query("SELECT id, nome FROM tipos_equipamentos WHERE ativo = TRUE ORDER BY nome ASC");
+        $resultado = $db->query("SELECT id, nome, prefixo_numeracao FROM tipos_equipamentos WHERE ativo = TRUE ORDER BY nome ASC");
         $this->tiposEquipamentos = $resultado->fetch_all(MYSQLI_ASSOC);
 
         foreach ($this->tiposEquipamentos as $tipo) {

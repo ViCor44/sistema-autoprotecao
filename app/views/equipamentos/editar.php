@@ -22,7 +22,7 @@
                     <select name="tipo_equipamento_id" id="tipo_equipamento_id" class="form-select" required>
                         <option value="">Selecione...</option>
                         <?php foreach ($tipos as $tipo): ?>
-                            <option value="<?php echo $tipo['id']; ?>" <?php echo $tipo['id'] === $equipamento['tipo_equipamento_id'] ? 'selected' : ''; ?>><?php echo $tipo['nome']; ?></option>
+                            <option value="<?php echo $tipo['id']; ?>" data-prefixo="<?php echo htmlspecialchars((string)($tipo['prefixo_numeracao'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" <?php echo $tipo['id'] === $equipamento['tipo_equipamento_id'] ? 'selected' : ''; ?>><?php echo $tipo['nome']; ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -141,8 +141,25 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const selectTipo = document.getElementById('tipo_equipamento_id');
+    const inputNumeroSerie = document.getElementById('numero_serie');
     const blocoCampos = document.getElementById('bloco-campos-dinamicos');
     const grupos = document.querySelectorAll('.campos-tipo');
+
+    function sugerirNumeroSerie() {
+        const optionSelecionada = selectTipo.options[selectTipo.selectedIndex];
+        const prefixo = optionSelecionada ? String(optionSelecionada.getAttribute('data-prefixo') || '').trim() : '';
+        const valorAtual = String(inputNumeroSerie.value || '').trim();
+        const valorFoiSugerido = inputNumeroSerie.getAttribute('data-prefixo-sugerido') === '1';
+
+        if (prefixo === '') {
+            return;
+        }
+
+        if (valorAtual === '' || valorFoiSugerido) {
+            inputNumeroSerie.value = prefixo + '-';
+            inputNumeroSerie.setAttribute('data-prefixo-sugerido', '1');
+        }
+    }
 
     function atualizarCamposDinamicos() {
         const tipoSelecionado = selectTipo.value;
@@ -166,8 +183,25 @@ document.addEventListener('DOMContentLoaded', function () {
         blocoCampos.style.display = existeGrupoVisivel ? 'block' : 'none';
     }
 
-    selectTipo.addEventListener('change', atualizarCamposDinamicos);
+    inputNumeroSerie.addEventListener('input', function () {
+        const valorAtual = String(inputNumeroSerie.value || '').trim();
+        if (valorAtual === '') {
+            inputNumeroSerie.setAttribute('data-prefixo-sugerido', '0');
+            return;
+        }
+
+        inputNumeroSerie.setAttribute('data-prefixo-sugerido', valorAtual.endsWith('-') ? '1' : '0');
+    });
+
+    selectTipo.addEventListener('change', function () {
+        atualizarCamposDinamicos();
+        sugerirNumeroSerie();
+    });
     atualizarCamposDinamicos();
+
+    if (String(inputNumeroSerie.value || '').trim() === '') {
+        sugerirNumeroSerie();
+    }
 });
 </script>
 
