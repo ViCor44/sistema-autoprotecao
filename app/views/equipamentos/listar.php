@@ -202,6 +202,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnAbrir = document.querySelectorAll('.js-abrir-equipamento');
     const autoAbrirEquipamentoId = <?php echo (int)$autoAbrirEquipamentoId; ?>;
 
+    function normalizarTextoQr(texto) {
+        return String(texto || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^\x20-\x7E]/g, '')
+            .trim();
+    }
+
     function valorOuTraco(valor) {
         return valor && String(valor).trim() !== '' ? String(valor) : '-';
     }
@@ -257,8 +265,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('modal-link-deletar').setAttribute('href', linkDeletar);
 
         modalQr.innerHTML = '';
-        const numeroSerie = valorOuTraco(equipamento.numero_serie);
-        const localizacao = valorOuTraco(equipamento.localizacao);
+        const numeroSerie = normalizarTextoQr(valorOuTraco(equipamento.numero_serie));
+        const localizacao = normalizarTextoQr(valorOuTraco(equipamento.localizacao));
         const qrPayload = 'NR=' + numeroSerie + ';LOC=' + localizacao;
 
         new QRCode(modalQr, {

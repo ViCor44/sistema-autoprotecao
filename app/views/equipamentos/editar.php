@@ -175,9 +175,17 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        function normalizarTextoQr(texto) {
+            return String(texto || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^\x20-\x7E]/g, '')
+                .trim();
+        }
+
         const numeroSerie = <?php echo json_encode((string)($equipamento['numero_serie'] ?? ''), JSON_UNESCAPED_UNICODE); ?>;
         const localizacao = <?php echo json_encode((string)($equipamento['localizacao'] ?? ''), JSON_UNESCAPED_UNICODE); ?>;
-        const qrPayload = 'NR=' + numeroSerie + ';LOC=' + localizacao;
+        const qrPayload = 'NR=' + normalizarTextoQr(numeroSerie) + ';LOC=' + normalizarTextoQr(localizacao);
         
         new QRCode(document.getElementById('qrcode-editar'), {
             text: qrPayload,

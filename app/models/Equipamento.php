@@ -437,7 +437,7 @@ class Equipamento {
         if (!empty($filtros['qr_numero']) && !empty($filtros['qr_localizacao'])) {
             $numero = $this->db->escape($filtros['qr_numero']);
             $localizacao = $this->db->escape($filtros['qr_localizacao']);
-            $where .= " AND e.numero_serie = '{$numero}' AND e.localizacao = '{$localizacao}'";
+            $where .= " AND e.numero_serie = '{$numero}' AND e.localizacao LIKE '%{$localizacao}%'";
             return $where;
         }
 
