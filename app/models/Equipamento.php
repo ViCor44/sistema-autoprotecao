@@ -244,9 +244,52 @@ class Equipamento {
     }
 
     /**
+     * Verificar e limpar numero_serie duplicado de equipamentos inativos
+     */
+    private function limparNumeroSerieInativo($numeroSerie) {
+        if (empty($numeroSerie)) {
+            return;
+        }
+
+        // Buscar equipamentos inativos com o mesmo numero_serie
+        $query = "UPDATE {$this->table} 
+                  SET numero_serie = NULL 
+                  WHERE numero_serie = ? AND ativo = FALSE 
+                  LIMIT 1";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("s", $numeroSerie);
+        return $stmt->execute();
+    }
+
+    /**
+     * Verificar e limpar codigo_barras duplicado de equipamentos inativos
+     */
+    private function limparCodigoBarrasInativo($codigoBarras) {
+        if (empty($codigoBarras)) {
+            return;
+        }
+
+        // Buscar equipamentos inativos com o mesmo codigo_barras
+        $query = "UPDATE {$this->table} 
+                  SET codigo_barras = NULL 
+                  WHERE codigo_barras = ? AND ativo = FALSE 
+                  LIMIT 1";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("s", $codigoBarras);
+        return $stmt->execute();
+    }
+
+    /**
      * Inserir novo equipamento
      */
     public function create($dados) {
+        // Se numero_serie foi preenchido, limpar duplicatas inativas
+        if (!empty($dados['numero_serie'])) {
+            $this->limparNumeroSerieInativo($dados['numero_serie']);
+        }
+
         // Gerar código de barras
         $codigoBarras = $this->gerarCodigoBarras($dados['tipo_equipamento_id']);
         
@@ -281,6 +324,15 @@ class Equipamento {
      * Atualizar equipamento
      */
     public function update($id, $dados) {
+        // Se numero_serie foi preenchido, limpar duplicatas inativas
+        if (!empty($dados['numero_serie'])) {
+            // Mas não limpar se for o mesmo equipamento
+            $equipamentoAtual = $this->getById($id);
+            if ($equipamentoAtual && $equipamentoAtual['numero_serie'] !== $dados['numero_serie']) {
+                $this->limparNumeroSerieInativo($dados['numero_serie']);
+            }
+        }
+
         $query = "UPDATE {$this->table} SET
                   tipo_equipamento_id = ?,
                   numero_serie = ?,
