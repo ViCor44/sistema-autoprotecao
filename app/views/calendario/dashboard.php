@@ -6,28 +6,28 @@
 
 <div class="row mb-4">
     <div class="col-md-4">
-        <div class="card bg-info text-white">
+        <a href="index.php?controler=inspecao&acao=listar" class="card bg-info text-white text-decoration-none dashboard-kpi-link">
             <div class="card-body">
                 <h5 class="card-title">Próximas Inspeções (30 dias)</h5>
                 <h2><?php echo count($proximasInspecoes); ?></h2>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-4">
-        <div class="card bg-danger text-white">
+        <a href="index.php?controler=inspecao&acao=listar" class="card bg-danger text-white text-decoration-none dashboard-kpi-link">
             <div class="card-body">
                 <h5 class="card-title">Inspeções em Atraso</h5>
                 <h2><?php echo count($inspecoesVencidas); ?></h2>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-4">
-        <div class="card bg-warning text-white">
+        <a href="index.php?controler=equipamento&acao=listar" class="card bg-warning text-white text-decoration-none dashboard-kpi-link">
             <div class="card-body">
                 <h5 class="card-title">Equipamentos com Vistoria Pendente</h5>
                 <h2><?php echo count($equipamentosPendentes); ?></h2>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
@@ -52,9 +52,9 @@
                             </thead>
                             <tbody>
                                 <?php foreach ($proximasInspecoes as $m): ?>
-                                    <tr>
+                                    <tr class="dashboard-table-clickable-row" onclick="window.location.href='index.php?controler=inspecao&acao=preencher&id=<?php echo (int)$m['id']; ?>'">
                                         <td><?php echo date('d/m/Y', strtotime($m['data_inspecao'])); ?></td>
-                                        <td><?php echo $m['localizacao']; ?></td>
+                                        <td><?php echo htmlspecialchars((string)$m['localizacao']); ?></td>
                                         <td><span class="badge bg-info"><?php echo ucfirst($m['prioridade']); ?></span></td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -86,9 +86,9 @@
                             </thead>
                             <tbody>
                                 <?php foreach ($inspecoesVencidas as $m): ?>
-                                    <tr class="table-danger">
+                                    <tr class="table-danger dashboard-table-clickable-row" onclick="window.location.href='index.php?controler=inspecao&acao=preencher&id=<?php echo (int)$m['id']; ?>'">
                                         <td><?php echo date('d/m/Y', strtotime($m['data_inspecao'])); ?></td>
-                                        <td><?php echo $m['localizacao']; ?></td>
+                                        <td><?php echo htmlspecialchars((string)$m['localizacao']); ?></td>
                                         <td><?php echo floor((strtotime('now') - strtotime($m['data_inspecao'])) / 86400); ?> dias</td>
                                     </tr>
                                 <?php endforeach; ?>

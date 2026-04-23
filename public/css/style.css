@@ -727,6 +727,25 @@ h2 {
     font-weight: 800;
 }
 
+.dashboard-kpi-link {
+    display: block;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.dashboard-kpi-link:hover,
+.dashboard-kpi-link:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.2);
+}
+
+.dashboard-table-clickable-row {
+    cursor: pointer;
+}
+
+.dashboard-table-clickable-row:hover td {
+    background-color: rgba(22, 93, 255, 0.08);
+}
+
 .dashboard-action-grid {
     display: grid;
     gap: 14px;
