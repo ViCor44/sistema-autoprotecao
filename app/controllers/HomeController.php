@@ -19,12 +19,17 @@ class HomeController extends Controller {
     public function index() {
         $proximasManutencoes = $this->calendarioManutencao->getProximos(7);
         $manutencoeVencidas = $this->calendarioManutencao->getVencidos();
+        $planeamentoManutencoes = array_merge($manutencoeVencidas, $proximasManutencoes);
+        usort($planeamentoManutencoes, function ($a, $b) {
+            return strtotime((string)($a['data_inspecao'] ?? '')) <=> strtotime((string)($b['data_inspecao'] ?? ''));
+        });
         $relatoriosRecentes = $this->relatorio->getAll(['data_inicio' => date('Y-m-d', strtotime('-30 days'))]);
         $totalEquipamentos = count($this->equipamento->getAll(['ativo' => 1]));
         $totalInspecoesAgendadas = count($this->calendarioManutencao->getAll(['status' => 'agendado']));
         $this->render('home/index', compact(
             'proximasManutencoes',
             'manutencoeVencidas',
+            'planeamentoManutencoes',
             'relatoriosRecentes',
             'totalEquipamentos',
             'totalInspecoesAgendadas'

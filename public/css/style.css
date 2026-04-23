@@ -498,6 +498,18 @@ h2 {
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
 }
 
+.dashboard-stat-card--link {
+    text-decoration: none;
+    color: inherit;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.dashboard-stat-card--link:hover,
+.dashboard-stat-card--link:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.1);
+}
+
 .dashboard-stat-card__icon {
     display: inline-flex;
     align-items: center;
@@ -635,6 +647,18 @@ h2 {
     border-radius: 20px;
     background: linear-gradient(180deg, #ffffff, #f8fbff);
     border: 1px solid var(--stroke-soft);
+}
+
+.dashboard-list__item-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.dashboard-list__item-link:hover .dashboard-list__item,
+.dashboard-list__item-link:focus-visible .dashboard-list__item {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+    border-color: rgba(22, 93, 255, 0.24);
 }
 
 .dashboard-list__date {

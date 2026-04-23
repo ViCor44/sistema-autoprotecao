@@ -66,14 +66,14 @@ $estadoClasse = $totalVencidas > 0 ? 'is-critical' : ($totalProximas > 0 ? 'is-w
             </div>
         </article>
 
-        <article class="dashboard-stat-card tone-coral">
+        <a href="index.php?controler=calendario&acao=dashboard" class="dashboard-stat-card dashboard-stat-card--link tone-coral">
             <div class="dashboard-stat-card__icon"><i class="bi bi-exclamation-triangle"></i></div>
             <div>
                 <span class="dashboard-stat-card__label">Inspeções em atraso</span>
                 <strong class="dashboard-stat-card__value"><?php echo $totalVencidas; ?></strong>
                 <span class="dashboard-stat-card__meta">Itens que exigem recuperação</span>
             </div>
-        </article>
+        </a>
 
         <article class="dashboard-stat-card tone-mint">
             <div class="dashboard-stat-card__icon"><i class="bi bi-file-earmark-text"></i></div>
@@ -95,7 +95,7 @@ $estadoClasse = $totalVencidas > 0 ? 'is-critical' : ($totalProximas > 0 ? 'is-w
                 <a href="index.php?controler=calendario&acao=dashboard" class="dashboard-panel__link">Ver agenda</a>
             </div>
 
-            <?php if (empty($proximasManutencoes)): ?>
+            <?php if (empty($planeamentoManutencoes)): ?>
                 <div class="dashboard-empty-state">
                     <div class="dashboard-empty-state__icon"><i class="bi bi-calendar2-check"></i></div>
                     <div>
@@ -105,23 +105,25 @@ $estadoClasse = $totalVencidas > 0 ? 'is-critical' : ($totalProximas > 0 ? 'is-w
                 </div>
             <?php else: ?>
                 <div class="dashboard-list">
-                    <?php foreach ($proximasManutencoes as $manutencao): ?>
-                        <article class="dashboard-list__item">
-                            <div class="dashboard-list__date">
-                                <span><?php echo date('d', strtotime($manutencao['data_inspecao'])); ?></span>
-                                <small><?php echo date('M', strtotime($manutencao['data_inspecao'])); ?></small>
-                            </div>
-                            <div class="dashboard-list__content">
-                                <h3><?php echo htmlspecialchars($manutencao['localizacao'] ?: $manutencao['tipo_equipamento']); ?></h3>
-                                <p><?php echo htmlspecialchars($manutencao['tipo_equipamento']); ?></p>
-                            </div>
-                            <div class="dashboard-list__meta">
-                                <?php if (in_array(($manutencao['status'] ?? ''), ['concluido', 'concluida'], true)): ?>
-                                    <span class="dashboard-done"><i class="bi bi-check-circle-fill"></i> Concluída</span>
-                                <?php endif; ?>
-                                <span class="dashboard-chip"><?php echo ucfirst($manutencao['tipo_inspecao']); ?></span>
-                            </div>
-                        </article>
+                    <?php foreach ($planeamentoManutencoes as $manutencao): ?>
+                        <a href="index.php?controler=calendario&acao=ver&id=<?php echo (int)$manutencao['id']; ?>" class="dashboard-list__item-link">
+                            <article class="dashboard-list__item">
+                                <div class="dashboard-list__date">
+                                    <span><?php echo date('d', strtotime($manutencao['data_inspecao'])); ?></span>
+                                    <small><?php echo date('M', strtotime($manutencao['data_inspecao'])); ?></small>
+                                </div>
+                                <div class="dashboard-list__content">
+                                    <h3><?php echo htmlspecialchars($manutencao['localizacao'] ?: $manutencao['tipo_equipamento']); ?></h3>
+                                    <p><?php echo htmlspecialchars($manutencao['tipo_equipamento']); ?></p>
+                                </div>
+                                <div class="dashboard-list__meta">
+                                    <?php if (in_array(($manutencao['status'] ?? ''), ['concluido', 'concluida'], true)): ?>
+                                        <span class="dashboard-done"><i class="bi bi-check-circle-fill"></i> Concluída</span>
+                                    <?php endif; ?>
+                                    <span class="dashboard-chip"><?php echo ucfirst($manutencao['tipo_inspecao']); ?></span>
+                                </div>
+                            </article>
+                        </a>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
