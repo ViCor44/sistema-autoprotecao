@@ -1,5 +1,6 @@
 <?php
 $totalEtiquetas = count($etiquetas ?? []);
+$paginasSimples = array_chunk($etiquetas ?? [], 24);
 ?>
 
 <!DOCTYPE html>
@@ -119,6 +120,22 @@ $totalEtiquetas = count($etiquetas ?? []);
             padding-top: 1mm;
         }
 
+        .etiqueta__placa--simples {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2.6mm;
+        }
+
+        .etiqueta__codigo--simples {
+            font-size: 8.6mm;
+            line-height: 1;
+            font-weight: 700;
+            letter-spacing: 0.18mm;
+            text-align: center;
+            word-break: break-word;
+        }
+
         .etiqueta__linha {
             font-size: 6.9px;
             color: #1d1d1d;
@@ -201,6 +218,23 @@ $totalEtiquetas = count($etiquetas ?? []);
                 <?php endforeach; ?>
 
                 <?php for ($vazio = count($pagina); $vazio < 24; $vazio++): ?>
+                    <article class="etiqueta etiqueta--vazia"></article>
+                <?php endfor; ?>
+            </section>
+        <?php endforeach; ?>
+
+        <?php foreach ($paginasSimples as $paginaSimples): ?>
+            <section class="sheet">
+                <?php foreach ($paginaSimples as $equipamento): ?>
+                    <?php $numeroSerie = trim((string)($equipamento['numero_serie'] ?? '')); ?>
+                    <article class="etiqueta">
+                        <div class="etiqueta__placa etiqueta__placa--simples">
+                            <div class="etiqueta__codigo etiqueta__codigo--simples"><?php echo htmlspecialchars($numeroSerie !== '' ? $numeroSerie : '-', ENT_QUOTES, 'UTF-8'); ?></div>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+
+                <?php for ($vazio = count($paginaSimples); $vazio < 24; $vazio++): ?>
                     <article class="etiqueta etiqueta--vazia"></article>
                 <?php endfor; ?>
             </section>
