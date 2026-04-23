@@ -125,10 +125,19 @@ $paginasSimples = array_chunk($etiquetas ?? [], 48);
         }
 
         .etiqueta__placa--simples {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: grid;
+            grid-template-rows: auto 1fr;
             padding: 2.6mm;
+            gap: 1mm;
+        }
+
+        .etiqueta__topo--simples {
+            font-size: 7px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            line-height: 1.15;
+            text-align: center;
         }
 
         .etiqueta__codigo--simples {
@@ -204,7 +213,7 @@ $paginasSimples = array_chunk($etiquetas ?? [], 48);
                     ?>
                     <article class="etiqueta">
                         <div class="etiqueta__placa">
-                            <div class="etiqueta__topo">Sistema Autoprotecao</div>
+                            <div class="etiqueta__topo">Sistema de Autoprote&#231;&#227;o</div>
                             <div class="etiqueta__meio">
                                 <div
                                     class="etiqueta__qr js-etiqueta-qr"
@@ -233,7 +242,8 @@ $paginasSimples = array_chunk($etiquetas ?? [], 48);
                     <?php $numeroSerie = trim((string)($equipamento['numero_serie'] ?? '')); ?>
                     <article class="etiqueta">
                         <div class="etiqueta__placa etiqueta__placa--simples">
-                            <div class="etiqueta__codigo etiqueta__codigo--simples"><?php echo htmlspecialchars($numeroSerie !== '' ? $numeroSerie : '-', ENT_QUOTES, 'UTF-8'); ?></div>
+                            <div class="etiqueta__topo etiqueta__topo--simples">Sistema de Autoprote&#231;&#227;o</div>
+                            <div class="etiqueta__codigo etiqueta__codigo--simples" style="display:flex;align-items:center;justify-content:center;"><?php echo htmlspecialchars($numeroSerie !== '' ? $numeroSerie : '-', ENT_QUOTES, 'UTF-8'); ?></div>
                         </div>
                     </article>
                 <?php endforeach; ?>
