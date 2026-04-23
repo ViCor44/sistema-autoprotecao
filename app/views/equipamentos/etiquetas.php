@@ -1,6 +1,6 @@
 <?php
 $totalEtiquetas = count($etiquetas ?? []);
-$paginasSimples = array_chunk($etiquetas ?? [], 24);
+$paginasSimples = array_chunk($etiquetas ?? [], 48);
 ?>
 
 <!DOCTYPE html>
@@ -47,6 +47,10 @@ $paginasSimples = array_chunk($etiquetas ?? [], 24);
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(6, 1fr);
             border: 1px dashed #d0d0d0;
+        }
+
+        .sheet--simples {
+            grid-template-rows: repeat(12, 1fr);
         }
 
         .etiqueta {
@@ -128,7 +132,7 @@ $paginasSimples = array_chunk($etiquetas ?? [], 24);
         }
 
         .etiqueta__codigo--simples {
-            font-size: 8.6mm;
+            font-size: 6.4mm;
             line-height: 1;
             font-weight: 700;
             letter-spacing: 0.18mm;
@@ -224,7 +228,7 @@ $paginasSimples = array_chunk($etiquetas ?? [], 24);
         <?php endforeach; ?>
 
         <?php foreach ($paginasSimples as $paginaSimples): ?>
-            <section class="sheet">
+            <section class="sheet sheet--simples">
                 <?php foreach ($paginaSimples as $equipamento): ?>
                     <?php $numeroSerie = trim((string)($equipamento['numero_serie'] ?? '')); ?>
                     <article class="etiqueta">
@@ -234,7 +238,7 @@ $paginasSimples = array_chunk($etiquetas ?? [], 24);
                     </article>
                 <?php endforeach; ?>
 
-                <?php for ($vazio = count($paginaSimples); $vazio < 24; $vazio++): ?>
+                <?php for ($vazio = count($paginaSimples); $vazio < 48; $vazio++): ?>
                     <article class="etiqueta etiqueta--vazia"></article>
                 <?php endfor; ?>
             </section>

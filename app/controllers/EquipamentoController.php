@@ -135,7 +135,7 @@ class EquipamentoController extends Controller {
     /**
      * Imprimir etiquetas dos equipamentos
      * A4 vertical: 4 colunas x 6 linhas por página
-     * Extintores: 2 etiquetas por equipamento
+        * Uma etiqueta completa e uma etiqueta simples por equipamento
      */
     public function etiquetas() {
         $filtros = ['ativo' => 1];
@@ -162,16 +162,7 @@ class EquipamentoController extends Controller {
         ];
 
         $equipamentos = $this->equipamento->getAll($filtros, null, 0, $ordenacao);
-        $etiquetas = [];
-
-        foreach ($equipamentos as $equipamento) {
-            $tipoNome = strtolower((string)($equipamento['tipo_nome'] ?? ''));
-            $quantidadeEtiquetas = str_contains($tipoNome, 'extintor') ? 2 : 1;
-
-            for ($i = 0; $i < $quantidadeEtiquetas; $i++) {
-                $etiquetas[] = $equipamento;
-            }
-        }
+        $etiquetas = $equipamentos;
 
         $etiquetasPorPagina = 24; // 4 colunas x 6 linhas
         $paginas = array_chunk($etiquetas, $etiquetasPorPagina);
