@@ -317,6 +317,9 @@ class Equipamento {
      * Inserir novo equipamento
      */
     public function create($dados) {
+        // Normalizar numero_serie vazio para null (evita violação de unique key)
+        $dados['numero_serie'] = !empty($dados['numero_serie']) ? $dados['numero_serie'] : null;
+
         // Se numero_serie foi preenchido, limpar duplicatas inativas
         if (!empty($dados['numero_serie'])) {
             $this->limparNumeroSerieInativo($dados['numero_serie']);
@@ -360,6 +363,9 @@ class Equipamento {
      * Atualizar equipamento
      */
     public function update($id, $dados) {
+        // Normalizar numero_serie vazio para null (evita violação de unique key)
+        $dados['numero_serie'] = !empty($dados['numero_serie']) ? $dados['numero_serie'] : null;
+
         // Se numero_serie foi preenchido, limpar duplicatas inativas
         if (!empty($dados['numero_serie'])) {
             // Mas não limpar se for o mesmo equipamento
