@@ -229,7 +229,7 @@ class Equipamento {
 
         $this->db->commit();
 
-        return $prefixo . '-' . str_pad($numero, 4, '0', STR_PAD_LEFT);
+        return $prefixo . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
     }
 
     /**

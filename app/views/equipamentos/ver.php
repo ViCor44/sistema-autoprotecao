@@ -100,7 +100,7 @@ $formatarDataSegura = function ($data) {
                 .trim();
         }
 
-        const numeroSerie = <?php echo json_encode((string)($equipamento['numero_serie'] ?? ''), JSON_UNESCAPED_UNICODE); ?>;
+        const numeroSerie = <?php echo json_encode((string)($equipamento['numero_registo'] ?? ''), JSON_UNESCAPED_UNICODE); ?>;
         const localizacao = <?php echo json_encode((string)($equipamento['localizacao'] ?? ''), JSON_UNESCAPED_UNICODE); ?>;
         const qrPayload = 'NR=' + normalizarTextoQr(numeroSerie) + ';LOC=' + normalizarTextoQr(localizacao);
         
