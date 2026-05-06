@@ -19,6 +19,7 @@ foreach ($equipamentos as $equip) {
         'tipo_nome' => (string)($equip['tipo_nome'] ?? ''),
         'estado' => (string)($equip['estado'] ?? ''),
         'localizacao' => (string)($equip['localizacao'] ?? ''),
+        'numero_registo' => (string)($equip['numero_registo'] ?? ''),
         'numero_serie' => (string)($equip['numero_serie'] ?? ''),
         'marca' => (string)($equip['marca'] ?? ''),
         'modelo' => (string)($equip['modelo'] ?? ''),
@@ -153,7 +154,7 @@ $equipamentosJson = json_encode($equipamentosPayload, JSON_UNESCAPED_UNICODE | J
                             <strong><?php echo htmlspecialchars($equip['tipo_nome'] ?? 'Equipamento', ENT_QUOTES, 'UTF-8'); ?></strong>
                             <span class="text-muted"> - <?php echo htmlspecialchars($equip['localizacao'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
                         </span>
-                        <span class="badge bg-secondary"><?php echo htmlspecialchars($equip['numero_serie'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
+                        <span class="badge bg-primary"><?php echo htmlspecialchars($equip['numero_registo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
                     </button>
                 <?php endforeach; ?>
             </div>
@@ -178,7 +179,7 @@ $equipamentosJson = json_encode($equipamentosPayload, JSON_UNESCAPED_UNICODE | J
                         <div class="mb-2"><strong>Tipo:</strong> <span id="modal-tipo">-</span></div>
                         <div class="mb-2"><strong>Estado:</strong> <span id="modal-estado" class="badge bg-secondary">-</span></div>
                         <div class="mb-2"><strong>Localizacao:</strong> <span id="modal-localizacao">-</span></div>
-                        <div class="mb-2"><strong>Numero de registo:</strong> <span id="modal-numero-serie">-</span></div>
+                        <div class="mb-2"><strong>Numero de registo:</strong> <span id="modal-numero-registo" class="badge bg-primary">-</span></div>
                         <div class="mb-2"><strong>Marca:</strong> <span id="modal-marca">-</span></div>
                         <div class="mb-2"><strong>Modelo:</strong> <span id="modal-modelo">-</span></div>
                         <div class="mb-2"><strong>Data de aquisicao:</strong> <span id="modal-data-aquisicao">-</span></div>
@@ -256,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.getElementById('modal-tipo').textContent = valorOuTraco(equipamento.tipo_nome);
         document.getElementById('modal-localizacao').textContent = valorOuTraco(equipamento.localizacao);
-        document.getElementById('modal-numero-serie').textContent = valorOuTraco(equipamento.numero_serie);
+        document.getElementById('modal-numero-registo').textContent = valorOuTraco(equipamento.numero_registo);
         document.getElementById('modal-marca').textContent = valorOuTraco(equipamento.marca);
         document.getElementById('modal-modelo').textContent = valorOuTraco(equipamento.modelo);
         document.getElementById('modal-data-aquisicao').textContent = formatarData(equipamento.data_aquisicao);
@@ -274,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('modal-link-deletar').setAttribute('href', linkDeletar);
 
         modalQr.innerHTML = '';
-        const numeroSerie = normalizarTextoQr(valorOuTraco(equipamento.numero_serie));
+        const numeroSerie = normalizarTextoQr(valorOuTraco(equipamento.numero_registo));
         const localizacao = normalizarTextoQr(valorOuTraco(equipamento.localizacao));
         const qrPayload = 'NR=' + numeroSerie + ';LOC=' + localizacao;
 

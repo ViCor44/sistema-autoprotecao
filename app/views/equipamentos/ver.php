@@ -40,8 +40,9 @@ $formatarDataSegura = function ($data) {
         <div class="card mb-3">
             <div class="card-body">
                 <p>
-                    <strong>Localização:</strong> <?php echo $equipamento['localizacao']; ?><br>
-                    <strong>Número de Registo:</strong> <?php echo $equipamento['numero_serie'] ?? '-'; ?><br>
+                    <strong>Localização:</strong> <?php echo htmlspecialchars($equipamento['localizacao'], ENT_QUOTES, 'UTF-8'); ?><br>
+                    <strong>Número de Registo:</strong> <span class="badge bg-primary"><?php echo htmlspecialchars($equipamento['numero_registo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span><br>
+                    <strong>Número de Série:</strong> <?php echo htmlspecialchars($equipamento['numero_serie'] ?? '-', ENT_QUOTES, 'UTF-8'); ?><br>
                     <strong>Marca:</strong> <?php echo $equipamento['marca'] ?? '-'; ?><br>
                     <strong>Modelo:</strong> <?php echo $equipamento['modelo'] ?? '-'; ?><br>
                     <strong>Data de Aquisição:</strong> <?php echo $formatarDataSegura($equipamento['data_aquisicao'] ?? null); ?><br>

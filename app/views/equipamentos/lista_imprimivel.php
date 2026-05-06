@@ -193,7 +193,7 @@ $formatarData = function ($data) {
                         <?php foreach ($equipamentos as $equipamento): ?>
                             <?php $estado = (string)($equipamento['estado'] ?? '-'); ?>
                             <tr>
-                                <td><?php echo htmlspecialchars((string)($equipamento['numero_serie'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars((string)($equipamento['numero_registo'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td><?php echo htmlspecialchars((string)($equipamento['localizacao'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td><?php echo htmlspecialchars((string)($equipamento['marca'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>
                                 <td><?php echo htmlspecialchars((string)($equipamento['modelo'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>

@@ -79,12 +79,21 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="numero_serie" class="form-label">Número de Registo / Património</label>
-                        <input type="text" class="form-control" name="numero_serie" id="numero_serie" value="<?php echo $equipamento['numero_serie'] ?? ''; ?>">
+                        <label class="form-label">Número de Registo</label>
+                        <div class="form-control-plaintext bg-light border rounded px-3 py-2">
+                            <strong><?php echo htmlspecialchars($equipamento['numero_registo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></strong>
+                        </div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="localizacao" class="form-label">Localização *</label>
-                        <input type="text" class="form-control" name="localizacao" id="localizacao" value="<?php echo $equipamento['localizacao']; ?>" required>
+                        <input type="text" class="form-control" name="localizacao" id="localizacao" value="<?php echo htmlspecialchars($equipamento['localizacao'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="numero_serie" class="form-label">Número de Série (Fabricante)</label>
+                        <input type="text" class="form-control" name="numero_serie" id="numero_serie" value="<?php echo htmlspecialchars($equipamento['numero_serie'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                     </div>
                 </div>
 

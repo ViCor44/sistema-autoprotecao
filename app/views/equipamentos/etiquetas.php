@@ -207,7 +207,7 @@ $paginasSimples = array_chunk($etiquetas ?? [], 48);
             <section class="sheet">
                 <?php foreach ($pagina as $index => $equipamento): ?>
                     <?php
-                    $numeroSerie = trim((string)($equipamento['numero_serie'] ?? ''));
+                    $numeroSerie = trim((string)($equipamento['numero_registo'] ?? ''));
                     $localizacao = trim((string)($equipamento['localizacao'] ?? ''));
                     $tipoNome = trim((string)($equipamento['tipo_nome'] ?? 'Equipamento'));
                     ?>
@@ -239,7 +239,7 @@ $paginasSimples = array_chunk($etiquetas ?? [], 48);
         <?php foreach ($paginasSimples as $paginaSimples): ?>
             <section class="sheet sheet--simples">
                 <?php foreach ($paginaSimples as $equipamento): ?>
-                    <?php $numeroSerie = trim((string)($equipamento['numero_serie'] ?? '')); ?>
+                    <?php $numeroSerie = trim((string)($equipamento['numero_registo'] ?? '')); ?>
                     <article class="etiqueta">
                         <div class="etiqueta__placa etiqueta__placa--simples">
                             <div class="etiqueta__topo etiqueta__topo--simples">Sistema de Autoprote&#231;&#227;o</div>

@@ -62,12 +62,21 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="numero_serie" class="form-label">Número de Registo / Património</label>
-                        <input type="text" class="form-control" name="numero_serie" id="numero_serie" placeholder="Ex: EXT-00123">
+                        <label class="form-label">Número de Registo</label>
+                        <div class="form-control-plaintext bg-light border rounded px-3 py-2 text-muted" id="preview-numero-registo">
+                            <i class="bi bi-hash"></i> Gerado automaticamente ao guardar
+                        </div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="localizacao" class="form-label">Localização *</label>
                         <input type="text" class="form-control" name="localizacao" id="localizacao" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="numero_serie" class="form-label">Número de Série (Fabricante)</label>
+                        <input type="text" class="form-control" name="numero_serie" id="numero_serie" placeholder="Ex: SN-20240001">
                     </div>
                 </div>
 
