@@ -205,31 +205,19 @@ class Equipamento {
      * Gerar número de registo sequencial para o equipamento
      * Usa transação com FOR UPDATE para garantir atomicidade
      */
-    private function gerarNumeroRegisto($tipoEquipamentoId) {
-        $this->db->beginTransaction();
-
+    private function obterDadosNumeracao($tipoEquipamentoId) {
         $query = "SELECT prefixo_numeracao, proximo_numero FROM tipos_equipamentos WHERE id = ? FOR UPDATE";
         $stmt = $this->db->prepare($query);
         $stmt->bind_param("i", $tipoEquipamentoId);
         $stmt->execute();
-        $resultado = $stmt->get_result()->fetch_assoc();
+        return $stmt->get_result()->fetch_assoc();
+    }
 
-        if (!$resultado) {
-            $this->db->commit();
-            return null;
-        }
-
-        $prefixo = !empty($resultado['prefixo_numeracao']) ? strtoupper(trim($resultado['prefixo_numeracao'])) : 'EQP';
-        $numero = (int)($resultado['proximo_numero'] ?? 1);
-
+    private function incrementarNumeracao($tipoEquipamentoId) {
         $updateQuery = "UPDATE tipos_equipamentos SET proximo_numero = proximo_numero + 1 WHERE id = ?";
         $stmtUpdate = $this->db->prepare($updateQuery);
         $stmtUpdate->bind_param("i", $tipoEquipamentoId);
         $stmtUpdate->execute();
-
-        $this->db->commit();
-
-        return $prefixo . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -325,12 +313,23 @@ class Equipamento {
             $this->limparNumeroSerieInativo($dados['numero_serie']);
         }
 
-        // Gerar número de registo automático
-        $numeroRegisto = $this->gerarNumeroRegisto($dados['tipo_equipamento_id']);
+        $this->db->beginTransaction();
+
+        // Obter número de registo (bloqueia a linha para evitar duplicados)
+        $dadosNumeracao = $this->obterDadosNumeracao($dados['tipo_equipamento_id']);
+
+        if (!$dadosNumeracao) {
+            $this->db->rollback();
+            return false;
+        }
+
+        $prefixo = !empty($dadosNumeracao['prefixo_numeracao']) ? strtoupper(trim($dadosNumeracao['prefixo_numeracao'])) : 'EQP';
+        $numero = (int)($dadosNumeracao['proximo_numero'] ?? 1);
+        $numeroRegisto = $prefixo . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
 
         // Gerar código de barras
         $codigoBarras = $this->gerarCodigoBarras($dados['tipo_equipamento_id']);
-        
+
         $query = "INSERT INTO {$this->table} 
                   (tipo_equipamento_id, numero_registo, numero_serie, codigo_barras, localizacao, marca, modelo, 
                    data_aquisicao, data_instalacao, data_proxima_manutencao, estado, observacoes)
@@ -354,8 +353,13 @@ class Equipamento {
         );
 
         if ($stmt->execute()) {
+            // Só incrementa o contador após INSERT bem-sucedido
+            $this->incrementarNumeracao($dados['tipo_equipamento_id']);
+            $this->db->commit();
             return $this->db->getLastId();
         }
+
+        $this->db->rollback();
         return false;
     }
 
