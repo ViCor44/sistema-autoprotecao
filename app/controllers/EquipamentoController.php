@@ -344,6 +344,37 @@ class EquipamentoController extends Controller {
     }
 
     /**
+     * AJAX: devolver preview do próximo número de registo para um tipo
+     */
+    public function previewNumero() {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $tipoId = (int)($_GET['tipo_id'] ?? 0);
+        if ($tipoId <= 0) {
+            echo json_encode(['numero' => '']);
+            exit;
+        }
+
+        $db = new Database();
+        $stmt = $db->prepare("SELECT prefixo_numeracao, proximo_numero FROM tipos_equipamentos WHERE id = ? AND ativo = TRUE");
+        $stmt->bind_param("i", $tipoId);
+        $stmt->execute();
+        $resultado = $stmt->get_result()->fetch_assoc();
+
+        if (!$resultado) {
+            echo json_encode(['numero' => '']);
+            exit;
+        }
+
+        $prefixo = !empty($resultado['prefixo_numeracao']) ? strtoupper(trim($resultado['prefixo_numeracao'])) : 'EQP';
+        $numero = (int)($resultado['proximo_numero'] ?? 1);
+        $preview = $prefixo . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+
+        echo json_encode(['numero' => $preview]);
+        exit;
+    }
+
+    /**
      * Salvar novo equipamento
      */
     public function salvar() {

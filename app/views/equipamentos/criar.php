@@ -63,8 +63,11 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Número de Registo</label>
-                        <div class="form-control-plaintext bg-light border rounded px-3 py-2 text-muted" id="preview-numero-registo">
-                            <i class="bi bi-hash"></i> Gerado automaticamente ao guardar
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                            <div class="form-control text-muted" id="preview-numero-registo" style="background:#f8f9fa;">
+                                Selecione um tipo de equipamento
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">
@@ -139,6 +142,36 @@ document.addEventListener('DOMContentLoaded', function () {
     const selectTipo = document.getElementById('tipo_equipamento_id');
     const blocoCampos = document.getElementById('bloco-campos-dinamicos');
     const grupos = document.querySelectorAll('.campos-tipo');
+    const previewEl = document.getElementById('preview-numero-registo');
+
+    function atualizarPreviewNumero(tipoId) {
+        if (!tipoId) {
+            previewEl.textContent = 'Selecione um tipo de equipamento';
+            previewEl.classList.add('text-muted');
+            previewEl.classList.remove('fw-bold', 'text-dark');
+            return;
+        }
+
+        previewEl.textContent = 'A calcular...';
+        previewEl.classList.add('text-muted');
+        previewEl.classList.remove('fw-bold', 'text-dark');
+
+        fetch('index.php?controler=equipamento&acao=previewNumero&tipo_id=' + encodeURIComponent(tipoId))
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.numero) {
+                    previewEl.textContent = data.numero;
+                    previewEl.classList.remove('text-muted');
+                    previewEl.classList.add('fw-bold', 'text-dark');
+                } else {
+                    previewEl.textContent = 'Prefixo não configurado';
+                    previewEl.classList.add('text-muted');
+                }
+            })
+            .catch(function () {
+                previewEl.textContent = 'Gerado ao guardar';
+            });
+    }
 
     function atualizarCamposDinamicos() {
         const tipoSelecionado = selectTipo.value;
@@ -162,7 +195,11 @@ document.addEventListener('DOMContentLoaded', function () {
         blocoCampos.style.display = existeGrupoVisivel ? 'block' : 'none';
     }
 
-    selectTipo.addEventListener('change', atualizarCamposDinamicos);
+    selectTipo.addEventListener('change', function () {
+        atualizarCamposDinamicos();
+        atualizarPreviewNumero(selectTipo.value);
+    });
     atualizarCamposDinamicos();
+    atualizarPreviewNumero(selectTipo.value);
 });
 </script>
