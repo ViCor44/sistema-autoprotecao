@@ -285,10 +285,10 @@ class EquipamentoController extends Controller {
         // Cabeçalho da tabela
         $headers = [
             ['Nº Registo',      35],
-            ['Localização',     75],
+            ['Localização',     68],
             ['Agente Extintor', 40],
             ['Estado',          22],
-            ['Próx. Vistoria',  18],
+            ['Próx. Vistoria',  25],
         ];
 
         $yHeader = 26;
@@ -323,11 +323,11 @@ class EquipamentoController extends Controller {
             $fill = $alt;
             $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
             $pdf->Cell(35,  7, $this->pdfTexto($eq['numero_registo'] ?? '-'), 1, 0, 'L', true);
-            $pdf->Cell(75,  7, $this->pdfTexto($eq['localizacao'] ?? '-'), 1, 0, 'L', true);
+            $pdf->Cell(68,  7, $this->pdfTexto($eq['localizacao'] ?? '-'), 1, 0, 'L', true);
             $agente = $agentesExtintores[(int)$eq['id']] ?? '-';
             $pdf->Cell(40,  7, $this->pdfTexto($agente), 1, 0, 'L', true);
             $pdf->Cell(22,  7, $this->pdfTexto(ucfirst((string)($eq['estado'] ?? '-'))), 1, 0, 'L', true);
-            $pdf->Cell(18,  7, $this->pdfTexto($this->formatarDataPdf($eq['data_proxima_manutencao'] ?? null)), 1, 1, 'L', true);
+            $pdf->Cell(25,  7, $this->pdfTexto($this->formatarDataPdf($eq['data_proxima_manutencao'] ?? null)), 1, 1, 'L', true);
             $alt = !$alt;
         }
 
