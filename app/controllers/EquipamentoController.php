@@ -317,12 +317,6 @@ class EquipamentoController extends Controller {
             $alt = !$alt;
         }
 
-        // Rodapé número de página
-        $pdf->SetY(-12);
-        $pdf->SetFont('Arial', 'I', 7);
-        $pdf->SetTextColor(120, 120, 120);
-        $pdf->Cell(0, 5, 'Pagina ' . $pdf->PageNo(), 0, 0, 'R');
-
         $pdf->Output('I', 'equipamentos_' . date('Ymd_Hi') . '.pdf');
         exit;
     }
