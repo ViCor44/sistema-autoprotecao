@@ -238,6 +238,23 @@ class EquipamentoController extends Controller {
             ['campo' => 'numero_registo', 'direcao' => 'ASC']
         );
 
+        // Buscar valores do campo dinâmico "Agente Extintor" em bloco
+        $agentesExtintores = [];
+        if (!empty($equipamentos)) {
+            $db = new Database();
+            $resultado = $db->query(
+                "SELECT ecv.equipamento_id, ecv.valor
+                 FROM equipamentos_campos_valores ecv
+                 JOIN tipos_equipamentos_campos tec ON tec.id = ecv.campo_id
+                 WHERE tec.slug = 'agente_extintor'"
+            );
+            if ($resultado) {
+                foreach ($resultado->fetch_all(MYSQLI_ASSOC) as $row) {
+                    $agentesExtintores[(int)$row['equipamento_id']] = $row['valor'];
+                }
+            }
+        }
+
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
 
         $pdf = new FPDF('P', 'mm', 'A4');
@@ -267,10 +284,11 @@ class EquipamentoController extends Controller {
 
         // Cabeçalho da tabela
         $headers = [
-            ['Nº Registo',    38],
-            ['Localização',   90],
-            ['Estado',        35],
-            ['Próx. Vistoria',27],
+            ['Nº Registo',      35],
+            ['Localização',     75],
+            ['Agente Extintor', 40],
+            ['Estado',          22],
+            ['Próx. Vistoria',  18],
         ];
 
         $yHeader = 26;
@@ -304,10 +322,12 @@ class EquipamentoController extends Controller {
 
             $fill = $alt;
             $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
-            $pdf->Cell(38,  7, $this->pdfTexto($eq['numero_registo'] ?? '-'), 1, 0, 'L', true);
-            $pdf->Cell(90,  7, $this->pdfTexto($eq['localizacao'] ?? '-'), 1, 0, 'L', true);
-            $pdf->Cell(35,  7, $this->pdfTexto(ucfirst((string)($eq['estado'] ?? '-'))), 1, 0, 'L', true);
-            $pdf->Cell(27,  7, $this->pdfTexto($this->formatarDataPdf($eq['data_proxima_manutencao'] ?? null)), 1, 1, 'L', true);
+            $pdf->Cell(35,  7, $this->pdfTexto($eq['numero_registo'] ?? '-'), 1, 0, 'L', true);
+            $pdf->Cell(75,  7, $this->pdfTexto($eq['localizacao'] ?? '-'), 1, 0, 'L', true);
+            $agente = $agentesExtintores[(int)$eq['id']] ?? '-';
+            $pdf->Cell(40,  7, $this->pdfTexto($agente), 1, 0, 'L', true);
+            $pdf->Cell(22,  7, $this->pdfTexto(ucfirst((string)($eq['estado'] ?? '-'))), 1, 0, 'L', true);
+            $pdf->Cell(18,  7, $this->pdfTexto($this->formatarDataPdf($eq['data_proxima_manutencao'] ?? null)), 1, 1, 'L', true);
             $alt = !$alt;
         }
 
