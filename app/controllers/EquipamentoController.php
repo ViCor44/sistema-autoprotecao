@@ -197,6 +197,138 @@ class EquipamentoController extends Controller {
     }
 
     /**
+     * Exportar lista de equipamentos com os filtros actuais em PDF
+     */
+    public function exportar_pdf() {
+        $filtros = ['ativo' => 1];
+
+        $tipoId  = isset($_GET['tipo'])   ? (int)$_GET['tipo']              : 0;
+        $estado  = isset($_GET['estado']) ? trim((string)$_GET['estado'])   : '';
+        $loc     = isset($_GET['localizacao']) ? trim((string)$_GET['localizacao']) : '';
+        $ordenar = isset($_GET['ordenar'])  ? trim((string)$_GET['ordenar'])  : 'localizacao';
+        $direcao = isset($_GET['direcao'])  ? strtoupper(trim((string)$_GET['direcao'])) : 'ASC';
+
+        $camposOrdenacaoPermitidos = ['tipo_nome', 'localizacao', 'estado', 'proxima_manutencao'];
+        if (!in_array($ordenar, $camposOrdenacaoPermitidos, true)) {
+            $ordenar = 'localizacao';
+        }
+        if (!in_array($direcao, ['ASC', 'DESC'], true)) {
+            $direcao = 'ASC';
+        }
+
+        $nomeTipo = 'Todos';
+        if ($tipoId > 0) {
+            $filtros['tipo_equipamento_id'] = $tipoId;
+            $tipo = $this->tipoEquipamento->getById($tipoId);
+            if ($tipo) {
+                $nomeTipo = $tipo['nome'];
+            }
+        }
+        if ($estado !== '') {
+            $filtros['estado'] = $estado;
+        }
+        if ($loc !== '') {
+            $filtros['localizacao'] = $loc;
+        }
+
+        $equipamentos = $this->equipamento->getAll(
+            $filtros,
+            null,
+            0,
+            ['campo' => $ordenar, 'direcao' => $direcao]
+        );
+
+        require_once APP_PATH . '/libs/fpdf/fpdf.php';
+
+        $pdf = new FPDF('L', 'mm', 'A4');
+        $pdf->SetAutoPageBreak(true, 15);
+        $pdf->AddPage();
+
+        // Cabeçalho
+        $pdf->SetFillColor(242, 245, 249);
+        $pdf->SetDrawColor(205, 212, 223);
+        $pdf->Rect(0, 0, 297, 22, 'FD');
+        $pdf->SetTextColor(26, 38, 56);
+        $pdf->SetFont('Arial', 'B', 14);
+        $pdf->SetXY(10, 5);
+        $pdf->Cell(140, 8, $this->pdfTexto(APP_NAME), 0, 0, 'L');
+        $pdf->SetFont('Arial', 'B', 13);
+        $pdf->Cell(137, 8, 'Lista de Equipamentos', 0, 1, 'R');
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetXY(10, 14);
+        $filtroDesc = 'Tipo: ' . $this->pdfTexto($nomeTipo);
+        if ($estado !== '') {
+            $filtroDesc .= '   |   Estado: ' . $this->pdfTexto(ucfirst($estado));
+        }
+        if ($loc !== '') {
+            $filtroDesc .= '   |   Localiz.: ' . $this->pdfTexto($loc);
+        }
+        $filtroDesc .= '   |   Total: ' . count($equipamentos) . '   |   ' . date('d/m/Y H:i');
+        $pdf->Cell(277, 5, $filtroDesc, 0, 1, 'L');
+
+        // Cabeçalho da tabela
+        $headers = [
+            ['Nº Registo',    32],
+            ['Tipo',          52],
+            ['Localização',   70],
+            ['Marca',         35],
+            ['Modelo',        38],
+            ['Estado',        30],
+            ['Próx. Vistoria',30],
+        ];
+
+        $yHeader = 26;
+        $pdf->SetFillColor(226, 232, 240);
+        $pdf->SetDrawColor(180, 190, 205);
+        $pdf->SetTextColor(26, 38, 56);
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->SetXY(10, $yHeader);
+        foreach ($headers as [$texto, $larg]) {
+            $pdf->Cell($larg, 8, $texto, 1, 0, 'L', true);
+        }
+        $pdf->Ln();
+
+        // Linhas
+        $pdf->SetFont('Arial', '', 8.5);
+        $alt = false;
+        foreach ($equipamentos as $eq) {
+            // Nova página se necessário
+            if ($pdf->GetY() > 190) {
+                $pdf->AddPage();
+                $pdf->SetFillColor(226, 232, 240);
+                $pdf->SetDrawColor(180, 190, 205);
+                $pdf->SetFont('Arial', 'B', 9);
+                $pdf->SetXY(10, 10);
+                foreach ($headers as [$texto, $larg]) {
+                    $pdf->Cell($larg, 8, $texto, 1, 0, 'L', true);
+                }
+                $pdf->Ln();
+                $pdf->SetFont('Arial', '', 8.5);
+            }
+
+            $fill = $alt;
+            $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
+            $pdf->Cell(32, 7, $this->pdfTexto($eq['numero_registo'] ?? '-'), 1, 0, 'L', true);
+            $pdf->Cell(52, 7, $this->pdfTexto($eq['tipo_nome'] ?? '-'), 1, 0, 'L', true);
+            $pdf->Cell(70, 7, $this->pdfTexto($eq['localizacao'] ?? '-'), 1, 0, 'L', true);
+            $pdf->Cell(35, 7, $this->pdfTexto($eq['marca'] ?? '-'), 1, 0, 'L', true);
+            $pdf->Cell(38, 7, $this->pdfTexto($eq['modelo'] ?? '-'), 1, 0, 'L', true);
+            $pdf->Cell(30, 7, $this->pdfTexto(ucfirst((string)($eq['estado'] ?? '-'))), 1, 0, 'L', true);
+            $pdf->Cell(30, 7, $this->pdfTexto($this->formatarDataPdf($eq['data_proxima_manutencao'] ?? null)), 1, 1, 'L', true);
+            $alt = !$alt;
+        }
+
+        // Rodapé número de página
+        $pdf->SetY(-12);
+        $pdf->SetFont('Arial', 'I', 7);
+        $pdf->SetTextColor(120, 120, 120);
+        $pdf->Cell(0, 5, 'Pagina ' . $pdf->PageNo(), 0, 0, 'R');
+
+        $pdf->Output('I', 'equipamentos_' . date('Ymd_Hi') . '.pdf');
+        exit;
+    }
+
+    /**
      * Exportar lista de equipamentos por tipo em PDF
      */
     public function lista_pdf() {
