@@ -241,7 +241,6 @@ class EquipamentoController extends Controller {
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
 
         $pdf = new FPDF('L', 'mm', 'A4');
-        $pdf->SetAutoPageBreak(true, 15);
         $pdf->AddPage();
 
         // Cabeçalho

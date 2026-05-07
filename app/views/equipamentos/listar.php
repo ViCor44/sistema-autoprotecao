@@ -48,15 +48,6 @@ $equipamentosJson = json_encode($equipamentosPayload, JSON_UNESCAPED_UNICODE | J
                 Novo Equipamento
             </a>
             <a
-                href="index.php?controler=equipamento&acao=exportar_pdf&amp;tipo=<?php echo $tipoAtual; ?>&amp;estado=<?php echo urlencode($estadoAtual); ?>&amp;localizacao=<?php echo urlencode($localizacaoAtual); ?>&amp;ordenar=<?php echo urlencode($ordenarAtual); ?>&amp;direcao=<?php echo urlencode($direcaoAtual); ?>"
-                class="btn btn-outline-danger"
-                target="_blank"
-                rel="noopener"
-            >
-                <i class="bi bi-file-earmark-pdf"></i>
-                Exportar PDF
-            </a>
-            <a
                 href="index.php?controler=equipamento&acao=etiquetas&amp;tipo=<?php echo $tipoAtual; ?>&amp;estado=<?php echo urlencode($estadoAtual); ?>&amp;localizacao=<?php echo urlencode($localizacaoAtual); ?>"
                 class="btn btn-outline-primary"
                 target="_blank"
@@ -150,6 +141,16 @@ $equipamentosJson = json_encode($equipamentosPayload, JSON_UNESCAPED_UNICODE | J
                     <span class="panel-surface__eyebrow">Resultados</span>
                     <h2><?php echo (int)$totalResultados; ?> equipamento(s) encontrado(s)</h2>
                     <p class="text-muted mb-0">Clique num equipamento da lista para abrir o detalhe em modal.</p>
+                </div>
+                <div>
+                    <a
+                        href="index.php?controler=equipamento&acao=exportar_pdf&amp;tipo=<?php echo $tipoAtual; ?>&amp;estado=<?php echo urlencode($estadoAtual); ?>&amp;localizacao=<?php echo urlencode($localizacaoAtual); ?>&amp;ordenar=<?php echo urlencode($ordenarAtual); ?>&amp;direcao=<?php echo urlencode($direcaoAtual); ?>"
+                        class="btn btn-outline-danger btn-sm"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+                    </a>
                 </div>
             </div>
             <div class="list-group list-group-flush">
