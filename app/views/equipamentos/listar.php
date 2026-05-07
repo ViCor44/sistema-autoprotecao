@@ -158,6 +158,42 @@ $equipamentosJson = json_encode($equipamentosPayload, JSON_UNESCAPED_UNICODE | J
                     </button>
                 <?php endforeach; ?>
             </div>
+            <?php if ($totalPaginas > 1): ?>
+            <?php
+                $queryPaginacao = array_merge($_GET, []);
+                unset($queryPaginacao['pagina']);
+                $queryBase = http_build_query($queryPaginacao);
+                $inicio = max(1, $paginaAtual - 2);
+                $fim = min($totalPaginas, $paginaAtual + 2);
+            ?>
+            <nav class="d-flex justify-content-between align-items-center px-3 py-3 border-top" aria-label="Paginacao">
+                <small class="text-muted">
+                    A mostrar <?php echo (int)(($paginaAtual - 1) * $porPagina + 1); ?>–<?php echo min((int)($paginaAtual * $porPagina), (int)$totalResultados); ?>
+                    de <?php echo (int)$totalResultados; ?> resultado(s)
+                </small>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item <?php echo $paginaAtual <= 1 ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="index.php?<?php echo $queryBase; ?>&pagina=<?php echo $paginaAtual - 1; ?>">&laquo;</a>
+                    </li>
+                    <?php if ($inicio > 1): ?>
+                        <li class="page-item"><a class="page-link" href="index.php?<?php echo $queryBase; ?>&pagina=1">1</a></li>
+                        <?php if ($inicio > 2): ?><li class="page-item disabled"><span class="page-link">&hellip;</span></li><?php endif; ?>
+                    <?php endif; ?>
+                    <?php for ($p = $inicio; $p <= $fim; $p++): ?>
+                        <li class="page-item <?php echo $p === $paginaAtual ? 'active' : ''; ?>">
+                            <a class="page-link" href="index.php?<?php echo $queryBase; ?>&pagina=<?php echo $p; ?>"><?php echo $p; ?></a>
+                        </li>
+                    <?php endfor; ?>
+                    <?php if ($fim < $totalPaginas): ?>
+                        <?php if ($fim < $totalPaginas - 1): ?><li class="page-item disabled"><span class="page-link">&hellip;</span></li><?php endif; ?>
+                        <li class="page-item"><a class="page-link" href="index.php?<?php echo $queryBase; ?>&pagina=<?php echo $totalPaginas; ?>"><?php echo $totalPaginas; ?></a></li>
+                    <?php endif; ?>
+                    <li class="page-item <?php echo $paginaAtual >= $totalPaginas ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="index.php?<?php echo $queryBase; ?>&pagina=<?php echo $paginaAtual + 1; ?>">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+            <?php endif; ?>
         </section>
     <?php endif; ?>
 </section>

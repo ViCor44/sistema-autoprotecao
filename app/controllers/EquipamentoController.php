@@ -83,7 +83,7 @@ class EquipamentoController extends Controller {
             $filtros['localizacao'] = $localizacao;
         }
 
-        $porPagina = 24;
+        $porPagina = 25;
         $paginaAtual = max(1, (int)($_GET['pagina'] ?? 1));
 
         $totalResultados = $this->equipamento->getTotal($filtros);
