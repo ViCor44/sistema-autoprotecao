@@ -353,10 +353,11 @@ class Equipamento {
         );
 
         if ($stmt->execute()) {
+            $novoId = $this->db->getLastId();
             // Só incrementa o contador após INSERT bem-sucedido
             $this->incrementarNumeracao($dados['tipo_equipamento_id']);
             $this->db->commit();
-            return $this->db->getLastId();
+            return $novoId;
         }
 
         $this->db->rollback();
