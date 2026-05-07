@@ -69,6 +69,18 @@
                                 Selecione um tipo de equipamento
                             </div>
                         </div>
+                        <div id="bloco-intercalar" style="display:none;" class="mt-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="usar_intercalacao" name="usar_intercalacao" value="1">
+                                <label class="form-check-label" for="usar_intercalacao">
+                                    Intercalar — inserir em posição específica e avançar os seguintes
+                                </label>
+                            </div>
+                            <div id="painel-intercalacao" class="mt-2" style="display:none;">
+                                <input type="number" class="form-control" name="intercalar_posicao" id="intercalar_posicao" min="1" step="1" placeholder="Número da posição (ex: 3)">
+                                <div class="form-text">O novo equipamento receberá esse número. Todos os seguintes avançam 1.</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="localizacao" class="form-label">Localização *</label>
@@ -143,35 +155,78 @@ document.addEventListener('DOMContentLoaded', function () {
     const blocoCampos = document.getElementById('bloco-campos-dinamicos');
     const grupos = document.querySelectorAll('.campos-tipo');
     const previewEl = document.getElementById('preview-numero-registo');
+    const blocoIntercalar = document.getElementById('bloco-intercalar');
+    const usarIntercalacao = document.getElementById('usar_intercalacao');
+    const painelIntercalacao = document.getElementById('painel-intercalacao');
+    const inputPosicao = document.getElementById('intercalar_posicao');
+
+    let prefixoAtual = '';
+
+    function mostrarPreview(texto, bold) {
+        previewEl.textContent = texto;
+        if (bold) {
+            previewEl.classList.remove('text-muted');
+            previewEl.classList.add('fw-bold', 'text-dark');
+        } else {
+            previewEl.classList.add('text-muted');
+            previewEl.classList.remove('fw-bold', 'text-dark');
+        }
+    }
+
+    function previewComPosicao() {
+        const pos = parseInt(inputPosicao.value, 10);
+        if (prefixoAtual && pos > 0) {
+            mostrarPreview(prefixoAtual + '-' + String(pos).padStart(3, '0'), true);
+        } else {
+            mostrarPreview('Introduza a posição', false);
+        }
+    }
 
     function atualizarPreviewNumero(tipoId) {
         if (!tipoId) {
-            previewEl.textContent = 'Selecione um tipo de equipamento';
-            previewEl.classList.add('text-muted');
-            previewEl.classList.remove('fw-bold', 'text-dark');
+            mostrarPreview('Selecione um tipo de equipamento', false);
+            blocoIntercalar.style.display = 'none';
+            usarIntercalacao.checked = false;
+            painelIntercalacao.style.display = 'none';
+            prefixoAtual = '';
             return;
         }
 
-        previewEl.textContent = 'A calcular...';
-        previewEl.classList.add('text-muted');
-        previewEl.classList.remove('fw-bold', 'text-dark');
+        blocoIntercalar.style.display = 'block';
+
+        if (usarIntercalacao.checked && inputPosicao.value) {
+            previewComPosicao();
+            return;
+        }
+
+        mostrarPreview('A calcular...', false);
 
         fetch('index.php?controler=equipamento&acao=previewNumero&tipo_id=' + encodeURIComponent(tipoId))
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 if (data.numero) {
-                    previewEl.textContent = data.numero;
-                    previewEl.classList.remove('text-muted');
-                    previewEl.classList.add('fw-bold', 'text-dark');
+                    prefixoAtual = data.numero.split('-').slice(0, -1).join('-');
+                    mostrarPreview(data.numero, true);
                 } else {
-                    previewEl.textContent = 'Prefixo não configurado';
-                    previewEl.classList.add('text-muted');
+                    mostrarPreview('Prefixo não configurado', false);
                 }
             })
             .catch(function () {
-                previewEl.textContent = 'Gerado ao guardar';
+                mostrarPreview('Gerado ao guardar', false);
             });
     }
+
+    usarIntercalacao.addEventListener('change', function () {
+        painelIntercalacao.style.display = this.checked ? 'block' : 'none';
+        if (!this.checked) {
+            inputPosicao.value = '';
+            atualizarPreviewNumero(selectTipo.value);
+        } else {
+            previewComPosicao();
+        }
+    });
+
+    inputPosicao.addEventListener('input', previewComPosicao);
 
     function atualizarCamposDinamicos() {
         const tipoSelecionado = selectTipo.value;
@@ -196,6 +251,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     selectTipo.addEventListener('change', function () {
+        usarIntercalacao.checked = false;
+        painelIntercalacao.style.display = 'none';
+        inputPosicao.value = '';
+        prefixoAtual = '';
         atualizarCamposDinamicos();
         atualizarPreviewNumero(selectTipo.value);
     });

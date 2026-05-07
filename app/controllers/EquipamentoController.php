@@ -380,6 +380,11 @@ class EquipamentoController extends Controller {
     public function salvar() {
         $this->requirePost('equipamento', 'listar');
 
+        $intercalarPosicao = null;
+        if (!empty($_POST['usar_intercalacao']) && !empty($_POST['intercalar_posicao'])) {
+            $intercalarPosicao = max(1, (int)$_POST['intercalar_posicao']);
+        }
+
         $dados = [
             'tipo_equipamento_id' => $_POST['tipo_equipamento_id'] ?? 0,
             'numero_serie' => $_POST['numero_serie'] ?? '',
@@ -390,7 +395,8 @@ class EquipamentoController extends Controller {
             'data_instalacao' => $_POST['data_instalacao'] ?? null,
             'data_proxima_manutencao' => $_POST['data_proxima_manutencao'] ?? null,
             'estado' => $_POST['estado'] ?? 'operacional',
-            'observacoes' => $_POST['observacoes'] ?? ''
+            'observacoes' => $_POST['observacoes'] ?? '',
+            'intercalar_posicao' => $intercalarPosicao,
         ];
 
         $equipamentoId = $this->equipamento->create($dados);

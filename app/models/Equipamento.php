@@ -213,6 +213,41 @@ class Equipamento {
         return $stmt->get_result()->fetch_assoc();
     }
 
+    private function intercalarNumeracao($tipoEquipamentoId, $posicao) {
+        // Buscar todos os equipamentos do tipo, ordenados pelo número DESC (para evitar conflito UNIQUE ao renomear)
+        $stmt = $this->db->prepare(
+            "SELECT id, numero_registo FROM {$this->table}
+             WHERE tipo_equipamento_id = ? AND ativo = TRUE
+             ORDER BY CAST(SUBSTRING_INDEX(numero_registo, '-', -1) AS UNSIGNED) DESC"
+        );
+        $stmt->bind_param("i", $tipoEquipamentoId);
+        $stmt->execute();
+        $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        $stmtUpd = $this->db->prepare(
+            "UPDATE {$this->table} SET numero_registo = ? WHERE id = ?"
+        );
+
+        foreach ($rows as $row) {
+            if (!preg_match('/^(.+)-(\d+)$/', $row['numero_registo'], $m)) {
+                continue;
+            }
+            $numAtual = (int)$m[2];
+            if ($numAtual < $posicao) {
+                continue;
+            }
+            $prefixo = $m[1];
+            $novoNum = $numAtual + 1;
+            $novoNr = $prefixo . '-' . str_pad($novoNum, 3, '0', STR_PAD_LEFT);
+            $stmtUpd->bind_param("si", $novoNr, $row['id']);
+            if (!$stmtUpd->execute()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private function incrementarNumeracao($tipoEquipamentoId) {
         $updateQuery = "UPDATE tipos_equipamentos SET proximo_numero = proximo_numero + 1 WHERE id = ?";
         $stmtUpdate = $this->db->prepare($updateQuery);
@@ -325,7 +360,19 @@ class Equipamento {
 
         $prefixo = !empty($dadosNumeracao['prefixo_numeracao']) ? strtoupper(trim($dadosNumeracao['prefixo_numeracao'])) : 'EQP';
         $numero = (int)($dadosNumeracao['proximo_numero'] ?? 1);
-        $numeroRegisto = $prefixo . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+
+        // Intercalar: inserir em posição específica e avançar os seguintes
+        $intercalar = isset($dados['intercalar_posicao']) && $dados['intercalar_posicao'] !== null && (int)$dados['intercalar_posicao'] < $numero;
+        if ($intercalar) {
+            $posicao = (int)$dados['intercalar_posicao'];
+            if (!$this->intercalarNumeracao($dados['tipo_equipamento_id'], $posicao)) {
+                $this->db->rollback();
+                return false;
+            }
+            $numeroRegisto = $prefixo . '-' . str_pad($posicao, 3, '0', STR_PAD_LEFT);
+        } else {
+            $numeroRegisto = $prefixo . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+        }
 
         // Gerar código de barras
         $codigoBarras = $this->gerarCodigoBarras($dados['tipo_equipamento_id']);
