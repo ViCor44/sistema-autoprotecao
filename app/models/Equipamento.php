@@ -561,6 +561,7 @@ class Equipamento {
             'localizacao' => 'e.localizacao',
             'estado' => 'e.estado',
             'proxima_manutencao' => 'e.data_proxima_manutencao',
+            'numero_registo' => 'CAST(SUBSTRING_INDEX(e.numero_registo, \'-\', -1) AS UNSIGNED)',
         ];
 
         $coluna = $mapaCampos[$campo] ?? $mapaCampos['tipo_nome'];

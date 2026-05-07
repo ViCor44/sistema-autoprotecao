@@ -235,7 +235,7 @@ class EquipamentoController extends Controller {
             $filtros,
             null,
             0,
-            ['campo' => $ordenar, 'direcao' => $direcao]
+            ['campo' => 'numero_registo', 'direcao' => 'ASC']
         );
 
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
@@ -252,28 +252,25 @@ class EquipamentoController extends Controller {
         $pdf->SetXY(10, 5);
         $pdf->Cell(140, 8, $this->pdfTexto(APP_NAME), 0, 0, 'L');
         $pdf->SetFont('Arial', 'B', 13);
-        $pdf->Cell(137, 8, 'Lista de Equipamentos', 0, 1, 'R');
+        $pdf->Cell(137, 8, $this->pdfTexto('Lista de Equipamentos' . ($nomeTipo !== 'Todos' ? ' - ' . $nomeTipo : '')), 0, 1, 'R');
         $pdf->SetFont('Arial', '', 8);
         $pdf->SetXY(10, 14);
-        $filtroDesc = 'Tipo: ' . $this->pdfTexto($nomeTipo);
+        $filtroDesc = 'Total: ' . count($equipamentos);
         if ($estado !== '') {
             $filtroDesc .= '   |   Estado: ' . $this->pdfTexto(ucfirst($estado));
         }
         if ($loc !== '') {
             $filtroDesc .= '   |   Localiz.: ' . $this->pdfTexto($loc);
         }
-        $filtroDesc .= '   |   Total: ' . count($equipamentos) . '   |   ' . date('d/m/Y H:i');
+        $filtroDesc .= '   |   ' . date('d/m/Y H:i');
         $pdf->Cell(277, 5, $filtroDesc, 0, 1, 'L');
 
         // Cabeçalho da tabela
         $headers = [
-            ['Nº Registo',    32],
-            ['Tipo',          52],
-            ['Localização',   70],
-            ['Marca',         35],
-            ['Modelo',        38],
-            ['Estado',        30],
-            ['Próx. Vistoria',30],
+            ['Nº Registo',    38],
+            ['Localização',  110],
+            ['Estado',        45],
+            ['Próx. Vistoria', 45],
         ];
 
         $yHeader = 26;
@@ -307,13 +304,10 @@ class EquipamentoController extends Controller {
 
             $fill = $alt;
             $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
-            $pdf->Cell(32, 7, $this->pdfTexto($eq['numero_registo'] ?? '-'), 1, 0, 'L', true);
-            $pdf->Cell(52, 7, $this->pdfTexto($eq['tipo_nome'] ?? '-'), 1, 0, 'L', true);
-            $pdf->Cell(70, 7, $this->pdfTexto($eq['localizacao'] ?? '-'), 1, 0, 'L', true);
-            $pdf->Cell(35, 7, $this->pdfTexto($eq['marca'] ?? '-'), 1, 0, 'L', true);
-            $pdf->Cell(38, 7, $this->pdfTexto($eq['modelo'] ?? '-'), 1, 0, 'L', true);
-            $pdf->Cell(30, 7, $this->pdfTexto(ucfirst((string)($eq['estado'] ?? '-'))), 1, 0, 'L', true);
-            $pdf->Cell(30, 7, $this->pdfTexto($this->formatarDataPdf($eq['data_proxima_manutencao'] ?? null)), 1, 1, 'L', true);
+            $pdf->Cell(38,  7, $this->pdfTexto($eq['numero_registo'] ?? '-'), 1, 0, 'L', true);
+            $pdf->Cell(110, 7, $this->pdfTexto($eq['localizacao'] ?? '-'), 1, 0, 'L', true);
+            $pdf->Cell(45,  7, $this->pdfTexto(ucfirst((string)($eq['estado'] ?? '-'))), 1, 0, 'L', true);
+            $pdf->Cell(45,  7, $this->pdfTexto($this->formatarDataPdf($eq['data_proxima_manutencao'] ?? null)), 1, 1, 'L', true);
             $alt = !$alt;
         }
 
