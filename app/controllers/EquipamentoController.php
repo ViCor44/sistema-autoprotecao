@@ -240,19 +240,19 @@ class EquipamentoController extends Controller {
 
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
 
-        $pdf = new FPDF('L', 'mm', 'A4');
+        $pdf = new FPDF('P', 'mm', 'A4');
         $pdf->AddPage();
 
         // Cabeçalho
         $pdf->SetFillColor(242, 245, 249);
         $pdf->SetDrawColor(205, 212, 223);
-        $pdf->Rect(0, 0, 297, 22, 'FD');
+        $pdf->Rect(0, 0, 210, 22, 'FD');
         $pdf->SetTextColor(26, 38, 56);
-        $pdf->SetFont('Arial', 'B', 14);
-        $pdf->SetXY(10, 5);
-        $pdf->Cell(140, 8, $this->pdfTexto(APP_NAME), 0, 0, 'L');
         $pdf->SetFont('Arial', 'B', 13);
-        $pdf->Cell(137, 8, $this->pdfTexto('Lista de Equipamentos' . ($nomeTipo !== 'Todos' ? ' - ' . $nomeTipo : '')), 0, 1, 'R');
+        $pdf->SetXY(10, 5);
+        $pdf->Cell(95, 8, $this->pdfTexto(APP_NAME), 0, 0, 'L');
+        $pdf->SetFont('Arial', 'B', 11);
+        $pdf->Cell(95, 8, $this->pdfTexto('Lista de Equipamentos' . ($nomeTipo !== 'Todos' ? ' - ' . $nomeTipo : '')), 0, 1, 'R');
         $pdf->SetFont('Arial', '', 8);
         $pdf->SetXY(10, 14);
         $filtroDesc = 'Total: ' . count($equipamentos);
@@ -263,14 +263,14 @@ class EquipamentoController extends Controller {
             $filtroDesc .= '   |   Localiz.: ' . $this->pdfTexto($loc);
         }
         $filtroDesc .= '   |   ' . date('d/m/Y H:i');
-        $pdf->Cell(277, 5, $filtroDesc, 0, 1, 'L');
+        $pdf->Cell(190, 5, $filtroDesc, 0, 1, 'L');
 
         // Cabeçalho da tabela
         $headers = [
             ['Nº Registo',    38],
-            ['Localização',  110],
-            ['Estado',        45],
-            ['Próx. Vistoria', 45],
+            ['Localização',   90],
+            ['Estado',        35],
+            ['Próx. Vistoria',27],
         ];
 
         $yHeader = 26;
@@ -289,7 +289,7 @@ class EquipamentoController extends Controller {
         $alt = false;
         foreach ($equipamentos as $eq) {
             // Nova página se necessário
-            if ($pdf->GetY() > 190) {
+            if ($pdf->GetY() > 272) {
                 $pdf->AddPage();
                 $pdf->SetFillColor(226, 232, 240);
                 $pdf->SetDrawColor(180, 190, 205);
@@ -305,9 +305,9 @@ class EquipamentoController extends Controller {
             $fill = $alt;
             $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
             $pdf->Cell(38,  7, $this->pdfTexto($eq['numero_registo'] ?? '-'), 1, 0, 'L', true);
-            $pdf->Cell(110, 7, $this->pdfTexto($eq['localizacao'] ?? '-'), 1, 0, 'L', true);
-            $pdf->Cell(45,  7, $this->pdfTexto(ucfirst((string)($eq['estado'] ?? '-'))), 1, 0, 'L', true);
-            $pdf->Cell(45,  7, $this->pdfTexto($this->formatarDataPdf($eq['data_proxima_manutencao'] ?? null)), 1, 1, 'L', true);
+            $pdf->Cell(90,  7, $this->pdfTexto($eq['localizacao'] ?? '-'), 1, 0, 'L', true);
+            $pdf->Cell(35,  7, $this->pdfTexto(ucfirst((string)($eq['estado'] ?? '-'))), 1, 0, 'L', true);
+            $pdf->Cell(27,  7, $this->pdfTexto($this->formatarDataPdf($eq['data_proxima_manutencao'] ?? null)), 1, 1, 'L', true);
             $alt = !$alt;
         }
 
