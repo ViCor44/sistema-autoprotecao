@@ -396,7 +396,7 @@ class Equipamento {
 
         $stmt = $this->db->prepare($query);
         $stmt->bind_param(
-            "isisssssssssss",
+            "isisssssssss",
             $dados['tipo_equipamento_id'],
             $numeroRegisto,
             $isReserva,
