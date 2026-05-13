@@ -80,13 +80,26 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Número de Registo</label>
-                        <div class="form-control-plaintext bg-light border rounded px-3 py-2">
-                            <strong><?php echo htmlspecialchars($equipamento['numero_registo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></strong>
-                        </div>
+                        <?php if ((int)($equipamento['is_reserva'] ?? 0) === 1): ?>
+                            <div class="form-control-plaintext bg-warning-subtle border rounded px-3 py-2">
+                                <span class="badge bg-warning text-dark"><i class="bi bi-box-seam"></i> Reserva</span>
+                                <small class="text-muted ms-2">Sem numeração atribuída</small>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="atribuir_numero" name="atribuir_numero" value="1">
+                                <label class="form-check-label" for="atribuir_numero">
+                                    Colocar em serviço — atribuir próximo número de registo
+                                </label>
+                            </div>
+                        <?php else: ?>
+                            <div class="form-control-plaintext bg-light border rounded px-3 py-2">
+                                <strong><?php echo htmlspecialchars($equipamento['numero_registo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></strong>
+                            </div>
+                        <?php endif; ?>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="localizacao" class="form-label">Localização *</label>
-                        <input type="text" class="form-control" name="localizacao" id="localizacao" value="<?php echo htmlspecialchars($equipamento['localizacao'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                        <label for="localizacao" class="form-label">Localização <?php echo (int)($equipamento['is_reserva'] ?? 0) === 1 ? '' : '*'; ?></label>
+                        <input type="text" class="form-control" name="localizacao" id="localizacao" value="<?php echo htmlspecialchars($equipamento['localizacao'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" <?php echo (int)($equipamento['is_reserva'] ?? 0) === 1 ? '' : 'required'; ?>>
                     </div>
                 </div>
 

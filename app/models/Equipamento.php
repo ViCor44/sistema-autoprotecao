@@ -24,6 +24,7 @@ class Equipamento {
     public $estado;
     public $observacoes;
     public $ativo;
+    public $is_reserva;
 
     public function __construct() {
         $this->db = new Database();
@@ -348,45 +349,57 @@ class Equipamento {
             $this->limparNumeroSerieInativo($dados['numero_serie']);
         }
 
+        $isReserva = !empty($dados['is_reserva']) ? 1 : 0;
+
         $this->db->beginTransaction();
 
-        // Obter número de registo (bloqueia a linha para evitar duplicados)
-        $dadosNumeracao = $this->obterDadosNumeracao($dados['tipo_equipamento_id']);
+        $numeroRegisto = null;
 
-        if (!$dadosNumeracao) {
-            $this->db->rollback();
-            return false;
-        }
+        if (!$isReserva) {
+            // Obter número de registo (bloqueia a linha para evitar duplicados)
+            $dadosNumeracao = $this->obterDadosNumeracao($dados['tipo_equipamento_id']);
 
-        $prefixo = !empty($dadosNumeracao['prefixo_numeracao']) ? strtoupper(trim($dadosNumeracao['prefixo_numeracao'])) : 'EQP';
-        $numero = (int)($dadosNumeracao['proximo_numero'] ?? 1);
-
-        // Intercalar: inserir em posição específica e avançar os seguintes
-        $intercalar = isset($dados['intercalar_posicao']) && $dados['intercalar_posicao'] !== null && (int)$dados['intercalar_posicao'] < $numero;
-        if ($intercalar) {
-            $posicao = (int)$dados['intercalar_posicao'];
-            if (!$this->intercalarNumeracao($dados['tipo_equipamento_id'], $posicao)) {
+            if (!$dadosNumeracao) {
                 $this->db->rollback();
                 return false;
             }
-            $numeroRegisto = $prefixo . '-' . str_pad($posicao, 3, '0', STR_PAD_LEFT);
-        } else {
-            $numeroRegisto = $prefixo . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+
+            $prefixo = !empty($dadosNumeracao['prefixo_numeracao']) ? strtoupper(trim($dadosNumeracao['prefixo_numeracao'])) : 'EQP';
+            $numero = (int)($dadosNumeracao['proximo_numero'] ?? 1);
+
+            // Intercalar: inserir em posição específica e avançar os seguintes
+            $intercalar = isset($dados['intercalar_posicao']) && $dados['intercalar_posicao'] !== null && (int)$dados['intercalar_posicao'] < $numero;
+            if ($intercalar) {
+                $posicao = (int)$dados['intercalar_posicao'];
+                if (!$this->intercalarNumeracao($dados['tipo_equipamento_id'], $posicao)) {
+                    $this->db->rollback();
+                    return false;
+                }
+                $numeroRegisto = $prefixo . '-' . str_pad($posicao, 3, '0', STR_PAD_LEFT);
+            } else {
+                $numeroRegisto = $prefixo . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+            }
         }
 
-        // Gerar código de barras
+        // Gerar código de barras (também útil para reservas, para identificação)
         $codigoBarras = $this->gerarCodigoBarras($dados['tipo_equipamento_id']);
 
+        // Localização: para reservas, permitir vazio com default "Reserva"
+        if ($isReserva && (empty($dados['localizacao']) || trim($dados['localizacao']) === '')) {
+            $dados['localizacao'] = 'Reserva';
+        }
+
         $query = "INSERT INTO {$this->table} 
-                  (tipo_equipamento_id, numero_registo, numero_serie, codigo_barras, localizacao, marca, modelo, 
+                  (tipo_equipamento_id, numero_registo, is_reserva, numero_serie, codigo_barras, localizacao, marca, modelo, 
                    data_aquisicao, data_instalacao, data_proxima_manutencao, estado, observacoes)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($query);
         $stmt->bind_param(
-            "isssssssssss",
+            "isisssssssssss",
             $dados['tipo_equipamento_id'],
             $numeroRegisto,
+            $isReserva,
             $dados['numero_serie'],
             $codigoBarras,
             $dados['localizacao'],
@@ -401,8 +414,10 @@ class Equipamento {
 
         if ($stmt->execute()) {
             $novoId = $this->db->getLastId();
-            // Só incrementa o contador após INSERT bem-sucedido
-            $this->incrementarNumeracao($dados['tipo_equipamento_id']);
+            // Só incrementa o contador para equipamentos numerados
+            if (!$isReserva) {
+                $this->incrementarNumeracao($dados['tipo_equipamento_id']);
+            }
             $this->db->commit();
             return $novoId;
         }
@@ -425,6 +440,70 @@ class Equipamento {
             if ($equipamentoAtual && $equipamentoAtual['numero_serie'] !== $dados['numero_serie']) {
                 $this->limparNumeroSerieInativo($dados['numero_serie']);
             }
+        } else {
+            $equipamentoAtual = $this->getById($id);
+        }
+
+        // Conversão reserva → numerado: gerar numero_registo
+        $atribuirNumero = !empty($dados['atribuir_numero'])
+            && !empty($equipamentoAtual)
+            && (int)($equipamentoAtual['is_reserva'] ?? 0) === 1;
+
+        if ($atribuirNumero) {
+            $this->db->beginTransaction();
+
+            $tipoId = (int)$dados['tipo_equipamento_id'];
+            $dadosNumeracao = $this->obterDadosNumeracao($tipoId);
+
+            if (!$dadosNumeracao) {
+                $this->db->rollback();
+                return false;
+            }
+
+            $prefixo = !empty($dadosNumeracao['prefixo_numeracao']) ? strtoupper(trim($dadosNumeracao['prefixo_numeracao'])) : 'EQP';
+            $numero = (int)($dadosNumeracao['proximo_numero'] ?? 1);
+            $novoNumeroRegisto = $prefixo . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+
+            $query = "UPDATE {$this->table} SET
+                      tipo_equipamento_id = ?,
+                      numero_registo = ?,
+                      is_reserva = 0,
+                      numero_serie = ?,
+                      localizacao = ?,
+                      marca = ?,
+                      modelo = ?,
+                      data_aquisicao = ?,
+                      data_instalacao = ?,
+                      data_proxima_manutencao = ?,
+                      estado = ?,
+                      observacoes = ?
+                      WHERE id = ?";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->bind_param(
+                "isssssssssssi",
+                $dados['tipo_equipamento_id'],
+                $novoNumeroRegisto,
+                $dados['numero_serie'],
+                $dados['localizacao'],
+                $dados['marca'],
+                $dados['modelo'],
+                $dados['data_aquisicao'],
+                $dados['data_instalacao'],
+                $dados['data_proxima_manutencao'],
+                $dados['estado'],
+                $dados['observacoes'],
+                $id
+            );
+
+            if ($stmt->execute()) {
+                $this->incrementarNumeracao($tipoId);
+                $this->db->commit();
+                return true;
+            }
+
+            $this->db->rollback();
+            return false;
         }
 
         $query = "UPDATE {$this->table} SET

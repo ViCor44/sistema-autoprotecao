@@ -164,7 +164,11 @@ $equipamentosJson = json_encode($equipamentosPayload, JSON_UNESCAPED_UNICODE | J
                             <strong><?php echo htmlspecialchars($equip['tipo_nome'] ?? 'Equipamento', ENT_QUOTES, 'UTF-8'); ?></strong>
                             <span class="text-muted"> - <?php echo htmlspecialchars($equip['localizacao'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
                         </span>
-                        <span class="badge bg-primary"><?php echo htmlspecialchars($equip['numero_registo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
+                        <?php if ((int)($equip['is_reserva'] ?? 0) === 1): ?>
+                            <span class="badge bg-warning text-dark"><i class="bi bi-box-seam"></i> Reserva</span>
+                        <?php else: ?>
+                            <span class="badge bg-primary"><?php echo htmlspecialchars($equip['numero_registo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span>
+                        <?php endif; ?>
                     </button>
                 <?php endforeach; ?>
             </div>

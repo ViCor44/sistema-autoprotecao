@@ -14,6 +14,18 @@
                     </select>
                 </div>
 
+                <div class="mb-3 p-3 border rounded bg-light">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="is_reserva" name="is_reserva" value="1">
+                        <label class="form-check-label fw-bold" for="is_reserva">
+                            <i class="bi bi-box-seam"></i> Equipamento de Reserva (stock)
+                        </label>
+                    </div>
+                    <div class="form-text">
+                        Marque para registar equipamentos em stock/reserva. Não recebem número de registo nem são alvo de inspeções calendarizadas, até serem colocados em serviço.
+                    </div>
+                </div>
+
                 <div class="mb-3" id="bloco-campos-dinamicos" style="display: none;">
                     <h5 class="mb-3">Características Específicas do Tipo</h5>
                     <?php foreach ($camposDinamicosPorTipo as $tipoId => $campos): ?>
@@ -60,7 +72,7 @@
                     <?php endforeach; ?>
                 </div>
 
-                <div class="row">
+                <div class="row" id="bloco-numero-registo">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Número de Registo</label>
                         <div class="input-group">
@@ -83,8 +95,11 @@
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="localizacao" class="form-label">Localização *</label>
+                        <label for="localizacao" class="form-label"><span id="label-localizacao-asterisco">Localização *</span></label>
                         <input type="text" class="form-control" name="localizacao" id="localizacao" required>
+                        <div class="form-text" id="hint-localizacao-reserva" style="display:none;">
+                            Opcional para reservas. Se vazio, será gravado como "Reserva".
+                        </div>
                     </div>
                 </div>
 
@@ -159,6 +174,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const usarIntercalacao = document.getElementById('usar_intercalacao');
     const painelIntercalacao = document.getElementById('painel-intercalacao');
     const inputPosicao = document.getElementById('intercalar_posicao');
+    const checkReserva = document.getElementById('is_reserva');
+    const blocoNumeroRegisto = document.getElementById('bloco-numero-registo');
+    const inputLocalizacao = document.getElementById('localizacao');
+    const labelLocAsterisco = document.getElementById('label-localizacao-asterisco');
+    const hintLocReserva = document.getElementById('hint-localizacao-reserva');
 
     let prefixoAtual = '';
 
@@ -253,6 +273,22 @@ document.addEventListener('DOMContentLoaded', function () {
     selectTipo.addEventListener('change', function () {
         usarIntercalacao.checked = false;
         painelIntercalacao.style.display = 'none';
+
+    function aplicarModoReserva() {
+        const reserva = checkReserva.checked;
+        blocoNumeroRegisto.style.display = reserva ? 'none' : '';
+        inputLocalizacao.required = !reserva;
+        labelLocAsterisco.textContent = reserva ? 'Localização' : 'Localização *';
+        hintLocReserva.style.display = reserva ? 'block' : 'none';
+        if (reserva) {
+            usarIntercalacao.checked = false;
+            painelIntercalacao.style.display = 'none';
+            inputPosicao.value = '';
+        }
+    }
+    checkReserva.addEventListener('change', aplicarModoReserva);
+    aplicarModoReserva();
+
         inputPosicao.value = '';
         prefixoAtual = '';
         atualizarCamposDinamicos();

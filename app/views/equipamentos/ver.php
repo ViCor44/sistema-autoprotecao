@@ -41,7 +41,12 @@ $formatarDataSegura = function ($data) {
             <div class="card-body">
                 <p>
                     <strong>Localização:</strong> <?php echo htmlspecialchars($equipamento['localizacao'], ENT_QUOTES, 'UTF-8'); ?><br>
-                    <strong>Número de Registo:</strong> <span class="badge bg-primary"><?php echo htmlspecialchars($equipamento['numero_registo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span><br>
+                    <strong>Número de Registo:</strong>
+                    <?php if ((int)($equipamento['is_reserva'] ?? 0) === 1): ?>
+                        <span class="badge bg-warning text-dark"><i class="bi bi-box-seam"></i> Reserva (sem numeração)</span><br>
+                    <?php else: ?>
+                        <span class="badge bg-primary"><?php echo htmlspecialchars($equipamento['numero_registo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></span><br>
+                    <?php endif; ?>
                     <strong>Número de Série:</strong> <?php echo htmlspecialchars($equipamento['numero_serie'] ?? '-', ENT_QUOTES, 'UTF-8'); ?><br>
                     <strong>Marca:</strong> <?php echo $equipamento['marca'] ?? '-'; ?><br>
                     <strong>Modelo:</strong> <?php echo $equipamento['modelo'] ?? '-'; ?><br>

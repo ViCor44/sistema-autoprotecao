@@ -519,13 +519,16 @@ class EquipamentoController extends Controller {
     public function salvar() {
         $this->requirePost('equipamento', 'listar');
 
+        $isReserva = !empty($_POST['is_reserva']) ? 1 : 0;
+
         $intercalarPosicao = null;
-        if (!empty($_POST['usar_intercalacao']) && !empty($_POST['intercalar_posicao'])) {
+        if (!$isReserva && !empty($_POST['usar_intercalacao']) && !empty($_POST['intercalar_posicao'])) {
             $intercalarPosicao = max(1, (int)$_POST['intercalar_posicao']);
         }
 
         $dados = [
             'tipo_equipamento_id' => $_POST['tipo_equipamento_id'] ?? 0,
+            'is_reserva' => $isReserva,
             'numero_serie' => $_POST['numero_serie'] ?? '',
             'localizacao' => $_POST['localizacao'] ?? '',
             'marca' => $_POST['marca'] ?? '',
@@ -585,7 +588,8 @@ class EquipamentoController extends Controller {
             'data_instalacao' => $_POST['data_instalacao'] ?? null,
             'data_proxima_manutencao' => $_POST['data_proxima_manutencao'] ?? null,
             'estado' => $_POST['estado'] ?? 'operacional',
-            'observacoes' => $_POST['observacoes'] ?? ''
+            'observacoes' => $_POST['observacoes'] ?? '',
+            'atribuir_numero' => !empty($_POST['atribuir_numero']) ? 1 : 0,
         ];
 
         if ($this->equipamento->update($id, $dados)) {
