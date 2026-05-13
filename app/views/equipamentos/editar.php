@@ -22,7 +22,7 @@
                     <select name="tipo_equipamento_id" id="tipo_equipamento_id" class="form-select" required>
                         <option value="">Selecione...</option>
                         <?php foreach ($tipos as $tipo): ?>
-                            <option value="<?php echo $tipo['id']; ?>" data-prefixo="<?php echo htmlspecialchars((string)($tipo['prefixo_numeracao'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" <?php echo $tipo['id'] === $equipamento['tipo_equipamento_id'] ? 'selected' : ''; ?>><?php echo $tipo['nome']; ?></option>
+                            <option value="<?php echo $tipo['id']; ?>" data-prefixo="<?php echo htmlspecialchars((string)($tipo['prefixo_numeracao'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" <?php echo (int)$tipo['id'] === (int)$equipamento['tipo_equipamento_id'] ? 'selected' : ''; ?>><?php echo $tipo['nome']; ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
