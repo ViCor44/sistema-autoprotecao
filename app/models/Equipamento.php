@@ -539,7 +539,9 @@ class Equipamento {
             $texto = $this->db->escape($filtros['localizacao']);
             $where .= " AND (
                 e.localizacao LIKE '%{$texto}%'
+                OR e.numero_registo LIKE '%{$texto}%'
                 OR e.numero_serie LIKE '%{$texto}%'
+                OR e.codigo_barras LIKE '%{$texto}%'
                 OR e.marca LIKE '%{$texto}%'
                 OR e.modelo LIKE '%{$texto}%'
             )";
