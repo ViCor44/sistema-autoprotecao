@@ -31,6 +31,42 @@ foreach ($equipamentos as $equip) {
 }
 
 $equipamentosJson = json_encode($equipamentosPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
+
+// Buscar valores de campos dinâmicos para os equipamentos visíveis (para tooltip)
+$camposDinamicosPorEquip = [];
+$idsEquipamentos = array_keys($equipamentosPayload);
+if (!empty($idsEquipamentos)) {
+    try {
+        $db = new Database();
+        $existe = $db->query("SHOW TABLES LIKE 'equipamentos_campos_valores'");
+        if ($existe && $existe->num_rows > 0) {
+            $idsSeguros = implode(',', array_map('intval', $idsEquipamentos));
+            $sql = "SELECT ecv.equipamento_id, tec.nome_campo, tec.unidade, ecv.valor
+                    FROM equipamentos_campos_valores ecv
+                    JOIN tipos_equipamentos_campos tec ON tec.id = ecv.campo_id
+                    WHERE ecv.equipamento_id IN ({$idsSeguros})
+                      AND tec.ativo = TRUE
+                    ORDER BY tec.ordem ASC, tec.nome_campo ASC";
+            $res = $db->query($sql);
+            if ($res) {
+                foreach ($res->fetch_all(MYSQLI_ASSOC) as $r) {
+                    $eid = (int)$r['equipamento_id'];
+                    $valor = trim((string)$r['valor']);
+                    if ($valor === '') {
+                        continue;
+                    }
+                    $unidade = trim((string)($r['unidade'] ?? ''));
+                    $camposDinamicosPorEquip[$eid][] = [
+                        'nome' => (string)$r['nome_campo'],
+                        'valor' => $valor . ($unidade !== '' ? ' ' . $unidade : ''),
+                    ];
+                }
+            }
+        }
+    } catch (\Throwable $e) {
+        // silencioso: tooltip continua sem campos dinâmicos
+    }
+}
 ?>
 
 <section class="page-shell page-shell--narrow equipamentos-page">
@@ -155,10 +191,55 @@ $equipamentosJson = json_encode($equipamentosPayload, JSON_UNESCAPED_UNICODE | J
             </div>
             <div class="list-group list-group-flush">
                 <?php foreach ($equipamentos as $equip): ?>
+                    <?php
+                        $tooltipLinhas = [];
+                        $marca = trim((string)($equip['marca'] ?? ''));
+                        $modelo = trim((string)($equip['modelo'] ?? ''));
+                        $numSerie = trim((string)($equip['numero_serie'] ?? ''));
+                        $estadoEq = trim((string)($equip['estado'] ?? ''));
+                        $proxMan = trim((string)($equip['data_proxima_manutencao'] ?? ''));
+                        $obs = trim((string)($equip['observacoes'] ?? ''));
+
+                        if ($marca !== '' || $modelo !== '') {
+                            $tooltipLinhas[] = '<strong>Marca/Modelo:</strong> ' . htmlspecialchars(trim($marca . ' ' . $modelo), ENT_QUOTES, 'UTF-8');
+                        }
+                        if ($numSerie !== '') {
+                            $tooltipLinhas[] = '<strong>N.º Série:</strong> ' . htmlspecialchars($numSerie, ENT_QUOTES, 'UTF-8');
+                        }
+                        if ($estadoEq !== '') {
+                            $tooltipLinhas[] = '<strong>Estado:</strong> ' . htmlspecialchars(ucfirst(str_replace('_', ' ', $estadoEq)), ENT_QUOTES, 'UTF-8');
+                        }
+                        if ($proxMan !== '' && $proxMan !== '0000-00-00') {
+                            $partesData = explode('-', $proxMan);
+                            $dataFmt = count($partesData) === 3 ? $partesData[2] . '/' . $partesData[1] . '/' . $partesData[0] : $proxMan;
+                            $tooltipLinhas[] = '<strong>Próxima vistoria:</strong> ' . htmlspecialchars($dataFmt, ENT_QUOTES, 'UTF-8');
+                        }
+
+                        // Campos dinâmicos (ex.: capacidade, agente extintor)
+                        $camposEquip = $camposDinamicosPorEquip[(int)$equip['id']] ?? [];
+                        foreach ($camposEquip as $cd) {
+                            $tooltipLinhas[] = '<strong>' . htmlspecialchars($cd['nome'], ENT_QUOTES, 'UTF-8') . ':</strong> '
+                                . htmlspecialchars($cd['valor'], ENT_QUOTES, 'UTF-8');
+                        }
+
+                        if ($obs !== '') {
+                            $obsCurta = mb_strlen($obs) > 120 ? mb_substr($obs, 0, 117) . '…' : $obs;
+                            $tooltipLinhas[] = '<em>' . htmlspecialchars($obsCurta, ENT_QUOTES, 'UTF-8') . '</em>';
+                        }
+
+                        $tooltipHtml = empty($tooltipLinhas)
+                            ? 'Sem características registadas'
+                            : implode('<br>', $tooltipLinhas);
+                    ?>
                     <button
                         type="button"
                         class="list-group-item list-group-item-action d-flex justify-content-between align-items-center js-abrir-equipamento"
                         data-equip-id="<?php echo (int)$equip['id']; ?>"
+                        data-bs-toggle="tooltip"
+                        data-bs-html="true"
+                        data-bs-placement="left"
+                        data-bs-custom-class="equipamento-tooltip"
+                        title="<?php echo htmlspecialchars($tooltipHtml, ENT_QUOTES, 'UTF-8'); ?>"
                     >
                         <span>
                             <strong><?php echo htmlspecialchars($equip['tipo_nome'] ?? 'Equipamento', ENT_QUOTES, 'UTF-8'); ?></strong>
@@ -350,8 +431,31 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // Inicializar tooltips do Bootstrap para os itens da lista
+    if (window.bootstrap && bootstrap.Tooltip) {
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+            new bootstrap.Tooltip(el, { container: 'body', delay: { show: 250, hide: 100 } });
+        });
+    }
+
     if (autoAbrirEquipamentoId > 0) {
         abrirModalEquipamento(autoAbrirEquipamentoId);
     }
 });
 </script>
+
+<style>
+.equipamento-tooltip .tooltip-inner {
+    max-width: 320px;
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    background-color: #1f2937;
+    color: #f9fafb;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+.equipamento-tooltip.bs-tooltip-start .tooltip-arrow::before,
+.equipamento-tooltip.bs-tooltip-auto[data-popper-placement^="left"] .tooltip-arrow::before {
+    border-left-color: #1f2937;
+}
+</style>
