@@ -120,8 +120,8 @@ class HomeController extends Controller {
             $_SESSION['utilizador_email'] = $user['email'];
             $_SESSION['utilizador_funcao'] = $user['funcao'];
 
-            $this->flash('Bem-vindo, ' . $user['nome'] . '!', 'sucesso');
-            $this->redirect('home');
+            $this->render('home/login', ['benvindo' => $user['nome']]);
+            return;
         }
 
         $mensagens = [
