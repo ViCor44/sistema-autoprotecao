@@ -6,7 +6,6 @@
                     <i class="bi bi-shield-check" style="font-size: 3rem; color: #0d6efd;"></i>
                     <h3 class="mt-3"><?php echo APP_NAME; ?></h3>
                     <p class="text-muted">Sistema de Autoproteção</p>
-                    <p class="text-primary fw-semibold">Bem-vindo! Inicie sessão para continuar.</p>
                 </div>
 
                 <?php if (!empty($benvindo)): ?>
