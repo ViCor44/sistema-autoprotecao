@@ -169,7 +169,7 @@ class EquipamentoController extends Controller {
         $etiquetasPorPagina = 24; // 4 colunas x 6 linhas
         $paginas = array_chunk($etiquetas, $etiquetasPorPagina);
 
-        $this->render('equipamentos/etiquetas', compact('paginas', 'etiquetas'));
+        $this->renderStandalone('equipamentos/etiquetas', compact('paginas', 'etiquetas'));
     }
 
     /**
