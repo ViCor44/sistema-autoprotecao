@@ -598,6 +598,10 @@ class Equipamento {
             $where .= " AND e.ativo = " . (int)$filtros['ativo'];
         }
 
+        if (isset($filtros['is_reserva'])) {
+            $where .= " AND e.is_reserva = " . (int)$filtros['is_reserva'];
+        }
+
         if (!empty($filtros['tipo_equipamento_id'])) {
             $where .= " AND e.tipo_equipamento_id = " . (int)$filtros['tipo_equipamento_id'];
         }

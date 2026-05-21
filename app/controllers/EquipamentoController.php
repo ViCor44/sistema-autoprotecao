@@ -161,6 +161,8 @@ class EquipamentoController extends Controller {
             'direcao' => 'ASC',
         ];
 
+        $filtros['is_reserva'] = 0;
+
         $equipamentos = $this->equipamento->getAll($filtros, null, 0, $ordenacao);
         $etiquetas = $equipamentos;
 
