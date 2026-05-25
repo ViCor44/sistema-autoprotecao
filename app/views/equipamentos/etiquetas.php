@@ -107,7 +107,7 @@ $baseUrl = 'index.php?controler=equipamento&acao=etiquetas';
     $eCols       = 4;
     $eLinhas     = (int)($eCelulas / $eCols);
     $gridClass   = $eIsExtintor ? 'pos-grid--qr' : 'pos-grid--simples';
-    $tipoLabel   = $eIsExtintor ? 'Etiqueta com QR (extintor)' : 'Etiqueta com numeracao';
+    $tipoLabel   = $eIsExtintor ? 'QR + Numerac&#771;a&#771;o (2 folhas)' : 'S&#243; Numerac&#771;a&#771;o';
 ?>
     <div class="toolbar">
         <div>
@@ -187,16 +187,19 @@ $baseUrl = 'index.php?controler=equipamento&acao=etiquetas';
     $eIsExtintor = (bool)($isExtintor ?? false);
     $ePosicao    = (int)($posicao ?? 0);
     $eCelulas    = (int)($totalCelulas ?? ($eIsExtintor ? 24 : 48));
-    $sheetClass  = $eIsExtintor ? 'sheet--qr' : 'sheet--simples';
     $eNr         = trim((string)($eq['numero_registo'] ?? ''));
     $eLoc        = trim((string)($eq['localizacao'] ?? ''));
     $eId         = (int)($eq['id'] ?? 0);
+    $nFolhas     = $eIsExtintor ? 2 : 1;
 ?>
     <div class="toolbar">
         <div>
             <div class="toolbar__title">
-                <strong>1</strong> etiqueta
-                <?php if ($eIsExtintor): ?>(extintor &mdash; com QR)<?php else: ?>(numerac&#771;a&#771;o)<?php endif; ?>
+                <?php if ($eIsExtintor): ?>
+                    <strong>2</strong> etiquetas (QR + numerac&#771;a&#771;o) &mdash; extintor
+                <?php else: ?>
+                    <strong>1</strong> etiqueta (numerac&#771;a&#771;o)
+                <?php endif; ?>
                 &mdash; posi&#231;&#227;o <?php echo ($ePosicao + 1); ?>/<?php echo $eCelulas; ?>
             </div>
         </div>
@@ -210,33 +213,45 @@ $baseUrl = 'index.php?controler=equipamento&acao=etiquetas';
         </div>
     </div>
 
-    <section class="sheet <?php echo $sheetClass; ?>">
-        <?php for ($i = 0; $i < $eCelulas; $i++): ?>
+    <?php if ($eIsExtintor): ?>
+    <!-- Folha 1: etiqueta com QR (4×6 = 24 posições) -->
+    <section class="sheet sheet--qr">
+        <?php for ($i = 0; $i < 24; $i++): ?>
             <?php if ($i === $ePosicao): ?>
                 <article class="etiqueta">
-                    <?php if ($eIsExtintor): ?>
-                        <div class="etiqueta__placa">
-                            <div class="etiqueta__topo">Sistema de Autoprote&#231;&#227;o</div>
-                            <div class="etiqueta__meio">
-                                <div class="etiqueta__qr js-etiqueta-qr"
-                                     data-qr="NR=<?php echo htmlspecialchars($eNr, ENT_QUOTES, 'UTF-8'); ?>;LOC=<?php echo htmlspecialchars($eLoc, ENT_QUOTES, 'UTF-8'); ?>"></div>
-                                <div class="etiqueta__conteudo">
-                                    <div class="etiqueta__codigo"><?php echo _etiNome($eNr); ?></div>
-                                </div>
-                            </div>
-                            <div class="etiqueta__rodape">
-                                <div class="etiqueta__linha"><strong>LOCALIZA&#199;&#195;O:</strong> <?php echo _etiNome($eLoc); ?></div>
+                    <div class="etiqueta__placa">
+                        <div class="etiqueta__topo">Sistema de Autoprote&#231;&#227;o</div>
+                        <div class="etiqueta__meio">
+                            <div class="etiqueta__qr js-etiqueta-qr"
+                                 data-qr="NR=<?php echo htmlspecialchars($eNr, ENT_QUOTES, 'UTF-8'); ?>;LOC=<?php echo htmlspecialchars($eLoc, ENT_QUOTES, 'UTF-8'); ?>"></div>
+                            <div class="etiqueta__conteudo">
+                                <div class="etiqueta__codigo"><?php echo _etiNome($eNr); ?></div>
                             </div>
                         </div>
-                    <?php else: ?>
-                        <div class="etiqueta__placa etiqueta__placa--simples">
-                            <div class="etiqueta__topo etiqueta__topo--simples">Sistema de Autoprote&#231;&#227;o</div>
-                            <div class="etiqueta__codigo etiqueta__codigo--simples"
-                                 style="display:flex;align-items:center;justify-content:center;">
-                                <?php echo _etiNome($eNr); ?>
-                            </div>
+                        <div class="etiqueta__rodape">
+                            <div class="etiqueta__linha"><strong>LOCALIZA&#199;&#195;O:</strong> <?php echo _etiNome($eLoc); ?></div>
                         </div>
-                    <?php endif; ?>
+                    </div>
+                </article>
+            <?php else: ?>
+                <article class="etiqueta etiqueta--vazia"></article>
+            <?php endif; ?>
+        <?php endfor; ?>
+    </section>
+    <?php endif; ?>
+
+    <!-- Folha <?php echo $eIsExtintor ? '2' : '1'; ?>: etiqueta com numeração (4×12 = 48 posições) -->
+    <section class="sheet sheet--simples">
+        <?php for ($i = 0; $i < 48; $i++): ?>
+            <?php if ($i === $ePosicao): ?>
+                <article class="etiqueta">
+                    <div class="etiqueta__placa etiqueta__placa--simples">
+                        <div class="etiqueta__topo etiqueta__topo--simples">Sistema de Autoprote&#231;&#227;o</div>
+                        <div class="etiqueta__codigo etiqueta__codigo--simples"
+                             style="display:flex;align-items:center;justify-content:center;">
+                            <?php echo _etiNome($eNr); ?>
+                        </div>
+                    </div>
                 </article>
             <?php else: ?>
                 <article class="etiqueta etiqueta--vazia"></article>
@@ -263,16 +278,18 @@ $baseUrl = 'index.php?controler=equipamento&acao=etiquetas';
     $paginasQr      = $paginasQr ?? [];
     $paginasSimples = $paginasSimples ?? [];
     $totalEtiquetas = (int)($totalEtiquetas ?? 0);
-    $nSimples = (int)array_sum(array_map('count', $paginasSimples));
     $nQr      = (int)array_sum(array_map('count', $paginasQr));
+    $nSimples = (int)array_sum(array_map('count', $paginasSimples));
+    // extintores entram nas duas listas; outros só em simples
+    $nOutros  = $nSimples - $nQr;
 ?>
     <div class="toolbar">
         <div>
-            <div class="toolbar__title"><strong><?php echo $totalEtiquetas; ?></strong> etiqueta(s)</div>
+            <div class="toolbar__title"><strong><?php echo $totalEtiquetas; ?></strong> equipamento(s)</div>
             <div class="toolbar__sub">
-                <?php if ($nQr > 0): ?><?php echo $nQr; ?> extintor(es) com QR<?php endif; ?>
-                <?php if ($nQr > 0 && $nSimples > 0): ?> &nbsp;|&nbsp; <?php endif; ?>
-                <?php if ($nSimples > 0): ?><?php echo $nSimples; ?> equipamento(s) com numera&#231;&#227;o<?php endif; ?>
+                <?php if ($nQr > 0): ?><?php echo $nQr; ?> extintor(es): QR + numerac&#771;a&#771;o<?php endif; ?>
+                <?php if ($nQr > 0 && $nOutros > 0): ?> &nbsp;|&nbsp; <?php endif; ?>
+                <?php if ($nOutros > 0): ?><?php echo $nOutros; ?> outro(s): s&#243; numerac&#771;a&#771;o<?php endif; ?>
             </div>
         </div>
         <div style="display:flex;gap:6px;">

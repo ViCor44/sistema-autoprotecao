@@ -138,7 +138,7 @@ class EquipamentoController extends Controller {
      * Modos:
      *   ?id=X             → Seleção de posição na folha para etiqueta individual
      *   ?id=X&posicao=N   → Render da etiqueta individual na posição N
-     *   ?tipo=T&…         → Batch (extintores→QR 24/pág; outros→simples 48/pág)
+     *   ?tipo=T&…         → Batch: extintores→QR+simples; outros→só simples
      */
     public function etiquetas() {
         $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -153,10 +153,11 @@ class EquipamentoController extends Controller {
             }
 
             $isExtintor = stripos((string)($equipamento['tipo_nome'] ?? ''), 'extintor') !== false;
+            // O seletor usa a grelha QR (24 células) para extintores, simples (48) para outros.
+            // A posição escolhida é válida nas duas folhas (pos < 24 ≤ 48).
             $totalCelulas = $isExtintor ? 24 : 48;
 
             if ($posicao < 0) {
-                // Mostrar seletor de posição na folha
                 $this->renderStandalone('equipamentos/etiquetas', [
                     'modoEscolhaPosicao' => true,
                     'equipamento'        => $equipamento,
@@ -181,9 +182,9 @@ class EquipamentoController extends Controller {
         // Modo batch: filtros
         $filtros = ['ativo' => 1, 'is_reserva' => 0];
 
-        $tipo      = isset($_GET['tipo'])       ? (int)$_GET['tipo']              : 0;
-        $estado    = isset($_GET['estado'])     ? trim((string)$_GET['estado'])   : '';
-        $localizacao = isset($_GET['localizacao']) ? trim((string)$_GET['localizacao']) : '';
+        $tipo        = isset($_GET['tipo'])         ? (int)$_GET['tipo']              : 0;
+        $estado      = isset($_GET['estado'])       ? trim((string)$_GET['estado'])   : '';
+        $localizacao = isset($_GET['localizacao'])  ? trim((string)$_GET['localizacao']) : '';
 
         if ($tipo > 0) {
             $filtros['tipo_equipamento_id'] = $tipo;
@@ -198,15 +199,14 @@ class EquipamentoController extends Controller {
         $ordenacao = ['campo' => 'tipo_nome', 'direcao' => 'ASC'];
         $equipamentos = $this->equipamento->getAll($filtros, null, 0, $ordenacao);
 
+        // Extintores recebem os dois tipos de etiqueta; outros só a simples.
         $etiquetasQr     = array_values(array_filter($equipamentos, function ($e) {
             return stripos((string)($e['tipo_nome'] ?? ''), 'extintor') !== false;
         }));
-        $etiquetasSimples = array_values(array_filter($equipamentos, function ($e) {
-            return stripos((string)($e['tipo_nome'] ?? ''), 'extintor') === false;
-        }));
+        $etiquetasSimples = array_values($equipamentos); // todos
 
-        $paginasQr     = !empty($etiquetasQr)     ? array_chunk($etiquetasQr,     24) : [];
-        $paginasSimples = !empty($etiquetasSimples) ? array_chunk($etiquetasSimples, 48) : [];
+        $paginasQr      = !empty($etiquetasQr)      ? array_chunk($etiquetasQr,      24) : [];
+        $paginasSimples = !empty($etiquetasSimples)  ? array_chunk($etiquetasSimples, 48) : [];
         $totalEtiquetas = count($equipamentos);
 
         $this->renderStandalone('equipamentos/etiquetas', compact(
