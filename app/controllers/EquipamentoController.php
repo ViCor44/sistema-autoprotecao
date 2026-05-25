@@ -133,43 +133,87 @@ class EquipamentoController extends Controller {
     }
 
     /**
-     * Imprimir etiquetas dos equipamentos
-     * A4 vertical: 4 colunas x 6 linhas por página
-        * Uma etiqueta completa e uma etiqueta simples por equipamento
+     * Imprimir etiquetas dos equipamentos.
+     *
+     * Modos:
+     *   ?id=X             → Seleção de posição na folha para etiqueta individual
+     *   ?id=X&posicao=N   → Render da etiqueta individual na posição N
+     *   ?tipo=T&…         → Batch (extintores→QR 24/pág; outros→simples 48/pág)
      */
     public function etiquetas() {
-        $filtros = ['ativo' => 1];
+        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        $posicao = isset($_GET['posicao']) && $_GET['posicao'] !== '' ? (int)$_GET['posicao'] : -1;
 
-        $tipo = isset($_GET['tipo']) ? (int)$_GET['tipo'] : 0;
-        $estado = isset($_GET['estado']) ? trim((string)$_GET['estado']) : '';
+        if ($id > 0) {
+            $equipamento = $this->equipamento->getById($id);
+            if (!$equipamento) {
+                $this->flash('Equipamento não encontrado.', 'erro');
+                $this->redirect('equipamento', 'listar');
+                return;
+            }
+
+            $isExtintor = stripos((string)($equipamento['tipo_nome'] ?? ''), 'extintor') !== false;
+            $totalCelulas = $isExtintor ? 24 : 48;
+
+            if ($posicao < 0) {
+                // Mostrar seletor de posição na folha
+                $this->renderStandalone('equipamentos/etiquetas', [
+                    'modoEscolhaPosicao' => true,
+                    'equipamento'        => $equipamento,
+                    'isExtintor'         => $isExtintor,
+                    'totalCelulas'       => $totalCelulas,
+                ]);
+                return;
+            }
+
+            $posicao = max(0, min($posicao, $totalCelulas - 1));
+
+            $this->renderStandalone('equipamentos/etiquetas', [
+                'modoUnico'    => true,
+                'etiqueta'     => $equipamento,
+                'isExtintor'   => $isExtintor,
+                'posicao'      => $posicao,
+                'totalCelulas' => $totalCelulas,
+            ]);
+            return;
+        }
+
+        // Modo batch: filtros
+        $filtros = ['ativo' => 1, 'is_reserva' => 0];
+
+        $tipo      = isset($_GET['tipo'])       ? (int)$_GET['tipo']              : 0;
+        $estado    = isset($_GET['estado'])     ? trim((string)$_GET['estado'])   : '';
         $localizacao = isset($_GET['localizacao']) ? trim((string)$_GET['localizacao']) : '';
 
         if ($tipo > 0) {
             $filtros['tipo_equipamento_id'] = $tipo;
         }
-
         if ($estado !== '') {
             $filtros['estado'] = $estado;
         }
-
         if ($localizacao !== '') {
             $filtros['localizacao'] = $localizacao;
         }
 
-        $ordenacao = [
-            'campo' => 'tipo_nome',
-            'direcao' => 'ASC',
-        ];
-
-        $filtros['is_reserva'] = 0;
-
+        $ordenacao = ['campo' => 'tipo_nome', 'direcao' => 'ASC'];
         $equipamentos = $this->equipamento->getAll($filtros, null, 0, $ordenacao);
-        $etiquetas = $equipamentos;
 
-        $etiquetasPorPagina = 24; // 4 colunas x 6 linhas
-        $paginas = array_chunk($etiquetas, $etiquetasPorPagina);
+        $etiquetasQr     = array_values(array_filter($equipamentos, function ($e) {
+            return stripos((string)($e['tipo_nome'] ?? ''), 'extintor') !== false;
+        }));
+        $etiquetasSimples = array_values(array_filter($equipamentos, function ($e) {
+            return stripos((string)($e['tipo_nome'] ?? ''), 'extintor') === false;
+        }));
 
-        $this->renderStandalone('equipamentos/etiquetas', compact('paginas', 'etiquetas'));
+        $paginasQr     = !empty($etiquetasQr)     ? array_chunk($etiquetasQr,     24) : [];
+        $paginasSimples = !empty($etiquetasSimples) ? array_chunk($etiquetasSimples, 48) : [];
+        $totalEtiquetas = count($equipamentos);
+
+        $this->renderStandalone('equipamentos/etiquetas', compact(
+            'etiquetasQr', 'etiquetasSimples',
+            'paginasQr', 'paginasSimples',
+            'totalEtiquetas'
+        ));
     }
 
     /**

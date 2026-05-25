@@ -324,6 +324,9 @@ if (!empty($idsEquipamentos)) {
             <div class="modal-footer justify-content-between">
                 <div>
                     <a id="modal-link-ver" href="#" class="btn btn-primary">Ver completo</a>
+                    <a id="modal-link-etiqueta" href="#" class="btn btn-outline-secondary" target="_blank" rel="noopener">
+                        <i class="bi bi-printer"></i> Etiqueta
+                    </a>
                 </div>
                 <div class="d-flex gap-2">
                     <a id="modal-link-editar" href="#" class="btn btn-warning">Editar</a>
@@ -400,10 +403,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const linkVer = 'index.php?controler=equipamento&acao=ver&id=' + id;
         const linkEditar = 'index.php?controler=equipamento&acao=editar&id=' + id;
         const linkDeletar = 'index.php?controler=equipamento&acao=deletar&id=' + id;
+        const linkEtiqueta = 'index.php?controler=equipamento&acao=etiquetas&id=' + id;
 
         document.getElementById('modal-link-ver').setAttribute('href', linkVer);
         document.getElementById('modal-link-editar').setAttribute('href', linkEditar);
         document.getElementById('modal-link-deletar').setAttribute('href', linkDeletar);
+        document.getElementById('modal-link-etiqueta').setAttribute('href', linkEtiqueta);
 
         modalQr.innerHTML = '';
         const numeroSerie = normalizarTextoQr(valorOuTraco(equipamento.numero_registo));

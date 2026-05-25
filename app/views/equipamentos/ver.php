@@ -83,6 +83,9 @@ $formatarDataSegura = function ($data) {
             <a href="index.php?controler=equipamento&acao=editar&id=<?php echo $equipamento['id']; ?>" class="btn btn-warning">
                 <i class="bi bi-pencil"></i> Editar
             </a>
+            <a href="index.php?controler=equipamento&acao=etiquetas&id=<?php echo $equipamento['id']; ?>" class="btn btn-outline-secondary" target="_blank" rel="noopener">
+                <i class="bi bi-printer"></i> Imprimir Etiqueta
+            </a>
             <a href="index.php?controler=equipamento&acao=deletar&id=<?php echo $equipamento['id']; ?>" class="btn btn-danger" onclick="return confirm('Tem a certeza?');">
                 <i class="bi bi-trash"></i> Eliminar
             </a>
