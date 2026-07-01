@@ -4,6 +4,7 @@
             <span class="page-hero__eyebrow">Edição</span>
             <h1><i class="bi bi-pencil-square"></i> Editar relatório</h1>
             <p>Atualize o conteúdo técnico do relatório antes da assinatura final.</p>
+            <p class="mt-2 mb-0"><small class="text-muted">Documento nº <strong><?php echo htmlspecialchars(Relatorio::formatarNumero($relatorio['id'])); ?></strong></small></p>
         </div>
     </div>
 

@@ -34,6 +34,7 @@
                 </div>
             </div>
             <div class="detail-stack">
+                <div class="detail-row"><span>Documento nº</span><strong><?php echo htmlspecialchars(Relatorio::formatarNumero($relatorio['id'])); ?></strong></div>
                 <div class="detail-row"><span>Equipamento</span><strong><?php echo htmlspecialchars($relatorio['tipo_equipamento'] . ' (' . ($relatorio['localizacao'] ?: 'Todos os equipamentos do tipo') . ')'); ?></strong></div>
                 <div class="detail-row"><span>Data</span><strong><?php echo date('d/m/Y', strtotime($relatorio['data_relatorio'])); ?></strong></div>
                 <div class="detail-row"><span>Tipo</span><strong><?php echo ucfirst($relatorio['tipo_relatorio']); ?></strong></div>

@@ -28,6 +28,7 @@
                 <table class="table modern-table align-middle">
                     <thead>
                         <tr>
+                            <th>Documento</th>
                             <th>Data</th>
                             <th>Equipamento</th>
                             <th>Tipo</th>
@@ -38,7 +39,8 @@
                     <tbody>
                         <?php foreach ($relatorios as $rel): ?>
                             <tr>
-                                <td><strong><?php echo date('d/m/Y', strtotime($rel['data_relatorio'])); ?></strong></td>
+                                <td><strong><?php echo htmlspecialchars(Relatorio::formatarNumero($rel['id'])); ?></strong></td>
+                                <td><?php echo date('d/m/Y', strtotime($rel['data_relatorio'])); ?></td>
                                 <td><?php echo htmlspecialchars($rel['localizacao'] ?: $rel['tipo_equipamento']); ?></td>
                                 <td><?php echo ucfirst($rel['tipo_relatorio']); ?></td>
                                 <td><?php echo htmlspecialchars($rel['responsavel_nome']); ?></td>

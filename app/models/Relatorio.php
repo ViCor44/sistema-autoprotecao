@@ -12,6 +12,13 @@ class Relatorio {
     }
 
     /**
+     * Formatar número do documento a partir do ID do relatório
+     */
+    public static function formatarNumero($id) {
+        return 'REL-' . str_pad((string)(int)$id, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
      * Obter todos os relatórios com filtros
      */
     public function getAll($filtros = []) {

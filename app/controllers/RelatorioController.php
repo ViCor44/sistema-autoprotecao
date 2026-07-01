@@ -210,7 +210,7 @@ class RelatorioController extends Controller {
         $pdf = new FPDF('P', 'mm', 'A5');
         $pdf->AddPage();
 
-        $numeroDocumento = 'REL-' . str_pad((string)$relatorio['id'], 4, '0', STR_PAD_LEFT);
+        $numeroDocumento = Relatorio::formatarNumero($relatorio['id']);
         $tecnico         = $relatorio['responsavel_nome'] ?: '-';
         $dataDocumento   = date('d/m/Y', strtotime($relatorio['data_relatorio']));
         $ambito          = !empty($relatorio['localizacao'])
