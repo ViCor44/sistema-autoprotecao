@@ -81,6 +81,7 @@ class Relatorio {
                   VALUES (NULLIF(?, 0), NULLIF(?, 0), NULLIF(?, 0), ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($query);
+        $proximaInspecao = !empty($dados['proxima_inspecao']) ? $dados['proxima_inspecao'] : null;
         $stmt->bind_param(
             "iiisisssss",
             $dados['calendario_id'],
@@ -92,7 +93,7 @@ class Relatorio {
             $dados['descricao'],
             $dados['observacoes'],
             $dados['condicoes_encontradas'],
-            $dados['proxima_inspecao'] ?: null
+            $proximaInspecao
         );
 
         if ($stmt->execute()) {
