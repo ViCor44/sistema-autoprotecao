@@ -337,21 +337,39 @@ class EquipamentoController extends Controller {
 
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
 
-        $pdf = new FPDF('P', 'mm', 'A4');
+        $pdf = new FPDF('L', 'mm', 'A4');
         $pdf->AddPage();
 
-        // Cabeçalho
+        $margemX = 10;
+        $larguraUtil = 277;
+        $yHeaderTabelaPrimeiraPagina = 26;
+        $yHeaderTabelaNovasPaginas = 10;
+        $yLimiteQuebra = 200;
+        $alturaLinhaTexto = 4.2;
+
+        $colunas = [
+            ['titulo' => 'Nº Registo', 'largura' => 24],
+            ['titulo' => 'Localização', 'largura' => $mostrarColunaCaracteristicas ? 52 : 88],
+        ];
+        if ($mostrarColunaCaracteristicas) {
+            $colunas[] = ['titulo' => 'Características', 'largura' => 85];
+        }
+        $colunas[] = ['titulo' => 'Observações', 'largura' => $mostrarColunaCaracteristicas ? 62 : 111];
+        $colunas[] = ['titulo' => 'Estado', 'largura' => 24];
+        $colunas[] = ['titulo' => 'Próx. Vistoria', 'largura' => 30];
+
+        // Cabeçalho principal da primeira página
         $pdf->SetFillColor(242, 245, 249);
         $pdf->SetDrawColor(205, 212, 223);
-        $pdf->Rect(0, 0, 210, 22, 'FD');
+        $pdf->Rect(0, 0, 297, 22, 'FD');
         $pdf->SetTextColor(26, 38, 56);
         $pdf->SetFont('Arial', 'B', 13);
-        $pdf->SetXY(10, 5);
-        $pdf->Cell(95, 8, $this->pdfTexto(APP_NAME), 0, 0, 'L');
+        $pdf->SetXY($margemX, 5);
+        $pdf->Cell(138, 8, $this->pdfTexto(APP_NAME), 0, 0, 'L');
         $pdf->SetFont('Arial', 'B', 11);
-        $pdf->Cell(95, 8, $this->pdfTexto('Lista de Equipamentos' . ($nomeTipo !== 'Todos' ? ' - ' . $nomeTipo : '')), 0, 1, 'R');
+        $pdf->Cell(138, 8, $this->pdfTexto('Lista de Equipamentos' . ($nomeTipo !== 'Todos' ? ' - ' . $nomeTipo : '')), 0, 1, 'R');
         $pdf->SetFont('Arial', '', 8);
-        $pdf->SetXY(10, 14);
+        $pdf->SetXY($margemX, 14);
         $filtroDesc = 'Total: ' . count($equipamentos);
         if ($estado !== '') {
             $filtroDesc .= '   |   Estado: ' . $this->pdfTexto(ucfirst($estado));
@@ -360,31 +378,16 @@ class EquipamentoController extends Controller {
             $filtroDesc .= '   |   Localiz.: ' . $this->pdfTexto($loc);
         }
         $filtroDesc .= '   |   ' . date('d/m/Y H:i');
-        $pdf->Cell(190, 5, $filtroDesc, 0, 1, 'L');
+        $pdf->Cell($larguraUtil, 5, $filtroDesc, 0, 1, 'L');
 
-        // Cabeçalho da tabela
-        $larguraLocalizacao = $mostrarColunaCaracteristicas ? 50 : 83;
-        $larguraCaracteristicas = 33;
-        $larguraObservacoes = 25;
-        $headers = [
-            ['Nº Registo',      35],
-            ['Localização',     $larguraLocalizacao],
-        ];
-        if ($mostrarColunaCaracteristicas) {
-            $headers[] = ['Características', $larguraCaracteristicas];
-        }
-        $headers[] = ['Observações', $larguraObservacoes];
-        $headers[] = ['Estado', 22];
-        $headers[] = ['Próx. Vistoria', 25];
-
-        $yHeader = 26;
+        // Cabeçalho de tabela
         $pdf->SetFillColor(226, 232, 240);
         $pdf->SetDrawColor(180, 190, 205);
         $pdf->SetTextColor(26, 38, 56);
         $pdf->SetFont('Arial', 'B', 9);
-        $pdf->SetXY(10, $yHeader);
-        foreach ($headers as [$texto, $larg]) {
-            $pdf->Cell($larg, 8, $texto, 1, 0, 'L', true);
+        $pdf->SetXY($margemX, $yHeaderTabelaPrimeiraPagina);
+        foreach ($colunas as $coluna) {
+            $pdf->Cell($coluna['largura'], 8, $this->pdfTexto($coluna['titulo']), 1, 0, 'L', true);
         }
         $pdf->Ln();
 
@@ -392,33 +395,56 @@ class EquipamentoController extends Controller {
         $pdf->SetFont('Arial', '', 8.5);
         $alt = false;
         foreach ($equipamentos as $eq) {
-            // Nova página se necessário
-            if ($pdf->GetY() > 272) {
+            $dadosLinha = [];
+            $dadosLinha[] = ['largura' => $colunas[0]['largura'], 'texto' => $this->pdfTexto($eq['numero_registo'] ?? '-')];
+            $dadosLinha[] = ['largura' => $colunas[1]['largura'], 'texto' => $this->pdfTexto($eq['localizacao'] ?? '-')];
+
+            if ($mostrarColunaCaracteristicas) {
+                $caracteristicas = $caracteristicasPorEquip[(int)$eq['id']] ?? [];
+                $caracteristicasTexto = empty($caracteristicas) ? '-' : implode("\n", $caracteristicas);
+                $dadosLinha[] = ['largura' => 85, 'texto' => $this->pdfTexto($caracteristicasTexto)];
+            }
+
+            $observacoes = trim((string)($eq['observacoes'] ?? ''));
+            $dadosLinha[] = ['largura' => $mostrarColunaCaracteristicas ? 62 : 111, 'texto' => $this->pdfTexto($observacoes === '' ? '-' : $observacoes)];
+            $dadosLinha[] = ['largura' => 24, 'texto' => $this->pdfTexto(ucfirst((string)($eq['estado'] ?? '-')))];
+            $dadosLinha[] = ['largura' => 30, 'texto' => $this->pdfTexto($this->formatarDataPdf($eq['data_proxima_manutencao'] ?? null))];
+
+            $linhasNecessarias = 1;
+            foreach ($dadosLinha as $celula) {
+                $linhasNecessarias = max($linhasNecessarias, $this->contarLinhasPdf($pdf, $celula['largura'] - 2, $celula['texto']));
+            }
+            $alturaLinha = max(7, ($linhasNecessarias * $alturaLinhaTexto) + 2);
+
+            if ($pdf->GetY() + $alturaLinha > $yLimiteQuebra) {
                 $pdf->AddPage();
                 $pdf->SetFillColor(226, 232, 240);
                 $pdf->SetDrawColor(180, 190, 205);
+                $pdf->SetTextColor(26, 38, 56);
                 $pdf->SetFont('Arial', 'B', 9);
-                $pdf->SetXY(10, 10);
-                foreach ($headers as [$texto, $larg]) {
-                    $pdf->Cell($larg, 8, $texto, 1, 0, 'L', true);
+                $pdf->SetXY($margemX, $yHeaderTabelaNovasPaginas);
+                foreach ($colunas as $coluna) {
+                    $pdf->Cell($coluna['largura'], 8, $this->pdfTexto($coluna['titulo']), 1, 0, 'L', true);
                 }
                 $pdf->Ln();
                 $pdf->SetFont('Arial', '', 8.5);
             }
 
-            $fill = $alt;
-            $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
-            $pdf->Cell(35,  7, $this->pdfTexto($eq['numero_registo'] ?? '-'), 1, 0, 'L', true);
-            $pdf->Cell($larguraLocalizacao, 7, $this->pdfTexto($eq['localizacao'] ?? '-'), 1, 0, 'L', true);
-            if ($mostrarColunaCaracteristicas) {
-                $caracteristicas = $caracteristicasPorEquip[(int)$eq['id']] ?? [];
-                $caracteristicasTexto = empty($caracteristicas) ? '-' : implode(' | ', $caracteristicas);
-                $pdf->Cell($larguraCaracteristicas, 7, $this->pdfTexto($this->limitarTextoPdf($caracteristicasTexto, 30)), 1, 0, 'L', true);
+            $x = $margemX;
+            $y = $pdf->GetY();
+            $pdf->SetDrawColor(180, 190, 205);
+            $pdf->SetFillColor($alt ? 248 : 255, $alt ? 250 : 255, $alt ? 252 : 255);
+
+            foreach ($dadosLinha as $celula) {
+                $larguraCelula = $celula['largura'];
+                $pdf->Rect($x, $y, $larguraCelula, $alturaLinha, 'DF');
+                $pdf->SetXY($x + 1, $y + 1);
+                $pdf->MultiCell($larguraCelula - 2, $alturaLinhaTexto, $celula['texto'], 0, 'L', false);
+                $x += $larguraCelula;
+                $pdf->SetXY($x, $y);
             }
-            $observacoes = trim((string)($eq['observacoes'] ?? ''));
-            $pdf->Cell($larguraObservacoes, 7, $this->pdfTexto($this->limitarTextoPdf($observacoes === '' ? '-' : $observacoes, 24)), 1, 0, 'L', true);
-            $pdf->Cell(22,  7, $this->pdfTexto(ucfirst((string)($eq['estado'] ?? '-'))), 1, 0, 'L', true);
-            $pdf->Cell(25,  7, $this->pdfTexto($this->formatarDataPdf($eq['data_proxima_manutencao'] ?? null)), 1, 1, 'L', true);
+
+            $pdf->SetXY($margemX, $y + $alturaLinha);
             $alt = !$alt;
         }
 
@@ -565,6 +591,67 @@ class EquipamentoController extends Controller {
         }
 
         return substr($texto, 0, $limite - 3) . '...';
+    }
+
+    private function contarLinhasPdf($pdf, $largura, $texto) {
+        $largura = (float)$largura;
+        if ($largura <= 0) {
+            return 1;
+        }
+
+        if (!isset($pdf->CurrentFont['cw'])) {
+            return 1;
+        }
+
+        $cw = $pdf->CurrentFont['cw'];
+        $wmax = ($largura - 2 * $pdf->cMargin) * 1000 / $pdf->FontSize;
+        $s = str_replace("\r", '', (string)$texto);
+        $nb = strlen($s);
+
+        if ($nb > 0 && $s[$nb - 1] === "\n") {
+            $nb--;
+        }
+
+        $sep = -1;
+        $i = 0;
+        $j = 0;
+        $l = 0;
+        $nl = 1;
+
+        while ($i < $nb) {
+            $c = $s[$i];
+            if ($c === "\n") {
+                $i++;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+                continue;
+            }
+
+            if ($c === ' ') {
+                $sep = $i;
+            }
+
+            $l += $cw[$c] ?? 0;
+            if ($l > $wmax) {
+                if ($sep === -1) {
+                    if ($i === $j) {
+                        $i++;
+                    }
+                } else {
+                    $i = $sep + 1;
+                }
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+            } else {
+                $i++;
+            }
+        }
+
+        return $nl;
     }
 
     /**
