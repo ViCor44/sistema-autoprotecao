@@ -253,6 +253,16 @@ class EquipamentoController extends Controller {
         $loc     = isset($_GET['localizacao']) ? trim((string)$_GET['localizacao']) : '';
         $ordenar = isset($_GET['ordenar'])  ? trim((string)$_GET['ordenar'])  : 'localizacao';
         $direcao = isset($_GET['direcao'])  ? strtoupper(trim((string)$_GET['direcao'])) : 'ASC';
+        $seletorCamposPresente = isset($_GET['campos_pdf_presentes']) && (string)$_GET['campos_pdf_presentes'] === '1';
+        $camposPdfSelecionados = [];
+        if (isset($_GET['campos_pdf']) && is_array($_GET['campos_pdf'])) {
+            foreach ($_GET['campos_pdf'] as $slugCampo) {
+                $slugCampo = preg_replace('/[^a-z0-9_\-]/i', '', (string)$slugCampo);
+                if ($slugCampo !== '') {
+                    $camposPdfSelecionados[$slugCampo] = true;
+                }
+            }
+        }
 
         $camposOrdenacaoPermitidos = ['tipo_nome', 'localizacao', 'estado', 'proxima_manutencao'];
         if (!in_array($ordenar, $camposOrdenacaoPermitidos, true)) {
@@ -284,19 +294,43 @@ class EquipamentoController extends Controller {
             ['campo' => 'numero_registo', 'direcao' => 'ASC']
         );
 
-        // Buscar valores do campo dinâmico "Agente Extintor" em bloco
-        $agentesExtintores = [];
+        // Buscar características dinâmicas dos equipamentos em bloco
+        $caracteristicasPorEquip = [];
+        $mostrarColunaCaracteristicas = true;
+        if ($seletorCamposPresente && empty($camposPdfSelecionados)) {
+            $mostrarColunaCaracteristicas = false;
+        }
+
         if (!empty($equipamentos)) {
             $db = new Database();
+            $idsSeguros = implode(',', array_map('intval', array_column($equipamentos, 'id')));
             $resultado = $db->query(
-                "SELECT ecv.equipamento_id, ecv.valor
+                "SELECT ecv.equipamento_id, tec.slug, tec.nome_campo, tec.unidade, ecv.valor
                  FROM equipamentos_campos_valores ecv
                  JOIN tipos_equipamentos_campos tec ON tec.id = ecv.campo_id
-                 WHERE tec.slug = 'agente_extintor'"
+                 WHERE ecv.equipamento_id IN ({$idsSeguros})
+                   AND tec.ativo = TRUE
+                 ORDER BY tec.ordem ASC, tec.nome_campo ASC"
             );
             if ($resultado) {
                 foreach ($resultado->fetch_all(MYSQLI_ASSOC) as $row) {
-                    $agentesExtintores[(int)$row['equipamento_id']] = $row['valor'];
+                    $slugCampo = trim((string)($row['slug'] ?? ''));
+                    if ($seletorCamposPresente && !empty($camposPdfSelecionados)) {
+                        if ($slugCampo === '' || !isset($camposPdfSelecionados[$slugCampo])) {
+                            continue;
+                        }
+                    }
+
+                    $equipamentoId = (int)$row['equipamento_id'];
+                    $valor = trim((string)($row['valor'] ?? ''));
+                    if ($valor === '') {
+                        continue;
+                    }
+
+                    $nomeCampo = trim((string)($row['nome_campo'] ?? 'Caracteristica'));
+                    $unidade = trim((string)($row['unidade'] ?? ''));
+                    $valorFormatado = $valor . ($unidade !== '' ? ' ' . $unidade : '');
+                    $caracteristicasPorEquip[$equipamentoId][] = $nomeCampo . ': ' . $valorFormatado;
                 }
             }
         }
@@ -329,13 +363,19 @@ class EquipamentoController extends Controller {
         $pdf->Cell(190, 5, $filtroDesc, 0, 1, 'L');
 
         // Cabeçalho da tabela
+        $larguraLocalizacao = $mostrarColunaCaracteristicas ? 50 : 83;
+        $larguraCaracteristicas = 33;
+        $larguraObservacoes = 25;
         $headers = [
             ['Nº Registo',      35],
-            ['Localização',     68],
-            ['Agente Extintor', 40],
-            ['Estado',          22],
-            ['Próx. Vistoria',  25],
+            ['Localização',     $larguraLocalizacao],
         ];
+        if ($mostrarColunaCaracteristicas) {
+            $headers[] = ['Características', $larguraCaracteristicas];
+        }
+        $headers[] = ['Observações', $larguraObservacoes];
+        $headers[] = ['Estado', 22];
+        $headers[] = ['Próx. Vistoria', 25];
 
         $yHeader = 26;
         $pdf->SetFillColor(226, 232, 240);
@@ -369,9 +409,14 @@ class EquipamentoController extends Controller {
             $fill = $alt;
             $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
             $pdf->Cell(35,  7, $this->pdfTexto($eq['numero_registo'] ?? '-'), 1, 0, 'L', true);
-            $pdf->Cell(68,  7, $this->pdfTexto($eq['localizacao'] ?? '-'), 1, 0, 'L', true);
-            $agente = $agentesExtintores[(int)$eq['id']] ?? '-';
-            $pdf->Cell(40,  7, $this->pdfTexto($agente), 1, 0, 'L', true);
+            $pdf->Cell($larguraLocalizacao, 7, $this->pdfTexto($eq['localizacao'] ?? '-'), 1, 0, 'L', true);
+            if ($mostrarColunaCaracteristicas) {
+                $caracteristicas = $caracteristicasPorEquip[(int)$eq['id']] ?? [];
+                $caracteristicasTexto = empty($caracteristicas) ? '-' : implode(' | ', $caracteristicas);
+                $pdf->Cell($larguraCaracteristicas, 7, $this->pdfTexto($this->limitarTextoPdf($caracteristicasTexto, 30)), 1, 0, 'L', true);
+            }
+            $observacoes = trim((string)($eq['observacoes'] ?? ''));
+            $pdf->Cell($larguraObservacoes, 7, $this->pdfTexto($this->limitarTextoPdf($observacoes === '' ? '-' : $observacoes, 24)), 1, 0, 'L', true);
             $pdf->Cell(22,  7, $this->pdfTexto(ucfirst((string)($eq['estado'] ?? '-'))), 1, 0, 'L', true);
             $pdf->Cell(25,  7, $this->pdfTexto($this->formatarDataPdf($eq['data_proxima_manutencao'] ?? null)), 1, 1, 'L', true);
             $alt = !$alt;
@@ -500,6 +545,26 @@ class EquipamentoController extends Controller {
         }
 
         return iconv('UTF-8', 'windows-1252//TRANSLIT', $texto) ?: $texto;
+    }
+
+    private function limitarTextoPdf($texto, $limite = 36) {
+        $texto = trim((string)$texto);
+        if ($texto === '') {
+            return '-';
+        }
+
+        if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+            if (mb_strlen($texto, 'UTF-8') <= $limite) {
+                return $texto;
+            }
+            return mb_substr($texto, 0, $limite - 3, 'UTF-8') . '...';
+        }
+
+        if (strlen($texto) <= $limite) {
+            return $texto;
+        }
+
+        return substr($texto, 0, $limite - 3) . '...';
     }
 
     /**

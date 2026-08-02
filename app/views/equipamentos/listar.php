@@ -34,6 +34,7 @@ $equipamentosJson = json_encode($equipamentosPayload, JSON_UNESCAPED_UNICODE | J
 
 // Buscar valores de campos dinâmicos para os equipamentos visíveis (para tooltip)
 $camposDinamicosPorEquip = [];
+$camposPdfDisponiveis = [];
 $idsEquipamentos = array_keys($equipamentosPayload);
 if (!empty($idsEquipamentos)) {
     try {
@@ -41,7 +42,7 @@ if (!empty($idsEquipamentos)) {
         $existe = $db->query("SHOW TABLES LIKE 'equipamentos_campos_valores'");
         if ($existe && $existe->num_rows > 0) {
             $idsSeguros = implode(',', array_map('intval', $idsEquipamentos));
-            $sql = "SELECT ecv.equipamento_id, tec.nome_campo, tec.unidade, ecv.valor
+            $sql = "SELECT ecv.equipamento_id, tec.slug, tec.nome_campo, tec.unidade, ecv.valor
                     FROM equipamentos_campos_valores ecv
                     JOIN tipos_equipamentos_campos tec ON tec.id = ecv.campo_id
                     WHERE ecv.equipamento_id IN ({$idsSeguros})
@@ -51,13 +52,20 @@ if (!empty($idsEquipamentos)) {
             if ($res) {
                 foreach ($res->fetch_all(MYSQLI_ASSOC) as $r) {
                     $eid = (int)$r['equipamento_id'];
+                    $slug = trim((string)($r['slug'] ?? ''));
+                    $nomeCampo = trim((string)($r['nome_campo'] ?? ''));
                     $valor = trim((string)$r['valor']);
                     if ($valor === '') {
                         continue;
                     }
+
+                    if ($slug !== '' && $nomeCampo !== '') {
+                        $camposPdfDisponiveis[$slug] = $nomeCampo;
+                    }
+
                     $unidade = trim((string)($r['unidade'] ?? ''));
                     $camposDinamicosPorEquip[$eid][] = [
-                        'nome' => (string)$r['nome_campo'],
+                        'nome' => $nomeCampo,
                         'valor' => $valor . ($unidade !== '' ? ' ' . $unidade : ''),
                     ];
                 }
@@ -66,6 +74,21 @@ if (!empty($idsEquipamentos)) {
     } catch (\Throwable $e) {
         // silencioso: tooltip continua sem campos dinâmicos
     }
+}
+
+$camposPdfSelecionados = [];
+if (isset($_GET['campos_pdf']) && is_array($_GET['campos_pdf'])) {
+    foreach ($_GET['campos_pdf'] as $slugSelecionado) {
+        $slugSelecionado = trim((string)$slugSelecionado);
+        if ($slugSelecionado !== '' && isset($camposPdfDisponiveis[$slugSelecionado])) {
+            $camposPdfSelecionados[] = $slugSelecionado;
+        }
+    }
+    $camposPdfSelecionados = array_values(array_unique($camposPdfSelecionados));
+}
+
+if (empty($camposPdfSelecionados) && !empty($camposPdfDisponiveis)) {
+    $camposPdfSelecionados = array_keys($camposPdfDisponiveis);
 }
 ?>
 
@@ -179,14 +202,37 @@ if (!empty($idsEquipamentos)) {
                     <p class="text-muted mb-0">Clique num equipamento da lista para abrir o detalhe em modal.</p>
                 </div>
                 <div>
-                    <a
-                        href="index.php?controler=equipamento&acao=exportar_pdf&amp;tipo=<?php echo $tipoAtual; ?>&amp;estado=<?php echo urlencode($estadoAtual); ?>&amp;localizacao=<?php echo urlencode($localizacaoAtual); ?>&amp;ordenar=<?php echo urlencode($ordenarAtual); ?>&amp;direcao=<?php echo urlencode($direcaoAtual); ?>"
-                        class="btn btn-outline-danger btn-sm"
-                        target="_blank"
-                        rel="noopener"
-                    >
-                        <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
-                    </a>
+                    <form method="GET" action="index.php" target="_blank" rel="noopener" class="d-flex flex-column align-items-end gap-2">
+                        <input type="hidden" name="controler" value="equipamento">
+                        <input type="hidden" name="acao" value="exportar_pdf">
+                        <input type="hidden" name="tipo" value="<?php echo (int)$tipoAtual; ?>">
+                        <input type="hidden" name="estado" value="<?php echo htmlspecialchars($estadoAtual, ENT_QUOTES, 'UTF-8'); ?>">
+                        <input type="hidden" name="localizacao" value="<?php echo htmlspecialchars($localizacaoAtual, ENT_QUOTES, 'UTF-8'); ?>">
+                        <input type="hidden" name="ordenar" value="<?php echo htmlspecialchars($ordenarAtual, ENT_QUOTES, 'UTF-8'); ?>">
+                        <input type="hidden" name="direcao" value="<?php echo htmlspecialchars($direcaoAtual, ENT_QUOTES, 'UTF-8'); ?>">
+                        <input type="hidden" name="campos_pdf_presentes" value="1">
+
+                        <?php if (!empty($camposPdfDisponiveis)): ?>
+                            <div class="d-flex flex-wrap justify-content-end gap-2" style="max-width: 500px;">
+                                <?php foreach ($camposPdfDisponiveis as $slugCampo => $nomeCampo): ?>
+                                    <label class="form-check form-check-inline m-0" style="font-size: 0.82rem;">
+                                        <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            name="campos_pdf[]"
+                                            value="<?php echo htmlspecialchars($slugCampo, ENT_QUOTES, 'UTF-8'); ?>"
+                                            <?php echo in_array($slugCampo, $camposPdfSelecionados, true) ? 'checked' : ''; ?>
+                                        >
+                                        <span class="form-check-label"><?php echo htmlspecialchars($nomeCampo, ENT_QUOTES, 'UTF-8'); ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+                        </button>
+                    </form>
                 </div>
             </div>
             <div class="list-group list-group-flush">
