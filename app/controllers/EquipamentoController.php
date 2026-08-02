@@ -327,10 +327,9 @@ class EquipamentoController extends Controller {
                         continue;
                     }
 
-                    $nomeCampo = trim((string)($row['nome_campo'] ?? 'Caracteristica'));
                     $unidade = trim((string)($row['unidade'] ?? ''));
                     $valorFormatado = $valor . ($unidade !== '' ? ' ' . $unidade : '');
-                    $caracteristicasPorEquip[$equipamentoId][] = $nomeCampo . ': ' . $valorFormatado;
+                    $caracteristicasPorEquip[$equipamentoId][] = $valorFormatado;
                 }
             }
         }
