@@ -336,25 +336,26 @@ class EquipamentoController extends Controller {
 
         require_once APP_PATH . '/libs/fpdf/fpdf.php';
 
-        $pdf = new FPDF('L', 'mm', 'A4');
+        $pdf = new FPDF('P', 'mm', 'A4');
         $pdf->AddPage();
 
-        $larguraLocalizacao = $mostrarColunaCaracteristicas ? 56 : 94;
-        $larguraCaracteristicas = 70;
-        $larguraObservacoes = $mostrarColunaCaracteristicas ? 64 : 96;
-        $larguraEstado = 27;
-        $larguraProx = 30;
+        $larguraNumero = 24;
+        $larguraLocalizacao = $mostrarColunaCaracteristicas ? 48 : 76;
+        $larguraCaracteristicas = 42;
+        $larguraObservacoes = $mostrarColunaCaracteristicas ? 36 : 50;
+        $larguraEstado = 20;
+        $larguraProx = 20;
 
         // Cabeçalho
         $pdf->SetFillColor(242, 245, 249);
         $pdf->SetDrawColor(205, 212, 223);
-        $pdf->Rect(0, 0, 297, 22, 'FD');
+        $pdf->Rect(0, 0, 210, 22, 'FD');
         $pdf->SetTextColor(26, 38, 56);
         $pdf->SetFont('Arial', 'B', 13);
         $pdf->SetXY(10, 5);
-        $pdf->Cell(138, 8, $this->pdfTexto(APP_NAME), 0, 0, 'L');
+        $pdf->Cell(95, 8, $this->pdfTexto(APP_NAME), 0, 0, 'L');
         $pdf->SetFont('Arial', 'B', 11);
-        $pdf->Cell(138, 8, $this->pdfTexto('Lista de Equipamentos' . ($nomeTipo !== 'Todos' ? ' - ' . $nomeTipo : '')), 0, 1, 'R');
+        $pdf->Cell(95, 8, $this->pdfTexto('Lista de Equipamentos' . ($nomeTipo !== 'Todos' ? ' - ' . $nomeTipo : '')), 0, 1, 'R');
         $pdf->SetFont('Arial', '', 8);
         $pdf->SetXY(10, 14);
         $filtroDesc = 'Total: ' . count($equipamentos);
@@ -365,11 +366,11 @@ class EquipamentoController extends Controller {
             $filtroDesc .= '   |   Localiz.: ' . $this->pdfTexto($loc);
         }
         $filtroDesc .= '   |   ' . date('d/m/Y H:i');
-        $pdf->Cell(277, 5, $filtroDesc, 0, 1, 'L');
+        $pdf->Cell(190, 5, $filtroDesc, 0, 1, 'L');
 
         // Cabeçalho da tabela
         $headers = [
-            ['Nº Registo', 30],
+            ['Nº Registo', $larguraNumero],
             ['Localização', $larguraLocalizacao],
         ];
         if ($mostrarColunaCaracteristicas) {
@@ -393,7 +394,7 @@ class EquipamentoController extends Controller {
         $pdf->SetFont('Arial', '', 8.5);
         $alt = false;
         foreach ($equipamentos as $eq) {
-            if ($pdf->GetY() > 200) {
+            if ($pdf->GetY() > 272) {
                 $pdf->AddPage();
                 $pdf->SetFillColor(226, 232, 240);
                 $pdf->SetDrawColor(180, 190, 205);
@@ -409,16 +410,16 @@ class EquipamentoController extends Controller {
 
             $fill = $alt;
             $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
-            $pdf->Cell(30, 7, $this->pdfTexto($this->limitarTextoPdf($eq['numero_registo'] ?? '-', 16)), 1, 0, 'L', true);
-            $pdf->Cell($larguraLocalizacao, 7, $this->pdfTexto($this->limitarTextoPdf($eq['localizacao'] ?? '-', 34)), 1, 0, 'L', true);
+            $pdf->Cell($larguraNumero, 7, $this->pdfTexto($this->limitarTextoPdf($eq['numero_registo'] ?? '-', 12)), 1, 0, 'L', true);
+            $pdf->Cell($larguraLocalizacao, 7, $this->pdfTexto($this->limitarTextoPdf($eq['localizacao'] ?? '-', 24)), 1, 0, 'L', true);
             if ($mostrarColunaCaracteristicas) {
                 $caracteristicas = $caracteristicasPorEquip[(int)$eq['id']] ?? [];
                 $caracteristicasTexto = empty($caracteristicas) ? '-' : implode(' | ', $caracteristicas);
-                $pdf->Cell($larguraCaracteristicas, 7, $this->pdfTexto($this->limitarTextoPdf($caracteristicasTexto, 58)), 1, 0, 'L', true);
+                $pdf->Cell($larguraCaracteristicas, 7, $this->pdfTexto($this->limitarTextoPdf($caracteristicasTexto, 32)), 1, 0, 'L', true);
             }
             $observacoes = trim((string)($eq['observacoes'] ?? ''));
-            $pdf->Cell($larguraObservacoes, 7, $this->pdfTexto($this->limitarTextoPdf($observacoes === '' ? '-' : $observacoes, $mostrarColunaCaracteristicas ? 52 : 80)), 1, 0, 'L', true);
-            $pdf->Cell($larguraEstado, 7, $this->pdfTexto($this->limitarTextoPdf(ucfirst((string)($eq['estado'] ?? '-')), 13)), 1, 0, 'L', true);
+            $pdf->Cell($larguraObservacoes, 7, $this->pdfTexto($this->limitarTextoPdf($observacoes === '' ? '-' : $observacoes, $mostrarColunaCaracteristicas ? 26 : 36)), 1, 0, 'L', true);
+            $pdf->Cell($larguraEstado, 7, $this->pdfTexto($this->limitarTextoPdf(ucfirst((string)($eq['estado'] ?? '-')), 11)), 1, 0, 'L', true);
             $pdf->Cell($larguraProx, 7, $this->pdfTexto($this->formatarDataPdf($eq['data_proxima_manutencao'] ?? null)), 1, 1, 'L', true);
             $alt = !$alt;
         }
