@@ -378,7 +378,7 @@ class EquipamentoController extends Controller {
         }
         $headers[] = ['Observações', $larguraObservacoes];
         $headers[] = ['Estado', $larguraEstado];
-        $headers[] = ['Próx. Vistoria', $larguraProx];
+        $headers[] = ['Próx. Vist.', $larguraProx];
 
         $pdf->SetFillColor(226, 232, 240);
         $pdf->SetDrawColor(180, 190, 205);
