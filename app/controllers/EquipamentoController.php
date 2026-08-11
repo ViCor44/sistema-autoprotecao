@@ -339,12 +339,31 @@ class EquipamentoController extends Controller {
         $pdf = new FPDF('P', 'mm', 'A4');
         $pdf->AddPage();
 
-        $larguraNumero = 24;
-        $larguraLocalizacao = $mostrarColunaCaracteristicas ? 48 : 76;
+        $larguraNumero = 22;
         $larguraCaracteristicas = 42;
-        $larguraObservacoes = $mostrarColunaCaracteristicas ? 36 : 50;
-        $larguraEstado = 20;
-        $larguraProx = 20;
+        $larguraEstado = 24;
+        $larguraProx = 22;
+
+        // A localização ocupa apenas o necessário; as observações recebem o restante.
+        $pdf->SetFont('Arial', '', 8.5);
+        $larguraLocalizacao = 30;
+        $larguraMaximaLocalizacao = $mostrarColunaCaracteristicas ? 50 : 87;
+        foreach ($equipamentos as $eq) {
+            $localizacao = $this->pdfTexto($eq['localizacao'] ?? '-');
+            while (
+                $larguraLocalizacao < $larguraMaximaLocalizacao
+                && count($pdf->SplitTextToWidth($larguraLocalizacao, $localizacao)) > 1
+            ) {
+                $larguraLocalizacao++;
+            }
+        }
+
+        $larguraObservacoes = 190
+            - $larguraNumero
+            - $larguraLocalizacao
+            - $larguraEstado
+            - $larguraProx
+            - ($mostrarColunaCaracteristicas ? $larguraCaracteristicas : 0);
 
         // Cabeçalho
         $pdf->SetFillColor(242, 245, 249);
