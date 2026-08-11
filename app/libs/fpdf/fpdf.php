@@ -178,6 +178,35 @@ class FPDF {
         }
     }
 
+    /**
+     * Devolve o texto dividido em linhas que cabem na largura indicada.
+     * Útil para construir tabelas com células de altura variável.
+     */
+    public function SplitTextToWidth($w, $txt) {
+        $w = (float)$w;
+        if ($w <= 0) {
+            $w = max(10.0, $this->pageWidthMm - $this->rMargin - $this->x);
+        }
+
+        $text = $this->sanitizeText($txt);
+        $parts = preg_split('/\r\n|\r|\n/', $text);
+        $lines = [];
+
+        foreach ($parts as $part) {
+            $part = trim((string)$part);
+            if ($part === '') {
+                $lines[] = '';
+                continue;
+            }
+
+            foreach ($this->wrapTextToWidth($part, $w - 2.4) as $line) {
+                $lines[] = $line;
+            }
+        }
+
+        return $lines ?: [''];
+    }
+
     public function Ln($h = null) {
         $delta = $h !== null ? (float)$h : $this->lastCellHeight;
         $delta = $delta > 0 ? $delta : 5.0;
