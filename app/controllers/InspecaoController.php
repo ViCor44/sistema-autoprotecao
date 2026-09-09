@@ -84,9 +84,70 @@ class InspecaoController extends Controller {
 
         $this->calendario->updateStatus($id, 'concluido');
         $inspecao = $this->calendario->getById($id);
-        $this->relatorio->createFromInspecao($inspecao, $_SESSION['utilizador_id'] ?? 0);
-        $this->flash('Inspeção preenchida e relatório gerado!', 'sucesso');
+        $relatorioId = $this->relatorio->createFromInspecao($inspecao, $_SESSION['utilizador_id'] ?? 0);
+        $errosFotos = $relatorioId ? $this->guardarFotos($relatorioId) : ['Não foi possível gerar o relatório para associar as fotografias.'];
+        $mensagem = empty($errosFotos)
+            ? 'Inspeção preenchida e relatório gerado!'
+            : 'Inspeção preenchida, mas algumas fotografias não foram enviadas: ' . implode(' ', $errosFotos);
+        $this->flash($mensagem, empty($errosFotos) ? 'sucesso' : 'aviso');
         $this->redirect('inspecao', 'ver', ['id' => $id]);
+    }
+
+    /**
+     * Validar e guardar as fotografias enviadas no relatório da inspeção.
+     */
+    private function guardarFotos($relatorioId) {
+        if (empty($_FILES['fotos']) || empty($_FILES['fotos']['name']) || !is_array($_FILES['fotos']['name'])) {
+            return [];
+        }
+
+        $erros = [];
+        $tiposPermitidos = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp'
+        ];
+        $diretorio = PUBLIC_PATH . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'relatorios';
+
+        if (!is_dir($diretorio) && !mkdir($diretorio, 0755, true)) {
+            return ['Não foi possível preparar a pasta de fotografias.'];
+        }
+
+        foreach ($_FILES['fotos']['name'] as $indice => $nomeOriginal) {
+            if ($_FILES['fotos']['error'][$indice] === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+
+            if ($_FILES['fotos']['error'][$indice] !== UPLOAD_ERR_OK) {
+                $erros[] = 'Falha ao enviar "' . basename($nomeOriginal) . '".';
+                continue;
+            }
+
+            $ficheiroTemporario = $_FILES['fotos']['tmp_name'][$indice];
+            if ($_FILES['fotos']['size'][$indice] > 8 * 1024 * 1024 || !is_uploaded_file($ficheiroTemporario)) {
+                $erros[] = 'A fotografia "' . basename($nomeOriginal) . '" excede 8 MB ou é inválida.';
+                continue;
+            }
+
+            $mime = (new finfo(FILEINFO_MIME_TYPE))->file($ficheiroTemporario);
+            if (!isset($tiposPermitidos[$mime]) || @getimagesize($ficheiroTemporario) === false) {
+                $erros[] = 'A fotografia "' . basename($nomeOriginal) . '" deve ser JPEG, PNG ou WebP.';
+                continue;
+            }
+
+            $nomeFicheiro = 'relatorio-' . (int)$relatorioId . '-' . bin2hex(random_bytes(12)) . '.' . $tiposPermitidos[$mime];
+            $caminhoFisico = $diretorio . DIRECTORY_SEPARATOR . $nomeFicheiro;
+            $caminhoPublico = 'uploads/relatorios/' . $nomeFicheiro;
+
+            if (!move_uploaded_file($ficheiroTemporario, $caminhoFisico) || !$this->relatorio->adicionarFoto($relatorioId, $caminhoPublico, basename($nomeOriginal))) {
+                if (file_exists($caminhoFisico)) {
+                    unlink($caminhoFisico);
+                }
+                $erros[] = 'Não foi possível guardar a fotografia "' . basename($nomeOriginal) . '".';
+            }
+        }
+
+        return $erros;
     }
 
     public function ver($id) {

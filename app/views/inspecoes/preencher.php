@@ -23,7 +23,7 @@
             </div>
         </aside>
 
-        <form method="POST" action="index.php?controler=inspecao&acao=guardar&id=<?php echo $inspecao['id']; ?>" class="panel-surface modern-form">
+        <form method="POST" action="index.php?controler=inspecao&acao=guardar&id=<?php echo $inspecao['id']; ?>" class="panel-surface modern-form" enctype="multipart/form-data">
             <div class="panel-surface__header compact">
                 <div>
                     <span class="panel-surface__eyebrow">Execução</span>
@@ -62,6 +62,12 @@
             <div class="mb-3">
                 <label for="observacoes" class="form-label">Observações adicionais</label>
                 <textarea class="form-control" name="observacoes" id="observacoes" rows="4"><?php echo htmlspecialchars($inspecao['observacoes'] ?? ''); ?></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="fotos" class="form-label">Fotografias da inspeção</label>
+                <input type="file" class="form-control" name="fotos[]" id="fotos" accept="image/jpeg,image/png,image/webp" capture="environment" multiple>
+                <div class="form-text">Pode selecionar ou tirar várias fotografias JPEG, PNG ou WebP, até 8 MB cada.</div>
             </div>
 
             <div class="form-actions-bar">
