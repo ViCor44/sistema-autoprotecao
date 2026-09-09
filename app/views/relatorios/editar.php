@@ -8,7 +8,7 @@
         </div>
     </div>
 
-    <form method="POST" action="index.php?controler=relatorio&acao=atualizar&id=<?php echo $relatorio['id']; ?>" class="panel-surface modern-form">
+    <form method="POST" action="index.php?controler=relatorio&acao=atualizar&id=<?php echo $relatorio['id']; ?>" class="panel-surface modern-form" enctype="multipart/form-data">
         <div class="panel-surface__header compact">
             <div>
                 <span class="panel-surface__eyebrow">Conteúdo</span>
@@ -41,6 +41,12 @@
         <div class="mb-3">
             <label for="observacoes" class="form-label">Observações</label>
             <textarea class="form-control" name="observacoes" id="observacoes" rows="4"><?php echo htmlspecialchars($relatorio['observacoes']); ?></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="fotos" class="form-label">Adicionar fotografias</label>
+            <input type="file" class="form-control" name="fotos[]" id="fotos" accept="image/jpeg,image/png,image/webp" multiple>
+            <div class="form-text">Pode selecionar várias imagens JPEG, PNG ou WebP, até 8 MB cada.</div>
         </div>
 
         <div class="form-actions-bar">

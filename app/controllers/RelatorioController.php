@@ -72,8 +72,9 @@ class RelatorioController extends Controller {
         }
 
         $itens = $this->relatorio->getItensRelatorio($id);
+    $fotos = $this->relatorio->getFotos($id);
         $relatorio = $this->preencherProximaInspecao($relatorio);
-        $this->render('relatorios/ver', compact('relatorio', 'itens'));
+    $this->render('relatorios/ver', compact('relatorio', 'itens', 'fotos'));
     }
 
     /**
@@ -118,7 +119,11 @@ class RelatorioController extends Controller {
                 }
             }
 
-            $this->flash('Relatório criado com sucesso!', 'sucesso');
+            $errosFotos = $this->guardarFotos($relatorio_id);
+            $mensagem = empty($errosFotos)
+                ? 'Relatório criado com sucesso!'
+                : 'Relatório criado, mas algumas fotografias não foram enviadas: ' . implode(' ', $errosFotos);
+            $this->flash($mensagem, empty($errosFotos) ? 'sucesso' : 'aviso');
             $this->redirect('relatorio', 'ver', ['id' => $relatorio_id]);
         } else {
             $this->flash('Erro ao criar relatório.', 'erro');
@@ -156,8 +161,69 @@ class RelatorioController extends Controller {
             'proxima_inspecao' => $_POST['proxima_inspecao'] ?? null
         ];
         $this->relatorio->atualizar($id, $dados);
-        $this->flash('Relatório atualizado com sucesso!', 'sucesso');
+        $errosFotos = $this->guardarFotos($id);
+        $mensagem = empty($errosFotos)
+            ? 'Relatório atualizado com sucesso!'
+            : 'Relatório atualizado, mas algumas fotografias não foram enviadas: ' . implode(' ', $errosFotos);
+        $this->flash($mensagem, empty($errosFotos) ? 'sucesso' : 'aviso');
         $this->redirect('relatorio', 'ver', ['id' => $id]);
+    }
+
+    /**
+     * Validar e guardar as fotografias enviadas para um relatório.
+     */
+    private function guardarFotos($relatorioId) {
+        if (empty($_FILES['fotos']) || empty($_FILES['fotos']['name']) || !is_array($_FILES['fotos']['name'])) {
+            return [];
+        }
+
+        $erros = [];
+        $tiposPermitidos = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp'
+        ];
+        $diretorio = PUBLIC_PATH . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'relatorios';
+
+        if (!is_dir($diretorio) && !mkdir($diretorio, 0755, true)) {
+            return ['Não foi possível preparar a pasta de fotografias.'];
+        }
+
+        foreach ($_FILES['fotos']['name'] as $indice => $nomeOriginal) {
+            if ($_FILES['fotos']['error'][$indice] === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+
+            if ($_FILES['fotos']['error'][$indice] !== UPLOAD_ERR_OK) {
+                $erros[] = 'Falha ao enviar "' . basename($nomeOriginal) . '".';
+                continue;
+            }
+
+            $ficheiroTemporario = $_FILES['fotos']['tmp_name'][$indice];
+            if ($_FILES['fotos']['size'][$indice] > 8 * 1024 * 1024 || !is_uploaded_file($ficheiroTemporario)) {
+                $erros[] = 'A fotografia "' . basename($nomeOriginal) . '" excede 8 MB ou é inválida.';
+                continue;
+            }
+
+            $mime = (new finfo(FILEINFO_MIME_TYPE))->file($ficheiroTemporario);
+            if (!isset($tiposPermitidos[$mime]) || @getimagesize($ficheiroTemporario) === false) {
+                $erros[] = 'A fotografia "' . basename($nomeOriginal) . '" deve ser JPEG, PNG ou WebP.';
+                continue;
+            }
+
+            $nomeFicheiro = 'relatorio-' . (int)$relatorioId . '-' . bin2hex(random_bytes(12)) . '.' . $tiposPermitidos[$mime];
+            $caminhoFisico = $diretorio . DIRECTORY_SEPARATOR . $nomeFicheiro;
+            $caminhoPublico = 'uploads/relatorios/' . $nomeFicheiro;
+
+            if (!move_uploaded_file($ficheiroTemporario, $caminhoFisico) || !$this->relatorio->adicionarFoto($relatorioId, $caminhoPublico, basename($nomeOriginal))) {
+                if (file_exists($caminhoFisico)) {
+                    unlink($caminhoFisico);
+                }
+                $erros[] = 'Não foi possível guardar a fotografia "' . basename($nomeOriginal) . '".';
+            }
+        }
+
+        return $erros;
     }
 
     /**

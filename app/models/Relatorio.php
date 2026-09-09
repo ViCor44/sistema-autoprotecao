@@ -233,6 +233,27 @@ class Relatorio {
     }
 
     /**
+     * Obter fotografias associadas a um relatório.
+     */
+    public function getFotos($relatorioId) {
+        $query = "SELECT * FROM relatorios_fotos WHERE relatorio_id = ? ORDER BY id ASC";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $relatorioId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * Associar uma fotografia armazenada ao relatório.
+     */
+    public function adicionarFoto($relatorioId, $caminho, $nomeOriginal) {
+        $query = "INSERT INTO relatorios_fotos (relatorio_id, caminho, nome_original) VALUES (?, ?, ?)";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("iss", $relatorioId, $caminho, $nomeOriginal);
+        return $stmt->execute();
+    }
+
+    /**
      * Obter relatórios pendentes de assinatura
      */
     public function getRelatoriosPendentesAssinatura() {

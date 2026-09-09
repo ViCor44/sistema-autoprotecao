@@ -67,6 +67,33 @@
     <section class="panel-surface">
         <div class="panel-surface__header compact">
             <div>
+                <span class="panel-surface__eyebrow">Evidência</span>
+                <h2>Fotografias da inspeção</h2>
+            </div>
+        </div>
+        <?php if (empty($fotos)): ?>
+            <div class="dashboard-empty-state">
+                <div class="dashboard-empty-state__icon"><i class="bi bi-camera"></i></div>
+                <div>
+                    <strong>Sem fotografias registadas</strong>
+                    <p>Este relatório ainda não tem evidência fotográfica associada.</p>
+                </div>
+            </div>
+        <?php else: ?>
+            <div class="report-photo-grid">
+                <?php foreach ($fotos as $foto): ?>
+                    <a class="report-photo" href="<?php echo htmlspecialchars(APP_URL . '/public/' . $foto['caminho']); ?>" target="_blank" rel="noopener noreferrer">
+                        <img src="<?php echo htmlspecialchars(APP_URL . '/public/' . $foto['caminho']); ?>" alt="<?php echo htmlspecialchars($foto['nome_original']); ?>">
+                        <span><?php echo htmlspecialchars($foto['nome_original']); ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </section>
+
+    <section class="panel-surface">
+        <div class="panel-surface__header compact">
+            <div>
                 <span class="panel-surface__eyebrow">Checklist</span>
                 <h2>Itens de verificação</h2>
             </div>

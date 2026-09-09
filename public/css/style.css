@@ -1,5 +1,41 @@
 /* Estilos personalizados da aplicação */
 
+.report-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.report-photo {
+    display: block;
+    overflow: hidden;
+    border: 1px solid #d8dee8;
+    border-radius: 6px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.report-photo:hover {
+    border-color: #6c8fc5;
+    color: inherit;
+}
+
+.report-photo img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+.report-photo span {
+    display: block;
+    padding: 0.55rem 0.7rem;
+    overflow: hidden;
+    font-size: 0.85rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 :root {
     --color-primary: #165dff;
     --color-secondary: #6c757d;
